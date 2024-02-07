@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8" ?> 
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:newznab="http://www.newznab.com/DTD/2010/feeds/attributes/">
+<channel>
+<atom:link href="https://scenenzbs.com/api/?t=tvsearch&amp;cat=5030%2c5040%2c5100&amp;extended=1&amp;apikey=c1e3d46f8df56a904cc35a6e3ccbc401&amp;offset=0&amp;limit=100&amp;tvdbid=323168&amp;tvmazeid=7194&amp;season=1&amp;ep=130" rel="self" type="application/rss+xml" />
+<title>SceneNZBs</title>
+<description>SceneNZBs Feed</description>
+<link>https://scenenzbs.com/</link>
+<language>en-gb</language>
+<webMaster>support@scenenzbs.com (SceneNZBs)</webMaster>
+<category></category>
+<image>
+	<url>https://scenenzbs.com/templates/default/images/banner.jpg</url>
+	<title>SceneNZBs</title>
+	<link>https://scenenzbs.com/</link>
+	<description>Visit SceneNZBs - </description>
+</image>
+<newznab:apilimits apicurrent="342" apimax="10000"  grabcurrent="3" grabmax="2000" apioldesttime="Tue, 06 Feb 2024 01:33:47 +0100" graboldesttime="Tue, 06 Feb 2024 17:54:25 +0100"/>
+
+<newznab:response offset="0" total="0" />
+
+</channel>
+</rss>

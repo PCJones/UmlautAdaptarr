@@ -9,13 +9,28 @@ namespace UmlautAdaptarr.Utilities
         {
             return context.Request.Query[key].FirstOrDefault() ?? string.Empty;
         }
+        public static string RemoveAccent(this string text)
+        {
+            var normalizedString = text.Normalize(NormalizationForm.FormD);
+            var stringBuilder = new StringBuilder();
+
+            foreach (var c in normalizedString)
+            {
+                var unicodeCategory = CharUnicodeInfo.GetUnicodeCategory(c);
+
+                if (unicodeCategory != UnicodeCategory.NonSpacingMark)
+                {
+                    stringBuilder.Append(c);
+                }
+            }
+
+            return stringBuilder.ToString().Normalize(NormalizationForm.FormC);
+        }
+
 
         public static string RemoveAccentButKeepGermanUmlauts(this string text)
         {
-            // TODO: evaluate if this is needed (here)
-            var stringWithoutSz = text.Replace("ß", "ss");
-
-            var normalizedString = stringWithoutSz.Normalize(NormalizationForm.FormD);
+            var normalizedString = text.Normalize(NormalizationForm.FormD);
             var stringBuilder = new StringBuilder();
 
             foreach (var c in normalizedString)
@@ -40,6 +55,18 @@ namespace UmlautAdaptarr.Utilities
                 .Replace("ö", "oe")
                 .Replace("ä", "ae")
                 .Replace("ü", "ue")
+                .Replace("ß", "ss");
+        }
+
+        public static string RemoveGermanUmlautDots(this string text)
+        {
+            return text
+                .Replace("ö", "o")
+                .Replace("ü", "u")
+                .Replace("ä", "a")
+                .Replace("Ö", "O")
+                .Replace("Ü", "U")
+                .Replace("Ä", "A")
                 .Replace("ß", "ss");
         }
 

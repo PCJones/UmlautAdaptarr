@@ -6,7 +6,15 @@ internal class Program
 {
     private static void Main(string[] args)
     {
+        // TODO:
+        // add option to sort by nzb age
+
+        // TODO
+        // add delay between requests
+
         var builder = WebApplication.CreateBuilder(args);
+
+        var configuration = builder.Configuration;
 
         // Add services to the container.
         builder.Services.AddHttpClient("HttpClient").ConfigurePrimaryHttpMessageHandler(() =>
@@ -28,6 +36,7 @@ internal class Program
         builder.Services.AddControllers();
         builder.Services.AddScoped<TitleQueryService>();
         builder.Services.AddScoped<ProxyService>();
+        builder.Services.AddScoped<TitleMatchingService>();
 
         var app = builder.Build();
 

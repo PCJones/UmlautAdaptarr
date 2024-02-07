@@ -4,6 +4,7 @@
     {
         private readonly HttpClient _httpClient = clientFactory.CreateClient("HttpClient") ?? throw new ArgumentNullException();
         private readonly string _userAgent = configuration["Settings:UserAgent"] ?? throw new ArgumentException("UserAgent must be set in appsettings.json");
+        // TODO: Add cache!
 
         public async Task<HttpResponseMessage> ProxyRequestAsync(HttpContext context, string targetUri)
         {
@@ -35,6 +36,8 @@
             try
             {
                 var responseMessage = _httpClient.Send(requestMessage, HttpCompletionOption.ResponseHeadersRead, context.RequestAborted);
+
+                // TODO: Handle 503 etc
                 responseMessage.EnsureSuccessStatusCode();
 
                 // Modify the response content if necessary
