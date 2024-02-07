@@ -20,3 +20,6 @@ Es werden nur Releases mit dem englischen Titel der Serie gefunden
 **Jetzt:**  
 ![Jetzige Suche, deutsche und englische Titel](https://i.imgur.com/eeq0Voj.png)  
 Es werden auch Titel mit dem deutschen Namen gefunden :D (haben nicht alle Suchergebnisse auf den Screenshot gepasst)
+
+PS:
+Das Problem, dass Prowlarr mit SceneNZBs nicht richtig funktioniert ist damit auch behoben :D
