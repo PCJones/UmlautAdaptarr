@@ -201,7 +201,11 @@ namespace UmlautAdaptarr.Controllers
                         // Aggregate the initial search result with additional results
                         var germanTitleVariations = _titleMatchingService.GenerateTitleVariations(germanTitle);
                         var aggregatedResult = await AggregateSearchResults(domain, queryParameters, germanTitleVariations, expectedTitle);
+                        // todo processedContent wie in BaseSearch
+
+
                         aggregatedResult.AggregateItems((initialSearchResult as ContentResult)?.Content ?? "");
+
                         return Content(aggregatedResult.Content, aggregatedResult.ContentType, aggregatedResult.ContentEncoding);
                     }
                     return initialSearchResult;
