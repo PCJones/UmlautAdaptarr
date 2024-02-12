@@ -4,8 +4,6 @@ services:
     build: https://github.com/PCJones/UmlautAdaptarr.git#master
     image: umlautadaptarr
     restart: unless-stopped
-    networks:
-      - local
     environment:
       - PUID=1000
       - PGID=1000
