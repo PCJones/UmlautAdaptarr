@@ -21,10 +21,10 @@ services:
       - PUID=1000
       - PGID=1000
       - TZ=Europe/Berlin
-      SONARR_HOST: "http://sonarr:8989"
-      SONARR_API_KEY: "API_KEY"
+      - SONARR_HOST="http://sonarr:8989"
+      - SONARR_API_KEY="API_KEY"
     ports:
-      - "5005:5005"
+      - "5005:5005" 
 ```
 
 Zusätzlich müsst ihr in Sonarr oder Prowlarr einen neuen Indexer hinzufügen (für jeden Indexer, bei dem UmlautAdapdarr greifen soll).
