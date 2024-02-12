@@ -9,21 +9,7 @@ Es sollte mit allen *arrs funktionieren, hat aber nur bei Sonarr schon Auswirkun
 
 Momentan ist docker dafür nötig, wer kein Docker nutzt muss sich noch etwas gedulden. 
 
-docker-compose.yml
-```
-version: '3.8'
-services:
-  umlautadaptarr:
-    build: https://github.com/PCJones/UmlautAdaptarr.git#master
-    image: umlautadaptarr
-    restart: unless-stopped
-    environment:
-      - TZ=Europe/Berlin
-      - SONARR_HOST="http://sonarr:8989"
-      - SONARR_API_KEY="API_KEY"
-    ports:
-      - "5005:5005" 
-```
+[Link zum Docker Image](https://hub.docker.com/r/pcjones/umlautadaptarr)
 
 Zusätzlich müsst ihr in Sonarr oder Prowlarr einen neuen Indexer hinzufügen (für jeden Indexer, bei dem UmlautAdapdarr greifen soll).
 
