@@ -1,22 +1,24 @@
 version: '3.8'
 services:
   umlautadaptarr:
-    build: https://github.com/PCJones/UmlautAdaptarr.git#master
+    # uncomment this to get the development branch
+    # build: https://github.com/PCJones/UmlautAdaptarr.git#develop
+        image: pcjones/umlautadaptarr:latest
     image: umlautadaptarr
     restart: unless-stopped
     environment:
       - TZ=Europe/Berlin
       - SONARR_ENABLED=false
-      - SONARR_HOST="http://localhost:8989"
-      - SONARR_API_KEY="API_KEY"
+      - SONARR_HOST=http://localhost:8989
+      - SONARR_API_KEY=API_KEY
       - RADARR_ENABLED=false
-      - RADARR_HOST="http://localhost:7878"
-      - RADARR_API_KEY="API_KEY"
+      - RADARR_HOST=http://localhost:7878
+      - RADARR_API_KEY=API_KEY
       - READARR_ENABLED=false
-      - READARR_HOST="http://localhost:8787"
-      - READARR_API_KEY="API_KEY"
+      - READARR_HOST=http://localhost:8787
+      - READARR_API_KEY=API_KEY
       - LIDARR_ENABLED=false
-      - LIDARR_HOST="http://localhost:8686"
-      - LIDARR_API_KEY="API_KEY"
+      - LIDARR_HOST=http://localhost:8686
+      - LIDARR_API_KEY=API_KEY
     ports:
-      - "5005:5005" 
+      - "5005":"5005 "
