@@ -1,17 +1,17 @@
 ﻿using System.Text.RegularExpressions;
 using System.Xml.Linq;
+using UmlautAdaptarr.Models;
 using UmlautAdaptarr.Utilities;
 
 namespace UmlautAdaptarr.Services
 {
     public partial class TitleMatchingService(CacheService cacheService, ILogger<TitleMatchingService> logger)
     {
-        public string RenameTitlesInContent(string content, string[]? titleMatchVariations, string? expectedTitle)
+        public string RenameTitlesInContent(string content, SearchItem? searchItem)
         {
             var xDoc = XDocument.Parse(content);
 
-            // If expectedTitle and titleMatchVariations are provided use them, if not use the CacheService to find matches.
-            bool useCacheService = string.IsNullOrEmpty(expectedTitle) || titleMatchVariations?.Length == 0;
+            bool useCacheService = searchItem == null;
 
             foreach (var item in xDoc.Descendants("item"))
             {
@@ -21,88 +21,40 @@ namespace UmlautAdaptarr.Services
                     var originalTitle = titleElement.Value;
                     var normalizedOriginalTitle = NormalizeTitle(originalTitle);
 
-                    if (useCacheService)
-                    {
-                        var categoryElement = item.Element("category");
-                        var category = categoryElement?.Value;
-                        var mediaType = GetMediaTypeFromCategory(category);
-                        if (mediaType == null)
-                        {
-                            continue;
-                        }
+                    var categoryElement = item.Element("category");
+                    var category = categoryElement?.Value;
+                    var mediaType = GetMediaTypeFromCategory(category);
 
-                        // Use CacheService to find a matching SearchItem by title
-                        var searchItem = cacheService.SearchItemByTitle(mediaType, normalizedOriginalTitle);
-                        if (searchItem != null)
-                        {
-                            // If a SearchItem is found, use its ExpectedTitle and titleMatchVariations for renaming
-                            expectedTitle = searchItem.ExpectedTitle;
-                            titleMatchVariations = searchItem.TitleMatchVariations;
-                        }
-                        else
-                        {
-                            // Skip processing this item if no matching SearchItem is found
-                            continue;
-                        }
+                    if (mediaType == null)
+                    {
+                        continue;
                     }
 
-                    var variationsOrderedByLength = titleMatchVariations!.OrderByDescending(variation => variation.Length);
-                    // Attempt to find a variation that matches the start of the original title
-                    foreach (var variation in variationsOrderedByLength)
+                    if (useCacheService)
                     {
-                        // Skip variations that are already the expectedTitle
-                        if (variation == expectedTitle)
-                        {
-                            continue;
-                        }
+                        // Use CacheService to find a matching SearchItem by title
+                        searchItem = cacheService.SearchItemByTitle(mediaType, normalizedOriginalTitle);
+                    }
 
-                        // Variation is already normalized at creation
-                        var variationMatchPattern = "^" + Regex.Escape(variation).Replace("\\ ", "[._ ]");
+                    if (searchItem == null)
+                    {
+                        // Skip processing this item if no matching SearchItem is found
+                        continue;
+                    }
 
-                        // Check if the originalTitle starts with the variation (ignoring case and separators)
-                        if (Regex.IsMatch(normalizedOriginalTitle, variationMatchPattern, RegexOptions.IgnoreCase))
-                        {
-                            // Workaround for the rare case of e.g. "Frieren: Beyond Journey's End" that also has the alias "Frieren"
-                            if (expectedTitle!.StartsWith(variation, StringComparison.OrdinalIgnoreCase))
-                            {
-                                logger.LogWarning($"TitleMatchingService - Didn't rename: '{originalTitle}' because the expected title '{expectedTitle}' starts with the variation '{variation}'");
-                                continue;
-                            }
-                            var originalTitleMatchPattern = "^" + Regex.Escape(variation).Replace("\\ ", "[._ ]");
-
-                            // Find the first separator used in the original title for consistent replacement
-                            var separator = FindFirstSeparator(originalTitle);
-                            // Reconstruct the expected title using the original separator
-                            var newTitlePrefix = expectedTitle!.Replace(" ", separator.ToString());
-
-                            // Extract the suffix from the original title starting right after the matched variation length
-                            var variationLength = variation.Length;
-                            var suffix = originalTitle[Math.Min(variationLength, originalTitle.Length)..];
-
-                            // Clean up any leading separators from the suffix
-                            suffix = Regex.Replace(suffix, "^[._ ]+", "");
-
-                            // TODO EVALUTE! definitely make this optional - this adds GERMAN to the title is the title is german to make sure it's recognized as german
-                            // can lead to problems with shows such as "dark" that have international dubs
-                            /*
-                            // Check if "german" is not in the original title, ignoring case
-                            if (!Regex.IsMatch(originalTitle, "german", RegexOptions.IgnoreCase))
-                            {
-                                // Insert "GERMAN" after the newTitlePrefix
-                                newTitlePrefix += separator + "GERMAN";
-                            }
-                            */
-
-                            // Construct the new title with the original suffix
-                            var newTitle = newTitlePrefix + (string.IsNullOrEmpty(suffix) ? "" : separator + suffix);
-
-                            // Update the title element's value with the new title
-                            //titleElement.Value = newTitle + $"({originalTitle.Substring(0, variationLength)})";
-                            titleElement.Value = newTitle;
-
-                            logger.LogInformation($"TitleMatchingService - Title changed: '{originalTitle}' to '{newTitle}'");
-                            break; // Break after the first successful match and modification
-                        }
+                    switch (mediaType)
+                    {
+                        case "tv":
+                            FindAndReplaceForMoviesAndTV(logger, searchItem, titleElement, originalTitle, normalizedOriginalTitle!);
+                            break;
+                        case "movie":
+                            FindAndReplaceForMoviesAndTV(logger, searchItem, titleElement, originalTitle, normalizedOriginalTitle!);
+                            break;
+                        case "audio":
+                            ReplaceForAudio(searchItem, titleElement, originalTitle, normalizedOriginalTitle!);
+                            break;
+                        default:
+                            throw new NotImplementedException();
                     }
                 }
             }
@@ -110,6 +62,161 @@ namespace UmlautAdaptarr.Services
             return xDoc.ToString();
         }
 
+        private string NormalizeString(string text)
+        {
+            return text.RemoveGermanUmlautDots().RemoveAccent().RemoveSpecialCharacters().Replace(" ", "").Trim().ToLower();
+        }
+
+
+        public void ReplaceForAudio(SearchItem searchItem, XElement? titleElement, string originalTitle, string normalizedOriginalTitle)
+        {
+            var authorMatch = FindBestMatch(searchItem.AuthorMatchVariations, NormalizeString(normalizedOriginalTitle), originalTitle);
+            var titleMatch = FindBestMatch(searchItem.TitleMatchVariations, NormalizeString(normalizedOriginalTitle), originalTitle);
+
+            if (authorMatch.Item1 && titleMatch.Item1)
+            {
+                int matchEndPositionInOriginal = Math.Max(authorMatch.Item3, titleMatch.Item3);
+
+                // Ensure we trim any leading delimiters from the suffix
+                string suffix = originalTitle.Substring(matchEndPositionInOriginal).TrimStart([' ', '-', '_']);
+
+                // Concatenate the expected title with the remaining suffix
+                var updatedTitle = $"{searchItem.ExpectedAuthor} - {searchItem.ExpectedTitle}-{suffix}";
+
+                // Update the title element
+                titleElement.Value = updatedTitle;
+                logger.LogInformation($"TitleMatchingService - Title changed: '{originalTitle}' to '{updatedTitle}'");
+            }
+            else
+            {
+                logger.LogInformation("TitleMatchingService - No satisfactory fuzzy match found for both author and title.");
+            }
+        }
+
+
+        private Tuple<bool, int, int> FindBestMatch(string[] variations, string normalizedOriginal, string originalTitle)
+        {
+            bool found = false;
+            int bestStart = int.MaxValue;
+            int bestEndInOriginal = -1;
+
+            foreach (var variation in variations)
+            {
+                var normalizedVariation = NormalizeString(variation);
+                int startNormalized = normalizedOriginal.IndexOf(normalizedVariation);
+
+                if (startNormalized >= 0)
+                {
+                    found = true;
+                    // Map the start position from the normalized string back to the original string
+                    int startOriginal = MapNormalizedIndexToOriginal(normalizedOriginal, originalTitle, startNormalized);
+                    int endOriginal = MapNormalizedIndexToOriginal(normalizedOriginal, originalTitle, startNormalized + normalizedVariation.Length);
+
+                    bestStart = Math.Min(bestStart, startOriginal);
+                    bestEndInOriginal = Math.Max(bestEndInOriginal, endOriginal);
+                }
+            }
+
+            if (!found) return Tuple.Create(false, 0, 0);
+            return Tuple.Create(found, bestStart, bestEndInOriginal);
+        }
+
+        // Maps an index from the normalized string back to a corresponding index in the original string
+        private int MapNormalizedIndexToOriginal(string normalizedOriginal, string originalTitle, int normalizedIndex)
+        {
+            // Count non-special characters up to the given index in the normalized string
+            int nonSpecialCharCount = 0;
+            for (int i = 0; i < normalizedIndex && i < normalizedOriginal.Length; i++)
+            {
+                if (char.IsLetterOrDigit(normalizedOriginal[i]))
+                {
+                    nonSpecialCharCount++;
+                }
+            }
+
+            // Count non-special characters in the original title to find the corresponding index
+            int originalIndex = 0;
+            for (int i = 0; i < originalTitle.Length; i++)
+            {
+                if (char.IsLetterOrDigit(originalTitle[i]))
+                {
+                    if (--nonSpecialCharCount < 0)
+                    {
+                        break;
+                    }
+                }
+                originalIndex = i;
+            }
+
+            return originalIndex + 1; // +1 to move past the matched character or to the next character in the original title
+        }
+
+
+
+        // This method replaces the first variation that starts at the beginning of the release title
+        private static void FindAndReplaceForMoviesAndTV(ILogger<TitleMatchingService> logger, SearchItem searchItem, XElement? titleElement, string originalTitle, string normalizedOriginalTitle)
+        {
+            var titleMatchVariations = searchItem.TitleMatchVariations;
+            var expectedTitle = searchItem.ExpectedTitle;
+            var variationsOrderedByLength = titleMatchVariations!.OrderByDescending(variation => variation.Length);
+            // Attempt to find a variation that matches the start of the original title
+            foreach (var variation in variationsOrderedByLength)
+            {
+                // Skip variations that are already the expectedTitle
+                if (variation == expectedTitle)
+                {
+                    continue;
+                }
+
+                // Variation is already normalized at creation
+                var variationMatchPattern = "^" + Regex.Escape(variation).Replace("\\ ", "[._ ]");
+
+                // Check if the originalTitle starts with the variation (ignoring case and separators)
+                if (Regex.IsMatch(normalizedOriginalTitle, variationMatchPattern, RegexOptions.IgnoreCase))
+                {
+                    // Workaround for the rare case of e.g. "Frieren: Beyond Journey's End" that also has the alias "Frieren"
+                    if (expectedTitle!.StartsWith(variation, StringComparison.OrdinalIgnoreCase))
+                    {
+                        logger.LogWarning($"TitleMatchingService - Didn't rename: '{originalTitle}' because the expected title '{expectedTitle}' starts with the variation '{variation}'");
+                        continue;
+                    }
+                    var originalTitleMatchPattern = "^" + Regex.Escape(variation).Replace("\\ ", "[._ ]");
+
+                    // Find the first separator used in the original title for consistent replacement
+                    var separator = FindFirstSeparator(originalTitle);
+                    // Reconstruct the expected title using the original separator
+                    var newTitlePrefix = expectedTitle!.Replace(" ", separator.ToString());
+
+                    // Extract the suffix from the original title starting right after the matched variation length
+                    var variationLength = variation.Length;
+                    var suffix = originalTitle[Math.Min(variationLength, originalTitle.Length)..];
+
+                    // Clean up any leading separators from the suffix
+                    suffix = Regex.Replace(suffix, "^[._ ]+", "");
+
+                    // TODO EVALUTE! definitely make this optional - this adds GERMAN to the title is the title is german to make sure it's recognized as german
+                    // can lead to problems with shows such as "dark" that have international dubs
+                    /*
+                    // Check if "german" is not in the original title, ignoring case
+                    if (!Regex.IsMatch(originalTitle, "german", RegexOptions.IgnoreCase))
+                    {
+                        // Insert "GERMAN" after the newTitlePrefix
+                        newTitlePrefix += separator + "GERMAN";
+                    }
+                    */
+
+                    // Construct the new title with the original suffix
+                    var newTitle = newTitlePrefix + (string.IsNullOrEmpty(suffix) ? "" : separator + suffix);
+
+                    // Update the title element's value with the new title
+                    //titleElement.Value = newTitle + $"({originalTitle.Substring(0, variationLength)})";
+                    titleElement.Value = newTitle;
+
+                    logger.LogInformation($"TitleMatchingService - Title changed: '{originalTitle}' to '{newTitle}'");
+                    break; // Break after the first successful match and modification
+                }
+            }
+        }
 
         private static string NormalizeTitle(string title)
         {
@@ -126,7 +233,11 @@ namespace UmlautAdaptarr.Services
 
         private static string ReconstructTitleWithSeparator(string title, char separator)
         {
-            // Replace spaces with the original separator found in the title
+            if (separator != ' ')
+            {
+                return title;
+            }
+            
             return title.Replace(' ', separator);
         }
 
@@ -153,6 +264,10 @@ namespace UmlautAdaptarr.Services
             {
                 return "book";
             }
+            else if (category.StartsWith("Audio"))
+            {
+                return "audio";
+            }
 
             return null;
         }
@@ -160,5 +275,6 @@ namespace UmlautAdaptarr.Services
 
         [GeneratedRegex("[._ ]")]
             private static partial Regex WordSeperationCharRegex();
+
     }
 }

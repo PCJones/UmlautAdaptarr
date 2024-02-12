@@ -141,7 +141,7 @@ namespace UmlautAdaptarr.Services
                 germanTitle = titleApiResponseData.germanTitle;
                 hasGermanTitle = true;
 
-                var hasGermanUmlaut = germanTitle?.HasGermanUmlauts() ?? false;
+                var hasGermanUmlaut = germanTitle?.HasUmlauts() ?? false;
 
                 var result = (hasGermanUmlaut, germanTitle, expectedTitle);
                 memoryCache.Set(cacheKey, result, new MemoryCacheEntryOptions

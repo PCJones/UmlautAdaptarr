@@ -13,9 +13,13 @@ namespace UmlautAdaptarr.Services
 {
     public class ArrSyncBackgroundService(
         SonarrClient sonarrClient,
+        LidarrClient lidarrClient,
         CacheService cacheService,
+        IConfiguration configuration,
         ILogger<ArrSyncBackgroundService> logger) : BackgroundService
     {
+        private readonly bool _sonarrEnabled = configuration.GetValue<bool>("SONARR_ENABLED");
+        private readonly bool _lidarrEnabled = configuration.GetValue<bool>("LIDARR_ENABLED");
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             logger.LogInformation("ArrSyncBackgroundService is starting.");
@@ -23,43 +27,78 @@ namespace UmlautAdaptarr.Services
             while (!stoppingToken.IsCancellationRequested)
             {
                 logger.LogInformation("ArrSyncBackgroundService is running.");
-                await FetchAndUpdateDataAsync();
+                var syncSuccess = await FetchAndUpdateDataAsync();
                 logger.LogInformation("ArrSyncBackgroundService has completed an iteration.");
 
-                await Task.Delay(TimeSpan.FromHours(12), stoppingToken);
+                if (syncSuccess)
+                {
+                    await Task.Delay(TimeSpan.FromHours(12), stoppingToken);
+                }
+                else
+                {
+                    logger.LogInformation("ArrSyncBackgroundService is sleeping for one hour only because not all syncs were successful.");
+                    await Task.Delay(TimeSpan.FromHours(1), stoppingToken);
+                }
             }
 
             logger.LogInformation("ArrSyncBackgroundService is stopping.");
         }
 
-        private async Task FetchAndUpdateDataAsync()
+        private async Task<bool> FetchAndUpdateDataAsync()
         {
             try
             {
-                await FetchItemsFromSonarrAsync();
+                var success = true;
+                if (_sonarrEnabled)
+                {
+                    success = await FetchItemsFromSonarrAsync();
+                }
+                if (_lidarrEnabled)
+                {
+                    success = await FetchItemsFromLidarrAsync();
+                }
+                return success;
             }
             catch (Exception ex)
             {
                 logger.LogError(ex, "An error occurred while fetching items from the Arrs.");
             }
+            return false;
         }
 
-        private async Task FetchItemsFromSonarrAsync()
+        private async Task<bool> FetchItemsFromSonarrAsync()
         {
             try
             {
                 var items = await sonarrClient.FetchAllItemsAsync();
                 UpdateSearchItems(items);
+                return items?.Any()?? false;
             }
             catch (Exception ex)
             {
                 logger.LogError(ex, "An error occurred while updating search item from Sonarr.");
             }
+            return false;
         }
 
-        private void UpdateSearchItems(IEnumerable<SearchItem> searchItems)
+        private async Task<bool> FetchItemsFromLidarrAsync()
         {
-            foreach (var searchItem in searchItems)
+            try
+            {
+                var items = await lidarrClient.FetchAllItemsAsync();
+                UpdateSearchItems(items);
+                return items?.Any() ?? false;
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "An error occurred while updating search item from Lidarr.");
+            }
+            return false;
+        }
+
+        private void UpdateSearchItems(IEnumerable<SearchItem>? searchItems)
+        {
+            foreach (var searchItem in searchItems ?? [])
             {
                 try
                 {

@@ -3,8 +3,10 @@ using UmlautAdaptarr.Providers;
 
 namespace UmlautAdaptarr.Services
 {
-    public class SearchItemLookupService(CacheService cacheService, SonarrClient sonarrClient)
+    public class SearchItemLookupService(CacheService cacheService, SonarrClient sonarrClient, LidarrClient lidarrClient, IConfiguration configuration)
     {
+        private readonly bool _sonarrEnabled = configuration.GetValue<bool>("SONARR_ENABLED");
+        private readonly bool _lidarrEnabled = configuration.GetValue<bool>("LIDARR_ENABLED");
         public async Task<SearchItem?> GetOrFetchSearchItemByExternalId(string mediaType, string externalId)
         {
             // Attempt to get the item from the cache first
@@ -19,9 +21,17 @@ namespace UmlautAdaptarr.Services
             switch (mediaType)
             {
                 case "tv":
-                    fetchedItem = await sonarrClient.FetchItemByExternalIdAsync(externalId);
+                    if (_sonarrEnabled)
+                    {
+                        fetchedItem = await sonarrClient.FetchItemByExternalIdAsync(externalId);
+                    }
                     break;
-                    // TODO Add cases for other sources like Radarr, Lidarr, etc.
+                case "audio":
+                    if (_lidarrEnabled)
+                    {
+                        fetchedItem = await lidarrClient.FetchItemByExternalIdAsync(externalId);
+                    }
+                    break;
             }
 
             // If an item is fetched, cache it
@@ -47,7 +57,10 @@ namespace UmlautAdaptarr.Services
             switch (mediaType)
             {
                 case "tv":
-                    fetchedItem = await sonarrClient.FetchItemByTitleAsync(title);
+                    if (_sonarrEnabled)
+                    {
+                        fetchedItem = await sonarrClient.FetchItemByTitleAsync(title);
+                    }
                     break;
                     // TODO add cases for other sources as needed, such as Radarr, Lidarr, etc.
             }

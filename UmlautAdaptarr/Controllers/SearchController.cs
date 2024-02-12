@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Formatters;
 using Newtonsoft.Json.Linq;
+using System.Linq;
 using System.Text;
 using System.Xml.Linq;
 using UmlautAdaptarr.Models;
@@ -34,7 +36,7 @@ namespace UmlautAdaptarr.Controllers
                 // Rename titles in the single search content
                 if (!string.IsNullOrEmpty(initialSearchResult?.Content))
                 {
-                    inititalProcessedContent = ProcessContent(initialSearchResult.Content, searchItem?.TitleMatchVariations, searchItem?.ExpectedTitle);
+                    inititalProcessedContent = ProcessContent(initialSearchResult.Content, searchItem);
                 }
 
                 var additionalTextSearch = searchItem != null
@@ -76,7 +78,7 @@ namespace UmlautAdaptarr.Controllers
                     }
 
                     // Handle multiple search requests based on German title variations
-                    var aggregatedResult = await AggregateSearchResults(domain, queryParameters, titleSearchVariations, searchItem.TitleMatchVariations, expectedTitle);
+                    var aggregatedResult = await AggregateSearchResults(domain, queryParameters, titleSearchVariations, searchItem);
                     aggregatedResult.AggregateItems(inititalProcessedContent);
 
                     return Content(aggregatedResult.Content, aggregatedResult.ContentType, aggregatedResult.ContentEncoding);
@@ -109,17 +111,17 @@ namespace UmlautAdaptarr.Controllers
         }
 
 
-        private string ProcessContent(string content, string[]? titleMatchVariations = null, string? expectedTitle = null)
+        private string ProcessContent(string content, SearchItem? searchItem)
         {
-            return titleMatchingService.RenameTitlesInContent(content, titleMatchVariations, expectedTitle);
+            return titleMatchingService.RenameTitlesInContent(content, searchItem);
         }
 
         public async Task<AggregatedSearchResult> AggregateSearchResults(
             string domain,
             IDictionary<string, string> queryParameters,
             IEnumerable<string> titleSearchVariations,
-            string[] titleMatchVariations,
-            string expectedTitle)
+            SearchItem? searchItem
+            )
         {
             string defaultContentType = "application/xml";
             Encoding defaultEncoding = Encoding.UTF8;
@@ -143,7 +145,7 @@ namespace UmlautAdaptarr.Controllers
                 }
 
                 // Process and rename titles in the content
-                content = ProcessContent(content, titleMatchVariations, expectedTitle);
+                content = ProcessContent(content, searchItem);
 
                 // Aggregate the items into a single document
                 aggregatedResult.AggregateItems(content);
@@ -157,6 +159,8 @@ namespace UmlautAdaptarr.Controllers
                                   TitleMatchingService titleMatchingService,
                                   SearchItemLookupService searchItemLookupService) : SearchControllerBase(proxyService, titleMatchingService)
     {
+        public readonly string[] AUDIO_CATEGORY_IDS = ["3000", "3010", "3020", "3040", "3050"];
+
         [HttpGet]
         public async Task<IActionResult> MovieSearch([FromRoute] string options, [FromRoute] string domain)
         {
@@ -169,10 +173,27 @@ namespace UmlautAdaptarr.Controllers
         [HttpGet]
         public async Task<IActionResult> GenericSearch([FromRoute] string options, [FromRoute] string domain)
         {
-            var queryParameters = HttpContext.Request.Query.ToDictionary(
+
+        var queryParameters = HttpContext.Request.Query.ToDictionary(
                  q => q.Key,
                  q => string.Join(",", q.Value));
-            return await BaseSearch(options, domain, queryParameters);
+
+            SearchItem? searchItem = null;
+
+            if (queryParameters.TryGetValue("q", out string? title) && !string.IsNullOrEmpty(title))
+            {
+                if (queryParameters.TryGetValue("cat", out string? categories) && !string.IsNullOrEmpty(categories))
+                {
+                    // Search for audio
+                    if (categories.Split(',').Any(category => AUDIO_CATEGORY_IDS.Contains(category)))
+                    {
+                        var mediaType = "audio";
+                        searchItem = await searchItemLookupService.GetOrFetchSearchItemByExternalId(mediaType, title.ToLower());
+                    }
+                }
+            }
+
+            return await BaseSearch(options, domain, queryParameters, searchItem);
         }
 
         [HttpGet]
@@ -192,7 +213,7 @@ namespace UmlautAdaptarr.Controllers
                  q => string.Join(",", q.Value));
 
             SearchItem? searchItem = null;
-            string mediaType = "tv";
+            var mediaType = "tv";
 
             if (queryParameters.TryGetValue("tvdbid", out string? tvdbId) && !string.IsNullOrEmpty(tvdbId))
             {

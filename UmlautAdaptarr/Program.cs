@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Configuration;
 using System.Net;
 using UmlautAdaptarr.Providers;
 using UmlautAdaptarr.Routing;
@@ -10,10 +11,8 @@ internal class Program
         // TODO:
         // add option to sort by nzb age
 
-        // TODO
-        // add delay between requests
-
-        var builder = WebApplication.CreateBuilder(args);
+    
+       var builder = WebApplication.CreateBuilder(args);
 
         var configuration = builder.Configuration;
 
@@ -38,7 +37,7 @@ internal class Program
         builder.Logging.AddFilter((category, level) =>
         {
             // Prevent logging of HTTP request and response if the category is HttpClient
-            if (category.Contains("System.Net.Http.HttpClient"))
+            if (category.Contains("System.Net.Http.HttpClient") || category.Contains("Microsoft.Extensions.Http.DefaultHttpClientFactory"))
             {
                 return false;
             }
@@ -47,10 +46,11 @@ internal class Program
 
         builder.Services.AddControllers();
         builder.Services.AddHostedService<ArrSyncBackgroundService>();
-        builder.Services.AddSingleton<TitleApiService>(); // TODO rename
+        builder.Services.AddSingleton<TitleApiService>();
         builder.Services.AddSingleton<SearchItemLookupService>();
         builder.Services.AddSingleton<TitleMatchingService>();
         builder.Services.AddSingleton<SonarrClient>();
+        builder.Services.AddSingleton<LidarrClient>();
         builder.Services.AddSingleton<CacheService>();
         builder.Services.AddSingleton<ProxyService>();
 

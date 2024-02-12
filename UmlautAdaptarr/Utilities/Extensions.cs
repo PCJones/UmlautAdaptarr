@@ -1,9 +1,10 @@
 ﻿using System.Globalization;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace UmlautAdaptarr.Utilities
 {
-    public static class Extensions
+    public static partial class Extensions
     {
         public static string GetQuery(this HttpContext context, string key)
         {
@@ -46,10 +47,17 @@ namespace UmlautAdaptarr.Utilities
             return stringBuilder.ToString().Normalize(NormalizationForm.FormC);
         }
 
+        // TODO possibly replace GetCleanTitle with RemoveSpecialCharacters
         public static string GetCleanTitle(this string text)
         {
             return text.Replace("(", "").Replace(")", "").Replace("?","").Replace(":", "").Replace("'", "");
         }
+
+        public static string RemoveSpecialCharacters(this string text)
+        {
+            return SpecialCharactersRegex().Replace(text, "");
+        }
+
 
         public static string ReplaceGermanUmlautsWithLatinEquivalents(this string text)
         {
@@ -75,11 +83,22 @@ namespace UmlautAdaptarr.Utilities
                 .Replace("ß", "ss");
         }
 
-        public static bool HasGermanUmlauts(this string text)
+        public static string RemoveExtraWhitespaces(this string text)
+        {
+            return MultipleWhitespaceRegex().Replace(text, " ");
+        }
+
+        public static bool HasUmlauts(this string text)
         {
             if (text == null) return false;
             var umlauts = new[] { 'ö', 'ä', 'ü', 'Ä', 'Ü', 'Ö', 'ß' };
             return umlauts.Any(text.Contains);
         }
+
+        [GeneratedRegex("[^a-zA-Z0-9 ]+", RegexOptions.Compiled)]
+        private static partial Regex SpecialCharactersRegex();
+
+        [GeneratedRegex(@"\s+")]
+        private static partial Regex MultipleWhitespaceRegex();
     }
 }

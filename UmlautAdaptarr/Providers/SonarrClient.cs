@@ -1,6 +1,4 @@
-﻿using Microsoft.Extensions.Caching.Memory;
-using Newtonsoft.Json;
-using System.Net.Http;
+﻿using Newtonsoft.Json;
 using UmlautAdaptarr.Models;
 using UmlautAdaptarr.Services;
 using UmlautAdaptarr.Utilities;
