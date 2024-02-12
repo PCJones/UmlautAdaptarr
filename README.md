@@ -97,9 +97,11 @@ Hier wird der komplette deutsche Titel im Release angegeben (also mit `- Das Lie
 ![grafik](https://github.com/PCJones/UmlautAdaptarr/assets/377223/52f0caf5-6e9d-442e-9018-ba29f954a890)
 UmlautAdapatarr erkennt alle auf TheTVDB angegebenen Aliase und benennt das Release in den Englischen Titel um
 
-
-PS:
-Das Problem, dass Prowlarr mit SceneNZBs nicht richtig funktioniert ist damit auch behoben :D
+## Kontakt & Support
+- Öffne gerne ein Issue auf GitHub falls du Unterstützung benötigst.
+- [Telegram](https://t.me/pc_jones)
+- Discord: pcjones1
+- Reddit: /u/IreliaIsLife
 
 
 ### Licenses & Metadata source
