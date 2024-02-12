@@ -34,6 +34,8 @@ Am Beispiel von sceneNZBs:
 Also alles wie immer, nur dass ihr als API-URL nicht direkt z.B. `https://scenenzbs.com` eingebt, sondern 
 `http://localhost:5005/_/scenenzbs.com`
 
+Den API-Key müsst ihr natürlich auch ganz normal setzen.
+
 ## Was macht UmlautAdaptarr überhaupt?
 UmlautAdaptarr löst mehrere Probleme:
 - Releases mit Umlauten werden grundsätzlich nicht korrekt von den *Arrs importiert
