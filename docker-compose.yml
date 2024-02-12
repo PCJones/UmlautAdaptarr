@@ -5,8 +5,6 @@ services:
     image: umlautadaptarr
     restart: unless-stopped
     environment:
-      - PUID=1000
-      - PGID=1000
       - TZ=Europe/Berlin
       - SONARR_HOST="http://sonarr:8989"
       - SONARR_API_KEY="API_KEY"
