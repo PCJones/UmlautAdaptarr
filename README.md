@@ -66,38 +66,31 @@ Einige Beispiele findet ihr unter Features.
 ## Beispiel-Funktionalität
 In den Klammern am Ende des Releasenamens (Bild 2 & 4) steht zu Anschauungszwecken der deutsche Titel der vorher nicht gefunden bzw. akzeptiert wurde. Das bleibt natürlich nicht so ;)
 
-**Vorher:**  
+**Vorher:** Release wird zwar gefunden, kann aber kann nicht zu geordnet werden.
 ![Vorherige Suche ohne deutsche Titel](https://i.imgur.com/7pfRzgH.png)  
-Release wird zwar gefunden, kann aber kann nicht zu geordnet werden.
 
-**Jetzt:**  
+**Jetzt:** 2-3 weitere Releases werden gefunden, außerdem meckert Sonarr nicht mehr über den Namen und würde es bei einer automatischen Suche ohne Probleme importieren.
 ![Jetzige Suche mit deutschen Titeln](https://i.imgur.com/k55YIN9.png)  
-2-3 weitere Releases werden gefunden, außerdem meckert Sonarr nicht mehr über den Namen und würde es bei einer automatischen Suche ohne Probleme importieren.
 
-**Vorher:**  
+**Vorher:** Es werden nur Releases mit dem englischen Titel der Serie gefunden
 ![Vorherige Suche, englische Titel](https://i.imgur.com/pbRlOeX.png)  
-Es werden nur Releases mit dem englischen Titel der Serie gefunden
 
-**Jetzt:**  
+**Jetzt:**  Es werden auch Titel mit dem deutschen Namen gefunden :D (haben nicht alle Suchergebnisse auf den Screenshot gepasst)
 ![Jetzige Suche, deutsche und englische Titel](https://i.imgur.com/eeq0Voj.png)  
-Es werden auch Titel mit dem deutschen Namen gefunden :D (haben nicht alle Suchergebnisse auf den Screenshot gepasst)
 
-**Vorher:**
-Die deutsche Produktion `Alone - Überlebe die Wildnis` hat auf [TheTVDB](https://thetvdb.com/series/alone-uberlebe-die-wildnis) den Englischen Namen `Alone Germany`.
-![grafik](https://github.com/PCJones/UmlautAdaptarr/assets/377223/62158f77-ecc2-4747-af85-4b8f94f51ab4)
+**Vorher:** Die deutsche Produktion `Alone - Überlebe die Wildnis` hat auf [TheTVDB](https://thetvdb.com/series/alone-uberlebe-die-wildnis) den Englischen Namen `Alone Germany`.
+
 Sonarr erwartet immer den Englischen Namen, der hier natürlich nicht gegeben ist.
+![grafik](https://github.com/PCJones/UmlautAdaptarr/assets/377223/62158f77-ecc2-4747-af85-4b8f94f51ab4)
 
-**Jetzt:**
+**Jetzt:** UmlautAdaptarr hat die Releases in `Alone Germany` umbenannt und Sonarr hat keine Probleme mehr
 ![grafik](https://github.com/PCJones/UmlautAdaptarr/assets/377223/57539ffc-b8a6-4255-a7f8-03079c10b1e8)
-UmlautAdaptarr hat die Releases in `Alone Germany` umbenannt und Sonarr hat keine Probleme mehr
 
-**Vorher:**
+**Vorher:** Hier wird der komplette deutsche Titel im Release angegeben (also mit `- Das Lied von Eis und Feuer`) - glücklicherweise stellt uns [TheTVDB](https://thetvdb.com/series/game-of-thrones) aber diesen längeren Titel als Alias zur Verfügung - nur nutzt Sonarr diese Informationen (bisher) einfach nicht.
 ![grafik](https://github.com/PCJones/UmlautAdaptarr/assets/377223/8f3297bd-ebe4-42de-b4e6-952882c8b902)
-Hier wird der komplette deutsche Titel im Release angegeben (also mit `- Das Lied von Eis und Feuer`) - glücklicherweise stellt uns [TheTVDB](https://thetvdb.com/series/game-of-thrones) aber diesen längeren Titel als Alias zur Verfügung - nur nutzt Sonarr diese Informationen einfach nicht.
 
-**Jetzt:**
+**Jetzt:** UmlautAdapatarr erkennt alle auf TheTVDB angegebenen Aliase und benennt das Release in den Englischen Titel um
 ![grafik](https://github.com/PCJones/UmlautAdaptarr/assets/377223/52f0caf5-6e9d-442e-9018-ba29f954a890)
-UmlautAdapatarr erkennt alle auf TheTVDB angegebenen Aliase und benennt das Release in den Englischen Titel um
 
 ## Kontakt & Support
 - Öffne gerne ein Issue auf GitHub falls du Unterstützung benötigst.
