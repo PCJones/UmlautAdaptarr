@@ -1,9 +1,9 @@
 version: '3.8'
 services:
   umlautadaptarr:
-    # uncomment this to get the development branch
-    # build: https://github.com/PCJones/UmlautAdaptarr.git#develop
-        image: pcjones/umlautadaptarr:latest
+    #uncomment this to get the development branch
+    #build: https://github.com/PCJones/UmlautAdaptarr.git#develop
+    build: https://github.com/PCJones/UmlautAdaptarr.git#master
     image: umlautadaptarr
     restart: unless-stopped
     environment:
@@ -21,4 +21,4 @@ services:
       - LIDARR_HOST=http://localhost:8686
       - LIDARR_API_KEY=API_KEY
     ports:
-      - "5005":"5005 "
+      - "5005":"5005"
