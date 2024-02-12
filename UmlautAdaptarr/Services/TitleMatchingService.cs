@@ -46,8 +46,9 @@ namespace UmlautAdaptarr.Services
                         }
                     }
 
+                    var variationsOrderedByLength = titleMatchVariations!.OrderByDescending(variation => variation.Length);
                     // Attempt to find a variation that matches the start of the original title
-                    foreach (var variation in titleMatchVariations!)
+                    foreach (var variation in variationsOrderedByLength)
                     {
                         // Skip variations that are already the expectedTitle
                         if (variation == expectedTitle)
@@ -56,11 +57,19 @@ namespace UmlautAdaptarr.Services
                         }
 
                         // Variation is already normalized at creation
-                        var pattern = "^" + Regex.Escape(variation).Replace("\\ ", "[._ ]");
+                        var variationMatchPattern = "^" + Regex.Escape(variation).Replace("\\ ", "[._ ]");
 
                         // Check if the originalTitle starts with the variation (ignoring case and separators)
-                        if (Regex.IsMatch(normalizedOriginalTitle, pattern, RegexOptions.IgnoreCase))
+                        if (Regex.IsMatch(normalizedOriginalTitle, variationMatchPattern, RegexOptions.IgnoreCase))
                         {
+                            // Workaround for the rare case of e.g. "Frieren: Beyond Journey's End" that also has the alias "Frieren"
+                            if (expectedTitle!.StartsWith(variation, StringComparison.OrdinalIgnoreCase))
+                            {
+                                logger.LogWarning($"TitleMatchingService - Didn't rename: '{originalTitle}' because the expected title '{expectedTitle}' starts with the variation '{variation}'");
+                                continue;
+                            }
+                            var originalTitleMatchPattern = "^" + Regex.Escape(variation).Replace("\\ ", "[._ ]");
+
                             // Find the first separator used in the original title for consistent replacement
                             var separator = FindFirstSeparator(originalTitle);
                             // Reconstruct the expected title using the original separator

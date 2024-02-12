@@ -48,7 +48,7 @@ namespace UmlautAdaptarr.Utilities
 
         public static string GetCleanTitle(this string text)
         {
-            return text.Replace("(", "").Replace(")", "").Replace("?","").Replace(":", "");
+            return text.Replace("(", "").Replace(")", "").Replace("?","").Replace(":", "").Replace("'", "");
         }
 
         public static string ReplaceGermanUmlautsWithLatinEquivalents(this string text)
