@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Text;
+﻿using System.Text;
 using System.Xml.Linq;
 
 namespace UmlautAdaptarr.Models
@@ -9,13 +8,13 @@ namespace UmlautAdaptarr.Models
         public XDocument ContentDocument { get; private set; }
         public string ContentType { get; set; }
         public Encoding ContentEncoding { get; set; }
-        private HashSet<string> _uniqueItems;
+        private readonly HashSet<string> _uniqueItems;
 
         public AggregatedSearchResult(string contentType, Encoding contentEncoding)
         {
             ContentType = contentType;
             ContentEncoding = contentEncoding;
-            _uniqueItems = new HashSet<string>();
+            _uniqueItems = [];
 
             // Initialize ContentDocument with a basic RSS structure
             ContentDocument = new XDocument(new XElement("rss", new XElement("channel")));
@@ -34,10 +33,6 @@ namespace UmlautAdaptarr.Models
                 if (_uniqueItems.Add(itemAsString))
                 {
                     ContentDocument.Root.Element("channel").Add(item);
-                }
-                else
-                {
-
                 }
             }
         }

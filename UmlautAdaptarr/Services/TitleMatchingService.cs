@@ -4,45 +4,14 @@ using UmlautAdaptarr.Utilities;
 
 namespace UmlautAdaptarr.Services
 {
-    public partial class TitleMatchingService
+    public partial class TitleMatchingService(CacheService cacheService, ILogger<TitleMatchingService> logger)
     {
-        public List<string> GenerateTitleVariations(string germanTitle)
-        {
-            var cleanTitle = germanTitle.RemoveAccentButKeepGermanUmlauts();
-            
-            // Start with base variations including handling umlauts
-            var baseVariations = new List<string>
-                {
-                    cleanTitle, // No change
-                    cleanTitle.ReplaceGermanUmlautsWithLatinEquivalents(),
-                    cleanTitle.RemoveGermanUmlautDots()
-                };
-
-            // Additional variations to accommodate titles with "-"
-            if (cleanTitle.Contains('-'))
-            {
-                var withoutDash = cleanTitle.Replace("-", "");
-                var withSpaceInsteadOfDash = cleanTitle.Replace("-", " ");
-
-                // Add variations of the title without dash and with space instead of dash
-                baseVariations.AddRange(new List<string>
-                {
-                    withoutDash,
-                    withSpaceInsteadOfDash,
-                    withoutDash.ReplaceGermanUmlautsWithLatinEquivalents(),
-                    withoutDash.RemoveGermanUmlautDots(),
-                    withSpaceInsteadOfDash.ReplaceGermanUmlautsWithLatinEquivalents(),
-                    withSpaceInsteadOfDash.RemoveGermanUmlautDots()
-                });
-            }
-
-            return baseVariations.Distinct().ToList();
-        }
-
-
-        public string RenameTitlesInContent(string content, List<string> germanTitleVariations, string expectedTitle)
+        public string RenameTitlesInContent(string content, string[]? titleMatchVariations, string? expectedTitle)
         {
             var xDoc = XDocument.Parse(content);
+
+            // If expectedTitle and titleMatchVariations are provided use them, if not use the CacheService to find matches.
+            bool useCacheService = string.IsNullOrEmpty(expectedTitle) || titleMatchVariations?.Length == 0;
 
             foreach (var item in xDoc.Descendants("item"))
             {
@@ -52,9 +21,40 @@ namespace UmlautAdaptarr.Services
                     var originalTitle = titleElement.Value;
                     var normalizedOriginalTitle = NormalizeTitle(originalTitle);
 
-                    // Attempt to find a variation that matches the start of the original title
-                    foreach (var variation in germanTitleVariations)
+                    if (useCacheService)
                     {
+                        var categoryElement = item.Element("category");
+                        var category = categoryElement?.Value;
+                        var mediaType = GetMediaTypeFromCategory(category);
+                        if (mediaType == null)
+                        {
+                            continue;
+                        }
+
+                        // Use CacheService to find a matching SearchItem by title
+                        var searchItem = cacheService.SearchItemByTitle(mediaType, originalTitle);
+                        if (searchItem != null)
+                        {
+                            // If a SearchItem is found, use its ExpectedTitle and titleMatchVariations for renaming
+                            expectedTitle = searchItem.ExpectedTitle;
+                            titleMatchVariations = searchItem.TitleMatchVariations;
+                        }
+                        else
+                        {
+                            // Skip processing this item if no matching SearchItem is found
+                            continue;
+                        }
+                    }
+
+                    // Attempt to find a variation that matches the start of the original title
+                    foreach (var variation in titleMatchVariations!)
+                    {
+                        // Skip variations that are already the expectedTitle
+                        if (variation == expectedTitle)
+                        {
+                            continue;
+                        }
+
                         // Variation is already normalized at creation
                         var pattern = "^" + Regex.Escape(variation).Replace("\\ ", "[._ ]");
 
@@ -64,7 +64,7 @@ namespace UmlautAdaptarr.Services
                             // Find the first separator used in the original title for consistent replacement
                             var separator = FindFirstSeparator(originalTitle);
                             // Reconstruct the expected title using the original separator
-                            var newTitlePrefix = expectedTitle.Replace(" ", separator.ToString());
+                            var newTitlePrefix = expectedTitle!.Replace(" ", separator.ToString());
 
                             // Extract the suffix from the original title starting right after the matched variation length
                             var variationLength = variation.Length;
@@ -88,7 +88,10 @@ namespace UmlautAdaptarr.Services
                             var newTitle = newTitlePrefix + (string.IsNullOrEmpty(suffix) ? "" : separator + suffix);
 
                             // Update the title element's value with the new title
-                            titleElement.Value = newTitle + $"({originalTitle.Substring(0, variationLength)})";
+                            //titleElement.Value = newTitle + $"({originalTitle.Substring(0, variationLength)})";
+                            titleElement.Value = newTitle;
+
+                            logger.LogInformation($"TitleMatchingService - Title changed: '{originalTitle}' to '{newTitle}'");
                             break; // Break after the first successful match and modification
                         }
                     }
@@ -102,7 +105,7 @@ namespace UmlautAdaptarr.Services
         private static string NormalizeTitle(string title)
         {
             title = title.RemoveAccentButKeepGermanUmlauts();
-            // Replace all known separators with a consistent one for normalization
+            // Replace all known separators with space for normalization
             return WordSeperationCharRegex().Replace(title, " ".ToString());
         }
 
@@ -116,6 +119,33 @@ namespace UmlautAdaptarr.Services
         {
             // Replace spaces with the original separator found in the title
             return title.Replace(' ', separator);
+        }
+
+        public string? GetMediaTypeFromCategory(string? category)
+        {
+            if (category == null)
+            {
+                return null;
+            }
+
+            if (category.StartsWith("EBook", StringComparison.OrdinalIgnoreCase) || category.StartsWith("Book", StringComparison.OrdinalIgnoreCase))
+            {
+                return "book";
+            }
+            else if (category.StartsWith("Movies", StringComparison.OrdinalIgnoreCase))
+            {
+                return "movies";
+            }
+            else if (category.StartsWith("TV", StringComparison.OrdinalIgnoreCase))
+            {
+                return "tv";
+            }
+            else if (category.Contains("Audiobook", StringComparison.OrdinalIgnoreCase))
+            {
+                return "book";
+            }
+
+            return null;
         }
 
 

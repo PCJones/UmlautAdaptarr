@@ -1,0 +1,9 @@
+version: '3.8'
+services:
+  umlautadaptarr:
+    build: .
+    environment:
+      SONARR_HOST: "http://localhost:8989"
+      SONARR_API_KEY: ""
+    ports:
+      - "5005:5005" 

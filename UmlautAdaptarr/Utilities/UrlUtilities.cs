@@ -40,5 +40,14 @@ namespace UmlautAdaptarr.Utilities
 
             return BuildUrl(domain, queryParameters);
         }
+
+        public static string RedactApiKey(string targetUri)
+        {
+            var apiKeyPattern = @"(apikey=)[^&]*";
+
+            var redactedUri = Regex.Replace(targetUri, apiKeyPattern, "$1[REDACTED]");
+
+            return redactedUri;
+        }
     }
 }

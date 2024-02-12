@@ -1,22 +1,58 @@
-﻿namespace UmlautAdaptarr.Services
+﻿using Microsoft.Extensions.Caching.Memory;
+using System.Collections.Concurrent;
+using UmlautAdaptarr.Utilities;
+
+namespace UmlautAdaptarr.Services
 {
-    public class ProxyService(IHttpClientFactory clientFactory, IConfiguration configuration)
+    public class ProxyService
     {
-        private readonly HttpClient _httpClient = clientFactory.CreateClient("HttpClient") ?? throw new ArgumentNullException();
-        private readonly string _userAgent = configuration["Settings:UserAgent"] ?? throw new ArgumentException("UserAgent must be set in appsettings.json");
-        // TODO: Add cache!
+        private readonly HttpClient _httpClient;
+        private readonly string _userAgent;
+        private readonly ILogger<ProxyService> _logger;
+        private readonly IMemoryCache _cache;
+        private static readonly ConcurrentDictionary<string, DateTimeOffset> _lastRequestTimes = new();
+
+        public ProxyService(IHttpClientFactory clientFactory, IConfiguration configuration, ILogger<ProxyService> logger, IMemoryCache cache)
+        {
+            _httpClient = clientFactory.CreateClient("HttpClient") ?? throw new ArgumentNullException(nameof(clientFactory));
+            _userAgent = configuration["Settings:UserAgent"] ?? throw new ArgumentException("UserAgent must be set in appsettings.json");
+            _logger = logger;
+            _cache = cache;
+        }
 
         public async Task<HttpResponseMessage> ProxyRequestAsync(HttpContext context, string targetUri)
         {
-            var requestMessage = new HttpRequestMessage();
-            var requestMethod = context.Request.Method;
-
-            if (!HttpMethods.IsGet(requestMethod))
+            if (!HttpMethods.IsGet(context.Request.Method))
             {
-                throw new ArgumentException("Only GET requests are supported", nameof(requestMethod));
+                throw new ArgumentException("Only GET requests are supported", context.Request.Method);
             }
 
-            // Copy the request headers
+            // Throttling mechanism
+            var host = new Uri(targetUri).Host;
+            if (_lastRequestTimes.TryGetValue(host, out var lastRequestTime))
+            {
+                var timeSinceLastRequest = DateTimeOffset.Now - lastRequestTime;
+                if (timeSinceLastRequest < TimeSpan.FromSeconds(3))
+                {
+                    await Task.Delay(TimeSpan.FromSeconds(3) - timeSinceLastRequest);
+                }
+            }
+            _lastRequestTimes[host] = DateTimeOffset.Now;
+
+            // Check cache
+            if (_cache.TryGetValue(targetUri, out HttpResponseMessage cachedResponse))
+            {
+                _logger.LogInformation($"Returning cached response for {UrlUtilities.RedactApiKey(targetUri)}");
+                return cachedResponse!;
+            }
+
+            var requestMessage = new HttpRequestMessage
+            {
+                RequestUri = new Uri(targetUri),
+                Method = HttpMethod.Get,
+            };
+
+            // Copy request headers
             foreach (var header in context.Request.Headers)
             {
                 if (header.Key == "User-Agent" && _userAgent.Length != 0)
@@ -29,34 +65,29 @@
                 }
             }
 
-            requestMessage.RequestUri = new Uri(targetUri);
-            requestMessage.Method = HttpMethod.Get;
-
-            //var responseMessage = await _httpClient.SendAsync(requestMessage, HttpCompletionOption.ResponseHeadersRead, context.RequestAborted);
             try
             {
-                var responseMessage = _httpClient.Send(requestMessage, HttpCompletionOption.ResponseHeadersRead, context.RequestAborted);
+                _logger.LogInformation($"ProxyService GET {UrlUtilities.RedactApiKey(targetUri)}");
+                var responseMessage = await _httpClient.SendAsync(requestMessage, HttpCompletionOption.ResponseHeadersRead, context.RequestAborted);
 
-                // TODO: Handle 503 etc
-                responseMessage.EnsureSuccessStatusCode();
-
-                // Modify the response content if necessary
-                /*var content = await responseMessage.Content.ReadAsStringAsync();
-                content = ReplaceCharacters(content);
-                responseMessage.Content = new StringContent(content);*/
+                if (responseMessage.IsSuccessStatusCode)
+                {
+                    _cache.Set(targetUri, responseMessage, TimeSpan.FromMinutes(5));
+                }
 
                 return responseMessage;
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.ToString());
-                return null;
-            }
-        }
+                _logger.LogError(ex, $"Error proxying request: {UrlUtilities.RedactApiKey(targetUri)}. Error: {ex.Message}");
 
-        private string ReplaceCharacters(string input)
-        {
-            return input.Replace("Ä", "AE");
+                // Create a response message indicating an internal server error
+                var errorResponse = new HttpResponseMessage(System.Net.HttpStatusCode.InternalServerError)
+                {
+                    Content = new StringContent($"An error occurred while processing your request: {ex.Message}")
+                };
+                return errorResponse;
+            }
         }
     }
 }

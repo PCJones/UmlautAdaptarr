@@ -1,4 +1,5 @@
 using System.Net;
+using UmlautAdaptarr.Providers;
 using UmlautAdaptarr.Routing;
 using UmlautAdaptarr.Services;
 
@@ -29,14 +30,17 @@ internal class Program
 
         builder.Services.AddMemoryCache(options =>
         {
-            options.SizeLimit = 500;
-        });
-        builder.Services.AddSingleton<ILogger, Logger<TitleQueryService>>();
+            //options.SizeLimit = 20000;
+        });        
 
         builder.Services.AddControllers();
-        builder.Services.AddScoped<TitleQueryService>();
-        builder.Services.AddScoped<ProxyService>();
-        builder.Services.AddScoped<TitleMatchingService>();
+        builder.Services.AddHostedService<ArrSyncBackgroundService>();
+        builder.Services.AddSingleton<TitleApiService>(); // TODO rename
+        builder.Services.AddSingleton<SearchItemLookupService>();
+        builder.Services.AddSingleton<TitleMatchingService>();
+        builder.Services.AddSingleton<SonarrClient>();
+        builder.Services.AddSingleton<CacheService>();
+        builder.Services.AddSingleton<ProxyService>();
 
         var app = builder.Build();
 

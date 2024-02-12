@@ -2,12 +2,10 @@
   "profiles": {
     "http": {
       "commandName": "Project",
-      "launchBrowser": true,
-      "_launchUrl": "optionsTODO/example.com/api?t=movie&apikey=132&imdbid=123&limit=100",
-      "launchUrl": "/",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
+      "_launchUrl": "optionsTODO/example.com/api?t=movie&apikey=132&imdbid=123&limit=100",
       "dotnetRunMessages": true,
       "applicationUrl": "http://localhost:5182"
     },
