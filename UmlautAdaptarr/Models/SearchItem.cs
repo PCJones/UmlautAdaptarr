@@ -67,6 +67,7 @@ namespace UmlautAdaptarr.Models
                 }
 
                 TitleMatchVariations = allTitleVariations.Distinct().ToArray();
+                AuthorMatchVariations = [];
             }
         }
 

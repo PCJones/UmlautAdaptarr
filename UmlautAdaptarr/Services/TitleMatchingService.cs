@@ -51,7 +51,7 @@ namespace UmlautAdaptarr.Services
                             FindAndReplaceForMoviesAndTV(logger, searchItem, titleElement, originalTitle, normalizedOriginalTitle!);
                             break;
                         case "audio":
-                            ReplaceForAudio(searchItem, titleElement, originalTitle, normalizedOriginalTitle!);
+                            FindAndReplaceForAudio(searchItem, titleElement, originalTitle!);
                             break;
                         default:
                             throw new NotImplementedException();
@@ -62,23 +62,25 @@ namespace UmlautAdaptarr.Services
             return xDoc.ToString();
         }
 
-        private string NormalizeString(string text)
+        public void FindAndReplaceForAudio(SearchItem searchItem, XElement? titleElement, string originalTitle)
         {
-            return text.RemoveGermanUmlautDots().RemoveAccent().RemoveSpecialCharacters().Replace(" ", "").Trim().ToLower();
-        }
-
-
-        public void ReplaceForAudio(SearchItem searchItem, XElement? titleElement, string originalTitle, string normalizedOriginalTitle)
-        {
-            var authorMatch = FindBestMatch(searchItem.AuthorMatchVariations, NormalizeString(normalizedOriginalTitle), originalTitle);
-            var titleMatch = FindBestMatch(searchItem.TitleMatchVariations, NormalizeString(normalizedOriginalTitle), originalTitle);
+            var authorMatch = FindBestMatch(searchItem.AuthorMatchVariations, originalTitle.NormalizeForComparison(), originalTitle);
+            var titleMatch = FindBestMatch(searchItem.TitleMatchVariations, originalTitle.NormalizeForComparison(), originalTitle);
 
             if (authorMatch.Item1 && titleMatch.Item1)
             {
                 int matchEndPositionInOriginal = Math.Max(authorMatch.Item3, titleMatch.Item3);
 
+                var test = originalTitle[matchEndPositionInOriginal];
+                // Check and adjust for immediate following delimiter
+                if (matchEndPositionInOriginal < originalTitle.Length && new char[] { ' ', '-', '_', '.' }.Contains(originalTitle[matchEndPositionInOriginal]))
+                {
+                    matchEndPositionInOriginal++; // Skip the delimiter if it's immediately after the match
+                }
+
                 // Ensure we trim any leading delimiters from the suffix
-                string suffix = originalTitle.Substring(matchEndPositionInOriginal).TrimStart([' ', '-', '_']);
+                string suffix = originalTitle[matchEndPositionInOriginal..].TrimStart([' ', '-', '_', '.']).Trim();
+                suffix = suffix.Replace("-", ".");
 
                 // Concatenate the expected title with the remaining suffix
                 var updatedTitle = $"{searchItem.ExpectedAuthor} - {searchItem.ExpectedTitle}-{suffix}";
@@ -102,7 +104,7 @@ namespace UmlautAdaptarr.Services
 
             foreach (var variation in variations)
             {
-                var normalizedVariation = NormalizeString(variation);
+                var normalizedVariation = variation.NormalizeForComparison();
                 int startNormalized = normalizedOriginal.IndexOf(normalizedVariation);
 
                 if (startNormalized >= 0)
@@ -148,10 +150,8 @@ namespace UmlautAdaptarr.Services
                 originalIndex = i;
             }
 
-            return originalIndex + 1; // +1 to move past the matched character or to the next character in the original title
+            return originalIndex;
         }
-
-
 
         // This method replaces the first variation that starts at the beginning of the release title
         private static void FindAndReplaceForMoviesAndTV(ILogger<TitleMatchingService> logger, SearchItem searchItem, XElement? titleElement, string originalTitle, string normalizedOriginalTitle)

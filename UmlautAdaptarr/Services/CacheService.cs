@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.Caching.Memory;
+﻿using Microsoft.AspNetCore.Mvc.Formatters;
+using Microsoft.Extensions.Caching.Memory;
+using System.Reflection.Metadata.Ecma335;
 using System.Text.RegularExpressions;
 using UmlautAdaptarr.Models;
 using UmlautAdaptarr.Utilities;
@@ -8,16 +10,17 @@ namespace UmlautAdaptarr.Services
     public partial class CacheService(IMemoryCache cache)
     {
         private readonly Dictionary<string, HashSet<string>> VariationIndex = [];
-        private readonly Dictionary<string, List<SearchItem>> AudioFuzzyIndex = [];
+        private readonly Dictionary<string, List<(HashSet<string> TitleVariations, string CacheKey)>> AudioVariationIndex = [];
         private const int VARIATION_LOOKUP_CACHE_LENGTH = 5;
 
         public void CacheSearchItem(SearchItem item)
         {
             var prefix = item.MediaType;
-            cache.Set($"{prefix}_extid_{item.ExternalId}", item);
+            var cacheKey = $"{prefix}_extid_{item.ExternalId}";
+            cache.Set(cacheKey, item);
             if (item.MediaType == "audio")
             {
-                CacheAudioSearchItem(item);
+                CacheAudioSearchItem(item, cacheKey);
                 return;
             }
 
@@ -28,7 +31,7 @@ namespace UmlautAdaptarr.Services
             foreach (var variation in item.TitleMatchVariations)
             {
                 var normalizedVariation = variation.RemoveAccentButKeepGermanUmlauts().ToLower();
-                var cacheKey = $"{prefix}_var_{normalizedVariation}";
+                cacheKey = $"{prefix}_var_{normalizedVariation}";
                 cache.Set(cacheKey, item);
 
                 // Indexing by prefix
@@ -41,29 +44,31 @@ namespace UmlautAdaptarr.Services
             }
         }
 
-        private void CacheAudioSearchItem(SearchItem item)
+        public void CacheAudioSearchItem(SearchItem item, string cacheKey)
         {
-            // Normalize and simplify the title and author for fuzzy matching
-            var key = NormalizeForFuzzyMatching(item.ExternalId);
-
-            if (!AudioFuzzyIndex.ContainsKey(key))
+            // Index author and title variations
+            foreach (var authorVariation in item.AuthorMatchVariations)
             {
-                AudioFuzzyIndex[key] = new List<SearchItem>();
-            }
-            AudioFuzzyIndex[key].Add(item);
-        }
+                var normalizedAuthor = authorVariation.NormalizeForComparison();
 
-        private string NormalizeForFuzzyMatching(string input)
-        {
-            // Normalize the input string by removing accents, converting to lower case, and removing non-alphanumeric characters
-            var normalized = input.RemoveAccentButKeepGermanUmlauts().RemoveSpecialCharacters().ToLower();
-            normalized = WhiteSpaceRegex().Replace(normalized, "");
-            return normalized;
+                if (!AudioVariationIndex.ContainsKey(normalizedAuthor))
+                {
+                    AudioVariationIndex[normalizedAuthor] = [];
+                }
+
+                var titleVariations = item.TitleMatchVariations.Select(titleMatchVariation => titleMatchVariation.NormalizeForComparison()).ToHashSet();
+                AudioVariationIndex[normalizedAuthor].Add((titleVariations, cacheKey));
+            }
         }
 
         public SearchItem? SearchItemByTitle(string mediaType, string title)
         {
             var normalizedTitle = title.RemoveAccentButKeepGermanUmlauts().ToLower();
+
+            if (mediaType == "audio")
+            {
+                return FindBestMatchForAudio(normalizedTitle.NormalizeForComparison());
+            }
 
             // Use the first few characters of the normalized title for cache prefix search
             var cacheSearchPrefix = normalizedTitle[..Math.Min(VARIATION_LOOKUP_CACHE_LENGTH, normalizedTitle.Length)];
@@ -107,10 +112,12 @@ namespace UmlautAdaptarr.Services
         {
             var normalizedTitle = title.RemoveAccentButKeepGermanUmlauts().ToLower();
 
+
             if (mediaType == "generic")
             {
                 // TODO
             }
+
             cache.TryGetValue($"{mediaType}_var_{normalizedTitle}", out SearchItem? item);
             if (item == null)
             {
@@ -118,6 +125,31 @@ namespace UmlautAdaptarr.Services
             }
             return item;
         }
+
+        private SearchItem? FindBestMatchForAudio(string normalizedOriginalTitle)
+        {
+            foreach (var authorEntry in AudioVariationIndex)
+            {
+                if (normalizedOriginalTitle.Contains(authorEntry.Key))
+                {
+                    var sortedEntries = authorEntry.Value.OrderByDescending(entry => entry.TitleVariations.FirstOrDefault()?.Length).ToList();
+
+                    foreach (var (titleVariations, cacheKey) in sortedEntries)
+                    {
+                        if (titleVariations.Any(normalizedOriginalTitle.Contains))
+                        {
+                            if (cache.TryGetValue(cacheKey, out SearchItem? item))
+                            {
+                                return item;
+                            }
+                        }
+                    }
+                }
+            }
+
+            return null;
+        }
+
 
         [GeneratedRegex("\\s")]
         private static partial Regex WhiteSpaceRegex();

@@ -62,6 +62,8 @@ namespace UmlautAdaptarr.Services
                         fetchedItem = await sonarrClient.FetchItemByTitleAsync(title);
                     }
                     break;
+                case "audio":
+                    break;
                     // TODO add cases for other sources as needed, such as Radarr, Lidarr, etc.
             }
 
@@ -74,5 +76,4 @@ namespace UmlautAdaptarr.Services
             return fetchedItem;
         }
     }
-
 }

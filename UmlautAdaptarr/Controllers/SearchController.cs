@@ -1,9 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Formatters;
-using Newtonsoft.Json.Linq;
-using System.Linq;
 using System.Text;
-using System.Xml.Linq;
 using UmlautAdaptarr.Models;
 using UmlautAdaptarr.Services;
 using UmlautAdaptarr.Utilities;

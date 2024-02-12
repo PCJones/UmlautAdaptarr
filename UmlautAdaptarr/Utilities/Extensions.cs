@@ -53,6 +53,11 @@ namespace UmlautAdaptarr.Utilities
             return text.Replace("(", "").Replace(")", "").Replace("?","").Replace(":", "").Replace("'", "");
         }
 
+        public static string NormalizeForComparison(this string text)
+        {
+            return text.RemoveGermanUmlautDots().RemoveAccent().RemoveSpecialCharacters().Replace(" ", "").Trim().ToLower();
+        }
+
         public static string RemoveSpecialCharacters(this string text)
         {
             return SpecialCharactersRegex().Replace(text, "");

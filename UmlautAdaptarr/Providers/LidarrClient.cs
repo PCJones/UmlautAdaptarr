@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using Microsoft.Extensions.Caching.Memory;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using UmlautAdaptarr.Models;
 using UmlautAdaptarr.Services;
@@ -9,7 +10,8 @@ namespace UmlautAdaptarr.Providers
     public class LidarrClient(
         IHttpClientFactory clientFactory,
         IConfiguration configuration,
-        TitleApiService titleService,
+        CacheService cacheService,
+        IMemoryCache cache,
         ILogger<LidarrClient> logger) : ArrClientBase()
     {
         private readonly string _lidarrHost = configuration.GetValue<string>("LIDARR_HOST") ?? throw new ArgumentException("LIDARR_HOST environment variable must be set");
@@ -23,7 +25,6 @@ namespace UmlautAdaptarr.Providers
 
             try
             {
-
                 var lidarrArtistsUrl = $"{_lidarrHost}/api/v1/artist?apikey={_lidarrApiKey}";
                 logger.LogInformation($"Fetching all artists from Lidarr: {UrlUtilities.RedactApiKey(lidarrArtistsUrl)}");
                 var artistsApiResponse = await httpClient.GetStringAsync(lidarrArtistsUrl);
@@ -40,9 +41,17 @@ namespace UmlautAdaptarr.Providers
                     var artistId = (int)artist.id;
 
                     var lidarrAlbumUrl = $"{_lidarrHost}/api/v1/album?artistId={artistId}&apikey={_lidarrApiKey}";
-                    logger.LogInformation($"Fetching all albums from artistId {artistId} from Lidarr: {UrlUtilities.RedactApiKey(lidarrArtistsUrl)}");
-                    var albumApiResponse = await httpClient.GetStringAsync(lidarrAlbumUrl);
-                    var albums = JsonConvert.DeserializeObject<List<dynamic>>(albumApiResponse);
+
+                    if (cache.TryGetValue(lidarrAlbumUrl, out List<dynamic>? albums))
+                    {
+                        logger.LogInformation($"Using cached albums for {UrlUtilities.RedactApiKey(lidarrAlbumUrl)}");
+                    }
+                    else
+                    {
+                        logger.LogInformation($"Fetching all albums from artistId {artistId} from Lidarr: {UrlUtilities.RedactApiKey(lidarrArtistsUrl)}");
+                        var albumApiResponse = await httpClient.GetStringAsync(lidarrAlbumUrl);
+                        albums = JsonConvert.DeserializeObject<List<dynamic>>(albumApiResponse);
+                    }
 
                     if (albums == null)
                     {
@@ -51,6 +60,9 @@ namespace UmlautAdaptarr.Providers
                     }
 
                     logger.LogInformation($"Successfully fetched {albums.Count} albums for artistId {artistId} from Lidarr.");
+
+                    // Cache albums for 3 minutes
+                    cache.Set(lidarrAlbumUrl, albums, TimeSpan.FromMinutes(3));
 
                     foreach (var album in albums)
                     {
@@ -92,42 +104,20 @@ namespace UmlautAdaptarr.Providers
 
         public override async Task<SearchItem?> FetchItemByExternalIdAsync(string externalId)
         {
-            var httpClient = clientFactory.CreateClient();
-
             try
             {
-                var lidarrUrl = $"{_lidarrHost}/api/v1/series?mbId={externalId}&includeSeasonImages=false&apikey={_lidarrApiKey}";
-                logger.LogInformation($"Fetching item by external ID from Lidarr: {UrlUtilities.RedactApiKey(lidarrUrl)}");
-                var response = await httpClient.GetStringAsync(lidarrUrl);
-                var artists = JsonConvert.DeserializeObject<dynamic>(response);
-                var artist = artists?[0];
-
-                if (artist != null)
+                // For now we have to fetch all items every time
+                var searchItems = await FetchAllItemsAsync();
+                foreach (var searchItem in searchItems ?? [])
                 {
-                    var mbId = (string)artist.mbId;
-                    if (mbId == null)
+                    try
                     {
-                        logger.LogWarning($"Lidarr Artist {artist.id} doesn't have a mbId.");
-                        return null;
+                        cacheService.CacheSearchItem(searchItem);
                     }
-                    (var germanTitle, var aliases) = await titleService.FetchGermanTitleAndAliasesByExternalIdAsync(_mediaType, mbId);
-
-                    throw new NotImplementedException();
-
-                    var searchItem = new SearchItem
-                    (
-                        arrId: (int)artist.id,
-                        externalId: mbId,
-                        title: (string)artist.title,
-                        expectedTitle: (string)artist.title,
-                        germanTitle: germanTitle,
-                        aliases: aliases,
-                        mediaType: _mediaType,
-                        expectedAuthor: "TODO"
-                    ); ;
-
-                    logger.LogInformation($"Successfully fetched artist {searchItem} from Lidarr.");
-                    return searchItem;
+                    catch (Exception ex)
+                    {
+                        logger.LogError(ex, $"An error occurred while caching search item with ID {searchItem.ArrId}.");
+                    }
                 }
             }
             catch (Exception ex)
@@ -140,54 +130,10 @@ namespace UmlautAdaptarr.Providers
 
         public override async Task<SearchItem?> FetchItemByTitleAsync(string title)
         {
-            var httpClient = clientFactory.CreateClient();
-
             try
             {
-                (string? germanTitle, string? mbId, string[]? aliases) = await titleService.FetchGermanTitleAndExternalIdAndAliasesByTitle(_mediaType, title);
-
-                if (mbId == null)
-                {
-                    return null;
-                }
-
-                var lidarrUrl = $"{_lidarrHost}/api/v1/series?mbId={mbId}&includeSeasonImages=false&apikey={_lidarrApiKey}";
-                var lidarrApiResponse = await httpClient.GetStringAsync(lidarrUrl);
-                var artists = JsonConvert.DeserializeObject<dynamic>(lidarrApiResponse);
-
-                if (artists == null)
-                {
-                    logger.LogError($"Parsing Lidarr API response for MB ID {mbId} resulted in null");
-                    return null;
-                }
-                else if (artists.Count == 0)
-                {
-                    logger.LogWarning($"No results found for MB ID {mbId}");
-                    return null;
-                }
-
-                var expectedTitle = (string)artists[0].title;
-                if (expectedTitle == null)
-                {
-                    logger.LogError($"Lidarr Title for MB ID {mbId} is null");
-                    return null;
-                }
-
+               // this should never be called at the moment
                 throw new NotImplementedException();
-                var searchItem = new SearchItem
-                (
-                    arrId: (int)artists[0].id,
-                    externalId: mbId,
-                    title: (string)artists[0].title,
-                    expectedTitle: (string)artists[0].title,
-                    germanTitle: germanTitle,
-                    aliases: aliases,
-                    mediaType: _mediaType,
-                    expectedAuthor: "TODO"
-                );
-
-                logger.LogInformation($"Successfully fetched artist {searchItem} from Lidarr.");
-                return searchItem;
             }
             catch (Exception ex)
             {
