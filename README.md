@@ -41,7 +41,7 @@ UmlautAdaptarr löst mehrere Probleme:
 - Sonarr & Radarr erwarten immer den englischen Titel von https://thetvdb.com/ bzw. https://www.themoviedb.org/. Das führt bei deutschen Produktionen oder deutschen Übersetzungen oft zu Problemen - falls die *arrs schon mal etwas mit der Meldung `Found matching series/movie via grab history, but release was matched to series by ID. Automatic import is not possible/` nicht importiert haben, dann war das der Grund.
 
 # Wie macht UmlautAdaptarr das?
-UmlautAdaptarr tut so, als wäre es ein Indexer. In Wahrheit schaltet sich UmlautAdaptarr aber nur zwischen die *arrs und den Indexer und kann somit die Suchen sowie die Ergebnisse abfangen und bearbeiten.
+UmlautAdaptarr tut so, als wäre es ein Indexer. In Wahrheit schaltet sich UmlautAdaptarr aber nur zwischen die *arrs und den echten Indexer und kann somit die Suchen sowie die Ergebnisse abfangen und bearbeiten.
 Am Ende werden die gefundenen Releases immer so umbenannt, das die Arrs sie einwandfrei erkennen.
 Einige Beispiele findet ihr unter Features.
 
