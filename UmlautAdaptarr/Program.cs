@@ -31,7 +31,19 @@ internal class Program
         builder.Services.AddMemoryCache(options =>
         {
             //options.SizeLimit = 20000;
-        });        
+        });
+
+
+        // TODO workaround to not log api keys
+        builder.Logging.AddFilter((category, level) =>
+        {
+            // Prevent logging of HTTP request and response if the category is HttpClient
+            if (category.Contains("System.Net.Http.HttpClient"))
+            {
+                return false;
+            }
+            return true;
+        });
 
         builder.Services.AddControllers();
         builder.Services.AddHostedService<ArrSyncBackgroundService>();
