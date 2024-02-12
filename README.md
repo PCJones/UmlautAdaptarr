@@ -31,7 +31,7 @@ Am Beispiel von sceneNZBs:
 
 ![grafik](https://github.com/PCJones/UmlautAdaptarr/assets/377223/97ca0aef-1a9e-4560-9374-c3a8215dafd2)
 
-Also alles wie immer, nur dass ihr als API-URL nicht direkt z.B. scenenzbs.com eingebt, sondern 
+Also alles wie immer, nur dass ihr als API-URL nicht direkt z.B. `https://scenenzbs.com` eingebt, sondern 
 `http://localhost:5005/_/scenenzbs.com`
 
 ## Was macht UmlautAdaptarr überhaupt?
