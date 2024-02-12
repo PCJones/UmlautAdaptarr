@@ -47,7 +47,7 @@ namespace UmlautAdaptarr.Models
             {
                 return [];
             }
-            var cleanTitle = germanTitle.RemoveAccentButKeepGermanUmlauts();
+            var cleanTitle = germanTitle.RemoveAccentButKeepGermanUmlauts().GetCleanTitle();
 
             // Start with base variations including handling umlauts
             var baseVariations = new List<string>

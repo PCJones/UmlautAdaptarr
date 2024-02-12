@@ -32,7 +32,7 @@ namespace UmlautAdaptarr.Services
                         }
 
                         // Use CacheService to find a matching SearchItem by title
-                        var searchItem = cacheService.SearchItemByTitle(mediaType, originalTitle);
+                        var searchItem = cacheService.SearchItemByTitle(mediaType, normalizedOriginalTitle);
                         if (searchItem != null)
                         {
                             // If a SearchItem is found, use its ExpectedTitle and titleMatchVariations for renaming

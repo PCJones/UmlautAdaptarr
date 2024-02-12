@@ -13,14 +13,13 @@ namespace UmlautAdaptarr.Services
         {
             var prefix = item.MediaType;
             var normalizedTitle = item.Title.RemoveAccentButKeepGermanUmlauts().ToLower();
-            // TODO maybe we need to also add the media type (movie/book/show etc)
 
             cache.Set($"{prefix}_extid_{item.ExternalId}", item);
             cache.Set($"{prefix}_title_{normalizedTitle}", item);
 
-            foreach (var variation in item.TitleSearchVariations)
+            foreach (var variation in item.TitleMatchVariations)
             {
-                var normalizedVariation = item.Title.RemoveAccentButKeepGermanUmlauts().ToLower();
+                var normalizedVariation = variation.RemoveAccentButKeepGermanUmlauts().ToLower();
                 var cacheKey = $"{prefix}_var_{normalizedVariation}";
                 cache.Set(cacheKey, item);
 
@@ -28,7 +27,7 @@ namespace UmlautAdaptarr.Services
                 var indexPrefix = normalizedVariation[..Math.Min(VARIATION_LOOKUP_CACHE_LENGTH, variation.Length)].ToLower();
                 if (!VariationIndex.ContainsKey(indexPrefix))
                 {
-                    VariationIndex[indexPrefix] = new HashSet<string>();
+                    VariationIndex[indexPrefix] = [];
                 }
                 VariationIndex[indexPrefix].Add(cacheKey);
             }

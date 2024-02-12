@@ -46,6 +46,11 @@ namespace UmlautAdaptarr.Utilities
             return stringBuilder.ToString().Normalize(NormalizationForm.FormC);
         }
 
+        public static string GetCleanTitle(this string text)
+        {
+            return text.Replace("(", "").Replace(")", "").Replace("?","").Replace(":", "");
+        }
+
         public static string ReplaceGermanUmlautsWithLatinEquivalents(this string text)
         {
             return text
