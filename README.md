@@ -1,5 +1,7 @@
 # UmlautAdaptarr
 
+## English description coming soon
+
 ## 12.02.2024: Erste Testversion
 Wer möchte kann den UmlautAdaptarr jetzt gerne testen! Über Feedback würde ich mich sehr freuen!
 
