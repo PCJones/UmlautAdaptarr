@@ -39,13 +39,13 @@ Einige Beispiele findet ihr unter Features.
 | Feature                                                           | Status        |
 |-------------------------------------------------------------------|---------------|
 | Sonarr & Prowlarr Support                                         | ✓             |
+| Lidarr Support                                                    | (✓) kein RSS Sync|
 | Releases mit deutschem Titel werden erkannt   | ✓             |
 | Releases mit TVDB-Alias Titel werden erkannt  | ✓             |
 | Korrekte Suche und Erkennung von Titel mit Umlauten                            | ✓             |
 | Anfragen-Caching für 5 Minuten zur Reduzierung der API-Zugriffe   | ✓             |
 | Radarr Support                                                    | Geplant       |
 | Readarr Support                                                   | Geplant       |
-| Lidarr Support                                                    | Geplant       |
 | Prowlarr Unterstützung für "DE" SceneNZBs Kategorien              | Geplant       |
 | Unterstützung weiterer Sprachen neben Deutsch                     | Geplant       |
 | Wünsche?                                                          | Vorschläge?   |
