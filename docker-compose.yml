@@ -7,12 +7,10 @@ services:
     networks:
       - local
     environment:
-      - PUID=${ENV_PUID}
-      - PGID=${ENV_PGID}
-      - TZ=${TIMEZONE}
-
-    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Berlin
       SONARR_HOST: "http://sonarr:8989"
-      SONARR_API_KEY: ${SONARR_API_KEY}
+      SONARR_API_KEY: "API_KEY"
     ports:
       - "5005:5005" 
