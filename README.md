@@ -38,7 +38,7 @@ Also alles wie immer, nur dass ihr als API-URL nicht direkt z.B. scenenzbs.com e
 UmlautAdaptarr löst mehrere Probleme:
 - Releases mit Umlauten werden grundsätzlich nicht korrekt von den *Arrs importiert
 - Releases mit Umlauten werden oft nicht korrekt gefunden (*Arrs suchen nach "o" statt "ö" & es fehlt häufig die korrekte Zuordnung zur Serie/zum Film beim Indexer)
-- Sonarr & Radarr erwarten immer den englischen Titel von https://thetvdb.com/ bzw. https://www.themoviedb.org/. Das führt bei deutschen Produktionen oder deutschen Übersetzungen oft zu Problemen - falls die *arrs schon mal etwas automatisch mit der Meldung `Found matching series/movie via grab history, but release was matched to series by ID. Automatic import is not possible/` nicht importiert haben, dann war das der Grund.
+- Sonarr & Radarr erwarten immer den englischen Titel von https://thetvdb.com/ bzw. https://www.themoviedb.org/. Das führt bei deutschen Produktionen oder deutschen Übersetzungen oft zu Problemen - falls die *arrs schon mal etwas mit der Meldung `Found matching series/movie via grab history, but release was matched to series by ID. Automatic import is not possible/` nicht importiert haben, dann war das der Grund.
 
 # Wie macht UmlautAdaptarr das?
 UmlautAdaptarr tut so, als wäre es ein Indexer. In Wahrheit schaltet sich UmlautAdaptarr aber nur zwischen die *arrs und den Indexer und kann somit die Suchen sowie die Ergebnisse abfangen und bearbeiten.
