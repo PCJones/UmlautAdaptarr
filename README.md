@@ -59,6 +59,7 @@ Einige Beispiele findet ihr unter Features.
 | Anfragen-Caching für 5 Minuten zur Reduzierung der API-Zugriffe   | ✓             |
 | Radarr Support                                                    | Geplant       |
 | Readarr Support                                                   | Geplant       |
+| Lidarr Support                                                    | Geplant       |
 | Prowlarr Unterstützung für "DE" SceneNZBs Kategorien              | Geplant       |
 | Unterstützung weiterer Sprachen neben Deutsch                     | Geplant       |
 | Wünsche?                                                          | Vorschläge?   |
