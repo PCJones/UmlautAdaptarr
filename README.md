@@ -2,10 +2,10 @@
 
 ## English description coming soon
 
-## 12.02.2024: Erste Testversion
+## Erste Testversion
 Wer möchte kann den UmlautAdaptarr jetzt gerne testen! Über Feedback würde ich mich sehr freuen!
 
-Es sollte mit allen *arrs funktionieren, hat aber nur bei Sonarr schon Auswirkungen (abgesehen vom Caching).
+Es sollte mit allen *arrs funktionieren, hat aber nur bei Sonarr und Lidarr schon Auswirkungen (abgesehen vom Caching).
 
 Momentan ist docker dafür nötig, wer kein Docker nutzt muss sich noch etwas gedulden. 
 
