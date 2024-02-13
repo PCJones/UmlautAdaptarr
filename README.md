@@ -38,8 +38,9 @@ Einige Beispiele findet ihr unter Features.
 
 | Feature                                                           | Status        |
 |-------------------------------------------------------------------|---------------|
-| Sonarr & Prowlarr Support                                         | ✓             |
-| Lidarr Support                                                    | (✓) kein RSS Sync|
+| Prowlarr Support                                                    | ✓|
+| Sonarr Support                                         | ✓             |
+| Lidarr Support                                                    | ✓|
 | Releases mit deutschem Titel werden erkannt   | ✓             |
 | Releases mit TVDB-Alias Titel werden erkannt  | ✓             |
 | Korrekte Suche und Erkennung von Titel mit Umlauten                            | ✓             |
