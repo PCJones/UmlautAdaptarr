@@ -82,10 +82,9 @@ namespace UmlautAdaptarr.Services
 
                 // Ensure we trim any leading delimiters from the suffix
                 string suffix = originalTitle[matchEndPositionInOriginal..].TrimStart([' ', '-', '_', '.']).Trim();
-                suffix = suffix.Replace("-", ".");
 
                 // Concatenate the expected title with the remaining suffix
-                var updatedTitle = $"{searchItem.ExpectedAuthor} - {searchItem.ExpectedTitle} [] {suffix}";
+                var updatedTitle = $"{searchItem.ExpectedAuthor} - {searchItem.ExpectedTitle}-[{suffix}]";
 
                 // Update the title element
                 titleElement.Value = updatedTitle;
