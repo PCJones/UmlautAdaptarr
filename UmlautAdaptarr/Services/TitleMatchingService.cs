@@ -74,7 +74,8 @@ namespace UmlautAdaptarr.Services
 
                 var test = originalTitle[matchEndPositionInOriginal];
                 // Check and adjust for immediate following delimiter
-                if (matchEndPositionInOriginal < originalTitle.Length && new char[] { ' ', '-', '_', '.' }.Contains(originalTitle[matchEndPositionInOriginal]))
+                char[] delimiters = new char[] { ' ', '-', '_', '.' };
+                if (matchEndPositionInOriginal < originalTitle.Length && delimiters.Contains(originalTitle[matchEndPositionInOriginal]))
                 {
                     matchEndPositionInOriginal++; // Skip the delimiter if it's immediately after the match
                 }
@@ -84,7 +85,7 @@ namespace UmlautAdaptarr.Services
                 suffix = suffix.Replace("-", ".");
 
                 // Concatenate the expected title with the remaining suffix
-                var updatedTitle = $"{searchItem.ExpectedAuthor} - {searchItem.ExpectedTitle}-{suffix}";
+                var updatedTitle = $"{searchItem.ExpectedAuthor} - {searchItem.ExpectedTitle} [] {suffix}";
 
                 // Update the title element
                 titleElement.Value = updatedTitle;
