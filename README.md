@@ -55,16 +55,18 @@ Einige Beispiele findet ihr unter Features.
 In den Klammern am Ende des Releasenamens (Bild 2 & 4) steht zu Anschauungszwecken der deutsche Titel der vorher nicht gefunden bzw. akzeptiert wurde. Das bleibt natürlich nicht so ;)
 
 **Vorher:** Release wird zwar gefunden, kann aber kann nicht zu geordnet werden.
-![Vorherige Suche ohne deutsche Titel](https://i.imgur.com/7pfRzgH.png)  
+![Vorherige Suche ohne deutsche Titel](https://github.com/PCJones/UmlautAdaptarr/assets/377223/1fce2909-a36c-4f1b-8497-85903357fee3)
 
 **Jetzt:** 2-3 weitere Releases werden gefunden, außerdem meckert Sonarr nicht mehr über den Namen und würde es bei einer automatischen Suche ohne Probleme importieren.
-![Jetzige Suche mit deutschen Titeln](https://i.imgur.com/k55YIN9.png)  
+![Jetzige Suche mit deutschen Titeln](https://github.com/PCJones/UmlautAdaptarr/assets/377223/0edf43ba-2beb-4f22-aaf4-30f9a619dbd6)
+
 
 **Vorher:** Es werden nur Releases mit dem englischen Titel der Serie gefunden
-![Vorherige Suche, englische Titel](https://i.imgur.com/pbRlOeX.png)  
+![Vorherige Suche, englische Titel](https://github.com/PCJones/UmlautAdaptarr/assets/377223/ed7ca0fa-ac36-4584-87ac-b29f32dd9ace)
 
 **Jetzt:**  Es werden auch Titel mit dem deutschen Namen gefunden :D (haben nicht alle Suchergebnisse auf den Screenshot gepasst)
-![Jetzige Suche, deutsche und englische Titel](https://i.imgur.com/eeq0Voj.png)  
+![Jetzige Suche, deutsche und englische Titel](https://github.com/PCJones/UmlautAdaptarr/assets/377223/1c2dbe1a-5943-4fc4-91ef-29708082900e)
+
 
 **Vorher:** Die deutsche Produktion `Alone - Überlebe die Wildnis` hat auf [TheTVDB](https://thetvdb.com/series/alone-uberlebe-die-wildnis) den Englischen Namen `Alone Germany`.
 
