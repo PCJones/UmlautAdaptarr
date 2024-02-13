@@ -54,6 +54,7 @@ namespace UmlautAdaptarr.Models
             else
             {
                 TitleSearchVariations = GenerateVariations(germanTitle, mediaType).ToArray();
+
                 var allTitleVariations = new List<string>(TitleSearchVariations);
 
                 // If aliases are not null, generate variations for each and add them to the list
@@ -66,8 +67,22 @@ namespace UmlautAdaptarr.Models
                     }
                 }
 
-                TitleMatchVariations = allTitleVariations.Distinct().ToArray();
                 AuthorMatchVariations = [];
+
+                // if a german title ends with (DE) also add a search string that replaces (DE) with GERMAN
+                // also add a matching title without (DE)
+                if (germanTitle?.EndsWith("(DE)") ?? false)
+                {
+                    TitleSearchVariations = [.. TitleSearchVariations, .. 
+                        GenerateVariations(
+                            germanTitle.Replace("(DE)", " GERMAN").RemoveExtraWhitespaces(),
+                        mediaType)];
+
+                    allTitleVariations.AddRange(GenerateVariations(germanTitle.Replace("(DE)", "").Trim(), mediaType));
+
+                }
+
+                TitleMatchVariations = allTitleVariations.Distinct().ToArray();
             }
         }
 
@@ -111,7 +126,7 @@ namespace UmlautAdaptarr.Models
             {
                 var cleanTitleWithoutArticle = germanTitle[3..].Trim();
                 baseVariations.AddRange(GenerateVariations(cleanTitleWithoutArticle, mediaType));
-            }
+            }        
 
             // Remove multiple spaces
             var cleanedVariations = baseVariations.Select(variation => variation.RemoveExtraWhitespaces());

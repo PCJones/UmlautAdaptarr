@@ -1,4 +1,5 @@
-﻿using System.Text.RegularExpressions;
+﻿using Microsoft.Extensions.FileSystemGlobbing.Internal;
+using System.Text.RegularExpressions;
 using System.Xml.Linq;
 using UmlautAdaptarr.Models;
 using UmlautAdaptarr.Utilities;
@@ -174,12 +175,6 @@ namespace UmlautAdaptarr.Services
                 // Check if the originalTitle starts with the variation (ignoring case and separators)
                 if (Regex.IsMatch(normalizedOriginalTitle, variationMatchPattern, RegexOptions.IgnoreCase))
                 {
-                    // Workaround for the rare case of e.g. "Frieren: Beyond Journey's End" that also has the alias "Frieren"
-                    if (expectedTitle!.StartsWith(variation, StringComparison.OrdinalIgnoreCase))
-                    {
-                        logger.LogWarning($"TitleMatchingService - Didn't rename: '{originalTitle}' because the expected title '{expectedTitle}' starts with the variation '{variation}'");
-                        continue;
-                    }
                     var originalTitleMatchPattern = "^" + Regex.Escape(variation).Replace("\\ ", "[._ ]");
 
                     // Find the first separator used in the original title for consistent replacement
@@ -190,6 +185,19 @@ namespace UmlautAdaptarr.Services
                     // Extract the suffix from the original title starting right after the matched variation length
                     var variationLength = variation.Length;
                     var suffix = originalTitle[Math.Min(variationLength, originalTitle.Length)..];
+
+                    // Workaround for the rare case of e.g. "Frieren: Beyond Journey's End" that also has the alias "Frieren"
+                    if (expectedTitle!.StartsWith(variation, StringComparison.OrdinalIgnoreCase))
+                    {
+                        // See if we already matched the whole title by checking if S01E01 pattern is coming next to avoid false positives
+                        // - that won't help with movies but with tv shows
+                        var seasonMatchingPattern = $"^{separator}S\\d{{1,2}}E\\d{{1,2}}";
+                        if (!Regex.IsMatch(suffix, seasonMatchingPattern))
+                        {
+                            logger.LogWarning($"TitleMatchingService - Didn't rename: '{originalTitle}' because the expected title '{expectedTitle}' starts with the variation '{variation}'");
+                            continue;
+                        }
+                    }
 
                     // Clean up any leading separators from the suffix
                     suffix = Regex.Replace(suffix, "^[._ ]+", "");
