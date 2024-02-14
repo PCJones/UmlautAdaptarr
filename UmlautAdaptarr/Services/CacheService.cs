@@ -84,7 +84,7 @@ namespace UmlautAdaptarr.Services
                             continue;
                         }
                         // After finding a potential item, compare normalizedTitle with each German title variation
-                        foreach (var variation in item?.TitleSearchVariations ?? [])
+                        foreach (var variation in item?.TitleMatchVariations ?? [])
                         {
                             var normalizedVariation = variation.RemoveAccentButKeepGermanUmlauts().ToLower();
                             if (normalizedTitle.StartsWith(variation, StringComparison.OrdinalIgnoreCase))
