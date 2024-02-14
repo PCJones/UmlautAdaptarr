@@ -47,20 +47,46 @@ namespace UmlautAdaptarr.Utilities
             return stringBuilder.ToString().Normalize(NormalizationForm.FormC);
         }
 
-        // TODO possibly replace GetCleanTitle with RemoveSpecialCharacters
+        public static string GetLidarrTitleForExternalId(this string text)
+        {
+            text = text.RemoveGermanUmlautDots()
+                       .GetCleanTitle()
+                       .ToLower();
+
+            // Lidarr removes the, an and a
+            return TitlePrefixRegex()
+                .Replace(text, "")
+                .RemoveExtraWhitespaces()
+                .Trim();
+        }
+
         public static string GetCleanTitle(this string text)
         {
-            return text.Replace("(", "").Replace(")", "").Replace("?","").Replace(":", "").Replace("'", "");
+            return text
+                .Replace(".", " ")
+                .Replace(":", " ")
+                .RemoveAccentButKeepGermanUmlauts()
+                .RemoveSpecialCharacters(removeUmlauts: false)
+                .RemoveExtraWhitespaces()
+                .Trim();
         }
 
         public static string NormalizeForComparison(this string text)
         {
+            // TODO see if we can replace RemoveGermanUmlautDots() with RemoveSpecialCharacters(removeUmlauts: false);
             return text.RemoveGermanUmlautDots().RemoveAccent().RemoveSpecialCharacters().Replace(" ", "").Trim().ToLower();
         }
 
-        public static string RemoveSpecialCharacters(this string text)
+        public static string RemoveSpecialCharacters(this string text, bool removeUmlauts = true)
         {
-            return SpecialCharactersRegex().Replace(text, "");
+            if (removeUmlauts)
+            {
+                return NoSpecialCharactersRegex().Replace(text, "");
+            }
+            else
+            {
+                return NoSpecialCharactersExceptUmlautsRegex().Replace(text, "");
+            }
         }
 
 
@@ -101,9 +127,15 @@ namespace UmlautAdaptarr.Utilities
         }
 
         [GeneratedRegex("[^a-zA-Z0-9 ]+", RegexOptions.Compiled)]
-        private static partial Regex SpecialCharactersRegex();
+        private static partial Regex NoSpecialCharactersRegex();
+
+        [GeneratedRegex("[^a-zA-Z0-9 öäüßÖÄÜ]+", RegexOptions.Compiled)]
+        private static partial Regex NoSpecialCharactersExceptUmlautsRegex();
 
         [GeneratedRegex(@"\s+")]
         private static partial Regex MultipleWhitespaceRegex();
+
+        [GeneratedRegex(@"\b(the|an|a)\b", RegexOptions.IgnoreCase, "de-DE")]
+        private static partial Regex TitlePrefixRegex();
     }
 }

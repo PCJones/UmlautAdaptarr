@@ -12,6 +12,7 @@ namespace UmlautAdaptarr.Models
         public bool HasUmlaut => Title?.HasUmlauts() ?? false;
         public string ExpectedTitle { get; set; }
         public string? ExpectedAuthor { get; set; }
+        // TODO rename GermanTitle into Foreign or LocalTitle?
         public string? GermanTitle { get; set; }
         public string[] TitleSearchVariations { get; set; }
         public string[] TitleMatchVariations { get; set; }
@@ -42,6 +43,11 @@ namespace UmlautAdaptarr.Models
                 if (expectedTitle.Contains(expectedAuthor))
                 {
                     var titleWithoutAuthorName = expectedTitle.Replace(expectedAuthor, string.Empty).RemoveExtraWhitespaces().Trim();
+
+                    if (titleWithoutAuthorName.Length < 2)
+                    {
+                        // TODO log warning that this album can't be searched for automatically
+                    }
                     TitleMatchVariations = GenerateVariations(titleWithoutAuthorName, mediaType).ToArray();
                 }
                 else
@@ -86,13 +92,18 @@ namespace UmlautAdaptarr.Models
             }
         }
 
-        private IEnumerable<string> GenerateVariations(string? germanTitle, string mediaType)
+        private IEnumerable<string> GenerateVariations(string? title, string mediaType)
         {
-            if (germanTitle == null)
+            if (title == null)
             {
                 return [];
             }
-            var cleanTitle = germanTitle.RemoveAccentButKeepGermanUmlauts().GetCleanTitle();
+            var cleanTitle = title.GetCleanTitle();
+
+            if (cleanTitle?.Length == 0)
+            {
+                return [];
+            }
 
             // Start with base variations including handling umlauts
             var baseVariations = new List<string>
@@ -121,12 +132,17 @@ namespace UmlautAdaptarr.Models
                 });
             }
 
-            // If a german title starts with der/die/das also accept variations without it
-            if (mediaType != "audio" && cleanTitle.StartsWith("Der") || cleanTitle.StartsWith("Die") || cleanTitle.StartsWith("Das"))
+            // If a title starts with der/die/das also accept variations without it
+            // Same for english the, an, a
+            if (cleanTitle.StartsWith("Der ") || cleanTitle.StartsWith("Die ") || cleanTitle.StartsWith("Das ")
+                || cleanTitle.StartsWith("The ") || cleanTitle.StartsWith("An "))
             {
-                var cleanTitleWithoutArticle = germanTitle[3..].Trim();
+                var cleanTitleWithoutArticle = title[3..].Trim();
                 baseVariations.AddRange(GenerateVariations(cleanTitleWithoutArticle, mediaType));
-            }        
+            } else if (cleanTitle.StartsWith("A "))
+            {
+                var cleanTitleWithoutArticle = title[2..].Trim();
+            }
 
             // Remove multiple spaces
             var cleanedVariations = baseVariations.Select(variation => variation.RemoveExtraWhitespaces());

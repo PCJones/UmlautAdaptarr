@@ -184,7 +184,7 @@ namespace UmlautAdaptarr.Controllers
                     if (categories.Split(',').Any(category => AUDIO_CATEGORY_IDS.Contains(category)))
                     {
                         var mediaType = "audio";
-                        searchItem = await searchItemLookupService.GetOrFetchSearchItemByExternalId(mediaType, title.ToLower());
+                        searchItem = await searchItemLookupService.GetOrFetchSearchItemByExternalId(mediaType, title.GetLidarrTitleForExternalId());
                     }
                 }
             }

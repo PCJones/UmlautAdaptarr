@@ -42,16 +42,17 @@ namespace UmlautAdaptarr.Providers
 
                     var lidarrAlbumUrl = $"{_lidarrHost}/api/v1/album?artistId={artistId}&apikey={_lidarrApiKey}";
 
-                    if (cache.TryGetValue(lidarrAlbumUrl, out List<dynamic>? albums))
-                    {
-                        logger.LogInformation($"Using cached albums for {UrlUtilities.RedactApiKey(lidarrAlbumUrl)}");
-                    }
-                    else
-                    {
-                        logger.LogInformation($"Fetching all albums from artistId {artistId} from Lidarr: {UrlUtilities.RedactApiKey(lidarrArtistsUrl)}");
-                        var albumApiResponse = await httpClient.GetStringAsync(lidarrAlbumUrl);
-                        albums = JsonConvert.DeserializeObject<List<dynamic>>(albumApiResponse);
-                    }
+                    // Disable cache for now as it can result in problems when adding new albums that aren't displayed on the artists page initially
+                    //if (cache.TryGetValue(lidarrAlbumUrl, out List<dynamic>? albums))
+                    //{
+                    //    logger.LogInformation($"Using cached albums for {UrlUtilities.RedactApiKey(lidarrAlbumUrl)}");
+                    //}
+                    //else
+                    //{
+                    logger.LogInformation($"Fetching all albums from artistId {artistId} from Lidarr: {UrlUtilities.RedactApiKey(lidarrArtistsUrl)}");
+                    var albumApiResponse = await httpClient.GetStringAsync(lidarrAlbumUrl);
+                    var albums = JsonConvert.DeserializeObject<List<dynamic>>(albumApiResponse);
+                    //}
 
                     if (albums == null)
                     {
@@ -74,7 +75,7 @@ namespace UmlautAdaptarr.Providers
                         string[]? aliases = null;
 
                         // Abuse externalId to set the search string Lidarr uses
-                        var externalId = expectedTitle.RemoveGermanUmlautDots().RemoveAccent().RemoveSpecialCharacters().RemoveExtraWhitespaces().ToLower();
+                        var externalId = expectedTitle.GetLidarrTitleForExternalId();
 
                         var searchItem = new SearchItem
                         (
