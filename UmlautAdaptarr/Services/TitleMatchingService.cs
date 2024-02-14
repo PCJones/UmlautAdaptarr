@@ -20,7 +20,7 @@ namespace UmlautAdaptarr.Services
                 if (titleElement != null)
                 {
                     var originalTitle = titleElement.Value;
-                    var normalizedOriginalTitle = NormalizeTitle(originalTitle);
+                    var cleanTitleSeperatedBySpace = ReplaceSeperatorsWithSpace(originalTitle.RemoveAccentButKeepGermanUmlauts());
 
                     var categoryElement = item.Element("category");
                     var category = categoryElement?.Value;
@@ -34,7 +34,7 @@ namespace UmlautAdaptarr.Services
                     if (useCacheService)
                     {
                         // Use CacheService to find a matching SearchItem by title
-                        searchItem = cacheService.SearchItemByTitle(mediaType, normalizedOriginalTitle);
+                        searchItem = cacheService.SearchItemByTitle(mediaType, cleanTitleSeperatedBySpace);
                     }
 
                     if (searchItem == null)
@@ -46,10 +46,10 @@ namespace UmlautAdaptarr.Services
                     switch (mediaType)
                     {
                         case "tv":
-                            FindAndReplaceForMoviesAndTV(logger, searchItem, titleElement, originalTitle, normalizedOriginalTitle!);
+                            FindAndReplaceForMoviesAndTV(logger, searchItem, titleElement, originalTitle, cleanTitleSeperatedBySpace!);
                             break;
                         case "movie":
-                            FindAndReplaceForMoviesAndTV(logger, searchItem, titleElement, originalTitle, normalizedOriginalTitle!);
+                            FindAndReplaceForMoviesAndTV(logger, searchItem, titleElement, originalTitle, cleanTitleSeperatedBySpace!);
                             break;
                         case "audio":
                             FindAndReplaceForAudio(searchItem, titleElement, originalTitle!);
@@ -68,9 +68,9 @@ namespace UmlautAdaptarr.Services
             var authorMatch = FindBestMatch(searchItem.AuthorMatchVariations, originalTitle.NormalizeForComparison(), originalTitle);
             var titleMatch = FindBestMatch(searchItem.TitleMatchVariations, originalTitle.NormalizeForComparison(), originalTitle);
 
-            if (authorMatch.Item1 && titleMatch.Item1)
+            if (authorMatch.foundMatch && titleMatch.foundMatch)
             {
-                int matchEndPositionInOriginal = Math.Max(authorMatch.Item3, titleMatch.Item3);
+                int matchEndPositionInOriginal = Math.Max(authorMatch.bestEndInOriginal, titleMatch.bestEndInOriginal);
 
                 // Check and adjust for immediate following delimiter
                 char[] delimiters = [' ', '-', '_', '.'];
@@ -96,7 +96,7 @@ namespace UmlautAdaptarr.Services
         }
 
 
-        private Tuple<bool, int, int> FindBestMatch(string[] variations, string normalizedOriginal, string originalTitle)
+        private (bool foundMatch, int bestStart, int bestEndInOriginal) FindBestMatch(string[] variations, string normalizedOriginal, string originalTitle)
         {
             bool found = false;
             int bestStart = int.MaxValue;
@@ -119,8 +119,8 @@ namespace UmlautAdaptarr.Services
                 }
             }
 
-            if (!found) return Tuple.Create(false, 0, 0);
-            return Tuple.Create(found, bestStart, bestEndInOriginal);
+            if (!found) return (false, 0, 0);
+            return (found, bestStart, bestEndInOriginal);
         }
 
         // Maps an index from the normalized string back to a corresponding index in the original string
@@ -159,6 +159,7 @@ namespace UmlautAdaptarr.Services
             var titleMatchVariations = searchItem.TitleMatchVariations;
             var expectedTitle = searchItem.ExpectedTitle;
             var variationsOrderedByLength = titleMatchVariations!.OrderByDescending(variation => variation.Length);
+
             // Attempt to find a variation that matches the start of the original title
             foreach (var variation in variationsOrderedByLength)
             {
@@ -198,8 +199,8 @@ namespace UmlautAdaptarr.Services
                         }
                     }
 
-                    // Clean up any leading separators from the suffix
-                    suffix = Regex.Replace(suffix, "^[._ ]+", "");
+                    // Clean up any leading separator from the suffix
+                    suffix = Regex.Replace(suffix, "^ +", "");
 
                     // TODO EVALUTE! definitely make this optional - this adds GERMAN to the title is the title is german to make sure it's recognized as german
                     // can lead to problems with shows such as "dark" that have international dubs
@@ -225,9 +226,8 @@ namespace UmlautAdaptarr.Services
             }
         }
 
-        private static string NormalizeTitle(string title)
+        private static string ReplaceSeperatorsWithSpace(string title)
         {
-            title = title.RemoveAccentButKeepGermanUmlauts();
             // Replace all known separators with space for normalization
             return WordSeperationCharRegex().Replace(title, " ".ToString());
         }
