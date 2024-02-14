@@ -5,7 +5,7 @@ namespace UmlautAdaptarr.Utilities
 {
     public partial class UrlUtilities
     {
-        [GeneratedRegex(@"^(?!http:\/\/)([a-zA-Z0-9]+(\.[a-zA-Z0-9]+)+.*)$")]
+        [GeneratedRegex(@"^(?!http:\/\/)([a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)+.*)$")]
         private static partial Regex UrlMatchingRegex();
         public static bool IsValidDomain(string domain)
         {
