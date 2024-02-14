@@ -72,9 +72,8 @@ namespace UmlautAdaptarr.Services
             {
                 int matchEndPositionInOriginal = Math.Max(authorMatch.Item3, titleMatch.Item3);
 
-                var test = originalTitle[matchEndPositionInOriginal];
                 // Check and adjust for immediate following delimiter
-                char[] delimiters = new char[] { ' ', '-', '_', '.' };
+                char[] delimiters = [' ', '-', '_', '.'];
                 if (matchEndPositionInOriginal < originalTitle.Length && delimiters.Contains(originalTitle[matchEndPositionInOriginal]))
                 {
                     matchEndPositionInOriginal++; // Skip the delimiter if it's immediately after the match
