@@ -39,6 +39,7 @@ namespace UmlautAdaptarr.Providers
                             logger.LogWarning($"Sonarr Show {show.id} doesn't have a tvdbId.");
                             continue;
                         }
+
                         (var germanTitle, var aliases) = await titleService.FetchGermanTitleAndAliasesByExternalIdAsync(_mediaType, tvdbId);
                         var searchItem = new SearchItem
                         (

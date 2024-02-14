@@ -82,7 +82,7 @@ namespace UmlautAdaptarr.Models
 
                 }
 
-                TitleMatchVariations = allTitleVariations.Distinct().ToArray();
+                TitleMatchVariations = allTitleVariations.Distinct(StringComparer.InvariantCultureIgnoreCase).ToArray();
             }
         }
 
