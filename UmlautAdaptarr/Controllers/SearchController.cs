@@ -185,7 +185,6 @@ namespace UmlautAdaptarr.Controllers
                     if (categories.Split(',').Any(category => READARR_CATEGORY_IDS.Contains(category)))
                     {
                         var mediaType = "book";
-                        // TODO rename function or use own
                         searchItem = await searchItemLookupService.GetOrFetchSearchItemByExternalId(mediaType, title.GetReadarrTitleForExternalId());
                     }
 

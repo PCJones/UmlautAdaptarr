@@ -22,7 +22,6 @@ namespace UmlautAdaptarr.Providers
 
             try
             {
-
                 var sonarrUrl = $"{_sonarrHost}/api/v3/series?includeSeasonImages=false&apikey={_sonarrApiKey}";
                 logger.LogInformation($"Fetching all items from Sonarr: {UrlUtilities.RedactApiKey(sonarrUrl)}");
                 var response = await httpClient.GetStringAsync(sonarrUrl);

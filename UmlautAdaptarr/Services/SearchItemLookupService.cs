@@ -35,12 +35,14 @@ namespace UmlautAdaptarr.Services
                     if (_lidarrEnabled)
                     {
                         fetchedItem = await lidarrClient.FetchItemByExternalIdAsync(externalId);
+                        fetchedItem = cacheService.GetSearchItemByExternalId(mediaType, externalId);
                     }
                     break;
                 case "book":
                     if (_readarrEnabled)
                     {
-                        fetchedItem = await readarrClient.FetchItemByExternalIdAsync(externalId);
+                        await readarrClient.FetchItemByExternalIdAsync(externalId);
+                        fetchedItem = cacheService.GetSearchItemByExternalId(mediaType, externalId);
                     }
                     break;
             }
