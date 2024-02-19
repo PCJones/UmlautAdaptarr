@@ -132,6 +132,18 @@ namespace UmlautAdaptarr.Utilities
                 .Replace("ß", "ss");
         }
 
+        public static string RemoveGermanUmlauts(this string text)
+        {
+            return text
+                .Replace("ö", "")
+                .Replace("ü", "")
+                .Replace("ä", "")
+                .Replace("Ö", "")
+                .Replace("Ü", "")
+                .Replace("Ä", "")
+                .Replace("ß", "");
+        }
+
         public static string RemoveExtraWhitespaces(this string text)
         {
             return MultipleWhitespaceRegex().Replace(text, " ");

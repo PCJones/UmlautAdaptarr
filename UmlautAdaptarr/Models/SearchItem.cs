@@ -103,14 +103,17 @@ namespace UmlautAdaptarr.Models
             TitleSearchVariations = GenerateVariations($"{expectedAuthor} {expectedTitle}", mediaType).ToArray();
             AuthorMatchVariations = GenerateVariations(expectedAuthor, mediaType).ToArray();
 
-            if (mediaType == "book" && (expectedAuthor?.Contains(' ') ?? false))
+            if (mediaType == "book")
             {
-                var nameParts = expectedAuthor.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-                var lastName = nameParts.Last();
-                var firstNames = nameParts.Take(nameParts.Length - 1);
+                if (expectedAuthor?.Contains(' ') ?? false)
+                {
+                    var nameParts = expectedAuthor.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                    var lastName = nameParts.Last();
+                    var firstNames = nameParts.Take(nameParts.Length - 1);
 
-                var alternativeExpectedAuthor = $"{lastName}, {string.Join(" ", firstNames)}";
-                AuthorMatchVariations = [.. AuthorMatchVariations, .. GenerateVariations(alternativeExpectedAuthor, mediaType)];
+                    var alternativeExpectedAuthor = $"{lastName}, {string.Join(" ", firstNames)}";
+                    AuthorMatchVariations = [.. AuthorMatchVariations, .. GenerateVariations(alternativeExpectedAuthor, mediaType)];
+                }
             }
         }
 
@@ -134,6 +137,11 @@ namespace UmlautAdaptarr.Models
                     cleanTitle.ReplaceGermanUmlautsWithLatinEquivalents(),
                     cleanTitle.RemoveGermanUmlautDots()
                 };
+
+            if (mediaType == "book" || mediaType == "audio")
+            {
+                baseVariations.Add(cleanTitle.RemoveGermanUmlauts());
+            }
 
             // TODO: determine if this is really needed
             // Additional variations to accommodate titles with "-"
