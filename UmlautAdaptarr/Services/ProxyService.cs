@@ -20,6 +20,20 @@ namespace UmlautAdaptarr.Services
             _cache = cache;
         }
 
+        private static async Task EnsureMinimumDelayAsync(string targetUri)
+        {
+            var host = new Uri(targetUri).Host;
+            if (_lastRequestTimes.TryGetValue(host, out var lastRequestTime))
+            {
+                var timeSinceLastRequest = DateTimeOffset.Now - lastRequestTime;
+                if (timeSinceLastRequest < TimeSpan.FromMilliseconds(1500))
+                {
+                    await Task.Delay(TimeSpan.FromMilliseconds(1500) - timeSinceLastRequest);
+                }
+            }
+            _lastRequestTimes[host] = DateTimeOffset.Now;
+        }
+
         public async Task<HttpResponseMessage> ProxyRequestAsync(HttpContext context, string targetUri)
         {
             if (!HttpMethods.IsGet(context.Request.Method))
@@ -27,24 +41,14 @@ namespace UmlautAdaptarr.Services
                 throw new ArgumentException("Only GET requests are supported", context.Request.Method);
             }
 
-            // Throttling mechanism
-            var host = new Uri(targetUri).Host;
-            if (_lastRequestTimes.TryGetValue(host, out var lastRequestTime))
-            {
-                var timeSinceLastRequest = DateTimeOffset.Now - lastRequestTime;
-                if (timeSinceLastRequest < TimeSpan.FromSeconds(3))
-                {
-                    await Task.Delay(TimeSpan.FromSeconds(3) - timeSinceLastRequest);
-                }
-            }
-            _lastRequestTimes[host] = DateTimeOffset.Now;
-
             // Check cache
             if (_cache.TryGetValue(targetUri, out HttpResponseMessage cachedResponse))
             {
                 _logger.LogInformation($"Returning cached response for {UrlUtilities.RedactApiKey(targetUri)}");
                 return cachedResponse!;
             }
+
+            await EnsureMinimumDelayAsync(targetUri);
 
             var requestMessage = new HttpRequestMessage
             {
