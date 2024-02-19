@@ -8,7 +8,8 @@ namespace UmlautAdaptarr.Controllers
 {
     public abstract class SearchControllerBase(ProxyService proxyService, TitleMatchingService titleMatchingService) : ControllerBase
     {
-        private readonly bool TODO_FORCE_TEXT_SEARCH_ORIGINAL_TITLE = false;
+        // TODO evaluate if this should be set to true by default
+        private readonly bool TODO_FORCE_TEXT_SEARCH_ORIGINAL_TITLE = true;
         private readonly bool TODO_FORCE_TEXT_SEARCH_GERMAN_TITLE = false;
         protected async Task<IActionResult> BaseSearch(string options,
                                                        string domain,
@@ -52,7 +53,7 @@ namespace UmlautAdaptarr.Controllers
 
                     var titleSearchVariations = new List<string>(searchItem?.TitleSearchVariations);
 
-                    string searchQuery = string.Empty;
+                    var searchQuery = string.Empty;
                     if (queryParameters.TryGetValue("q", out string? q))
                     {
                         searchQuery = q ?? string.Empty;
