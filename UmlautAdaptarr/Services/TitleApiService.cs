@@ -13,13 +13,14 @@ namespace UmlautAdaptarr.Services
         private async Task EnsureMinimumDelayAsync()
         {
             var sinceLastRequest = DateTime.Now - lastRequestTime;
-            if (sinceLastRequest < TimeSpan.FromSeconds(2))
+            if (sinceLastRequest < TimeSpan.FromSeconds(1))
             {
-                await Task.Delay(TimeSpan.FromSeconds(2) - sinceLastRequest);
+                await Task.Delay(TimeSpan.FromSeconds(1) - sinceLastRequest);
             }
             lastRequestTime = DateTime.Now;
         }
 
+        // TODO add cache, TODO add bulk request
         public async Task<(string? germanTitle, string[]? aliases)> FetchGermanTitleAndAliasesByExternalIdAsync(string mediaType, string externalId)
         {
             try
