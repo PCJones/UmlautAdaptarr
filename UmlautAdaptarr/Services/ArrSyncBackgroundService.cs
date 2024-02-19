@@ -14,15 +14,18 @@ namespace UmlautAdaptarr.Services
     public class ArrSyncBackgroundService(
         SonarrClient sonarrClient,
         LidarrClient lidarrClient,
+        ReadarrClient readarrClient,
         CacheService cacheService,
         IConfiguration configuration,
         ILogger<ArrSyncBackgroundService> logger) : BackgroundService
     {
         private readonly bool _sonarrEnabled = configuration.GetValue<bool>("SONARR_ENABLED");
         private readonly bool _lidarrEnabled = configuration.GetValue<bool>("LIDARR_ENABLED");
+        private readonly bool _readarrEnabled = configuration.GetValue<bool>("READARR_ENABLED");
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             logger.LogInformation("ArrSyncBackgroundService is starting.");
+            bool lastRunSuccess = true;
 
             while (!stoppingToken.IsCancellationRequested)
             {
@@ -32,12 +35,22 @@ namespace UmlautAdaptarr.Services
 
                 if (syncSuccess)
                 {
+                    lastRunSuccess = true;
                     await Task.Delay(TimeSpan.FromHours(12), stoppingToken);
                 }
                 else
                 {
-                    logger.LogInformation("ArrSyncBackgroundService is sleeping for one hour only because not all syncs were successful.");
-                    await Task.Delay(TimeSpan.FromHours(1), stoppingToken);
+                    if (lastRunSuccess)
+                    {
+                        lastRunSuccess = false;
+                        logger.LogInformation("ArrSyncBackgroundService is trying again in 2 minutes because not all syncs were successful.");
+                        await Task.Delay(TimeSpan.FromMinutes(2), stoppingToken);
+                    }
+                    else
+                    {
+                        logger.LogInformation("ArrSyncBackgroundService is trying again in one hour only because not all syncs were successful twice in a row.");
+                        await Task.Delay(TimeSpan.FromHours(1), stoppingToken);
+                    }
                 }
             }
 
@@ -49,13 +62,17 @@ namespace UmlautAdaptarr.Services
             try
             {
                 var success = true;
+                if (_readarrEnabled)
+                {
+                    success = success && await FetchItemsFromReadarrAsync();
+                }
                 if (_sonarrEnabled)
                 {
-                    success = await FetchItemsFromSonarrAsync();
+                    success = success && await FetchItemsFromSonarrAsync();
                 }
                 if (_lidarrEnabled)
                 {
-                    success = await FetchItemsFromLidarrAsync();
+                    success = success && await FetchItemsFromLidarrAsync();
                 }
                 return success;
             }
@@ -86,6 +103,21 @@ namespace UmlautAdaptarr.Services
             try
             {
                 var items = await lidarrClient.FetchAllItemsAsync();
+                UpdateSearchItems(items);
+                return items?.Any() ?? false;
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "An error occurred while updating search item from Lidarr.");
+            }
+            return false;
+        }
+
+        private async Task<bool> FetchItemsFromReadarrAsync()
+        {
+            try
+            {
+                var items = await readarrClient.FetchAllItemsAsync();
                 UpdateSearchItems(items);
                 return items?.Any() ?? false;
             }

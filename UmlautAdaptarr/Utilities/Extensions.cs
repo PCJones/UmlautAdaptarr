@@ -50,14 +50,32 @@ namespace UmlautAdaptarr.Utilities
         public static string GetLidarrTitleForExternalId(this string text)
         {
             text = text.RemoveGermanUmlautDots()
+                       .Replace("-", "")
                        .GetCleanTitle()
                        .ToLower();
 
-            // Lidarr removes the, an and a
+            // Lidarr removes the, an and a at the beginning
             return TitlePrefixRegex()
                 .Replace(text, "")
                 .RemoveExtraWhitespaces()
                 .Trim();
+        }
+
+        public static string GetReadarrTitleForExternalId(this string text)
+        {
+            text = text.ToLower();
+
+            // Readarr removes "the" at the beginning
+            if (text.StartsWith("the "))
+            {
+                text = text[4..];
+            }
+
+            return text.RemoveGermanUmlautDots()
+                       .Replace(".", " ")
+                       .Replace("-", " ")
+                       .Replace(":", " ")
+                       .GetCleanTitle();
         }
 
         public static string GetCleanTitle(this string text)
@@ -81,11 +99,11 @@ namespace UmlautAdaptarr.Utilities
         {
             if (removeUmlauts)
             {
-                return NoSpecialCharactersRegex().Replace(text, "");
+                return NoSpecialCharactersExceptHypenRegex().Replace(text, "");
             }
             else
             {
-                return NoSpecialCharactersExceptUmlautsRegex().Replace(text, "");
+                return NoSpecialCharactersExceptHyphenAndUmlautsRegex().Replace(text, "");
             }
         }
 
@@ -126,11 +144,11 @@ namespace UmlautAdaptarr.Utilities
             return umlauts.Any(text.Contains);
         }
 
-        [GeneratedRegex("[^a-zA-Z0-9 ]+", RegexOptions.Compiled)]
-        private static partial Regex NoSpecialCharactersRegex();
+        [GeneratedRegex("[^a-zA-Z0-9 -]+", RegexOptions.Compiled)]
+        private static partial Regex NoSpecialCharactersExceptHypenRegex();
 
-        [GeneratedRegex("[^a-zA-Z0-9 öäüßÖÄÜ]+", RegexOptions.Compiled)]
-        private static partial Regex NoSpecialCharactersExceptUmlautsRegex();
+        [GeneratedRegex("[^a-zA-Z0-9 -öäüßÖÄÜß]+", RegexOptions.Compiled)]
+        private static partial Regex NoSpecialCharactersExceptHyphenAndUmlautsRegex();
 
         [GeneratedRegex(@"\s+")]
         private static partial Regex MultipleWhitespaceRegex();

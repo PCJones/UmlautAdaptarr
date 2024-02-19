@@ -37,58 +37,80 @@ namespace UmlautAdaptarr.Models
             ExpectedAuthor = expectedAuthor;
             GermanTitle = germanTitle;
             MediaType = mediaType;
-            if (mediaType == "audio" && expectedAuthor != null)
+            if ((mediaType == "audio" || mediaType == "book") && expectedAuthor != null)
             {
-                // e.g. Die Ärzte - best of die Ärzte
-                if (expectedTitle.Contains(expectedAuthor))
-                {
-                    var titleWithoutAuthorName = expectedTitle.Replace(expectedAuthor, string.Empty).RemoveExtraWhitespaces().Trim();
-
-                    if (titleWithoutAuthorName.Length < 2)
-                    {
-                        // TODO log warning that this album can't be searched for automatically
-                    }
-                    TitleMatchVariations = GenerateVariations(titleWithoutAuthorName, mediaType).ToArray();
-                }
-                else
-                {
-                    TitleMatchVariations = GenerateVariations(expectedTitle, mediaType).ToArray();
-                }
-                TitleSearchVariations = GenerateVariations($"{expectedAuthor} {expectedTitle}", mediaType).ToArray();
-                AuthorMatchVariations = GenerateVariations(expectedAuthor, mediaType).ToArray();
+                GenerateVariationsForBooksAndAudio(expectedTitle, mediaType, expectedAuthor);
             }
             else
             {
-                TitleSearchVariations = GenerateVariations(germanTitle, mediaType).ToArray();
+                GenerateVariationsForTV(germanTitle, mediaType, aliases);
+            }
+        }
 
-                var allTitleVariations = new List<string>(TitleSearchVariations);
+        private void GenerateVariationsForTV(string? germanTitle, string mediaType, string[]? aliases)
+        {
+            TitleSearchVariations = GenerateVariations(germanTitle, mediaType).ToArray();
 
-                // If aliases are not null, generate variations for each and add them to the list
-                // TODO (not necessarily here) only use deu and eng alias
-                if (aliases != null)
+            var allTitleVariations = new List<string>(TitleSearchVariations);
+
+            // If aliases are not null, generate variations for each and add them to the list
+            // TODO (not necessarily here) only use deu and eng alias
+            if (aliases != null)
+            {
+                foreach (var alias in aliases)
                 {
-                    foreach (var alias in aliases)
-                    {
-                        allTitleVariations.AddRange(GenerateVariations(alias, mediaType));
-                    }
+                    allTitleVariations.AddRange(GenerateVariations(alias, mediaType));
                 }
+            }
 
-                AuthorMatchVariations = [];
+            AuthorMatchVariations = [];
 
-                // if a german title ends with (DE) also add a search string that replaces (DE) with GERMAN
-                // also add a matching title without (DE)
-                if (germanTitle?.EndsWith("(DE)") ?? false)
+            // if a german title ends with (DE) also add a search string that replaces (DE) with GERMAN
+            // also add a matching title without (DE)
+            if (germanTitle?.EndsWith("(DE)") ?? false)
+            {
+                TitleSearchVariations = [.. TitleSearchVariations,
+                    ..
+                    GenerateVariations(
+                        germanTitle.Replace("(DE)", " GERMAN").RemoveExtraWhitespaces(),
+                    mediaType)];
+
+                allTitleVariations.AddRange(GenerateVariations(germanTitle.Replace("(DE)", "").Trim(), mediaType));
+
+            }
+
+            TitleMatchVariations = allTitleVariations.Distinct(StringComparer.InvariantCultureIgnoreCase).ToArray();
+        }
+
+        private void GenerateVariationsForBooksAndAudio(string expectedTitle, string mediaType, string? expectedAuthor)
+        {
+            // e.g. Die Ärzte - best of die Ärzte
+            if (expectedTitle.Contains(expectedAuthor))
+            {
+                var titleWithoutAuthorName = expectedTitle.Replace(expectedAuthor, string.Empty).RemoveExtraWhitespaces().Trim();
+
+                if (titleWithoutAuthorName.Length < 2)
                 {
-                    TitleSearchVariations = [.. TitleSearchVariations, .. 
-                        GenerateVariations(
-                            germanTitle.Replace("(DE)", " GERMAN").RemoveExtraWhitespaces(),
-                        mediaType)];
-
-                    allTitleVariations.AddRange(GenerateVariations(germanTitle.Replace("(DE)", "").Trim(), mediaType));
-
+                    // TODO log warning that this album can't be searched for automatically
                 }
+                TitleMatchVariations = GenerateVariations(titleWithoutAuthorName, mediaType).ToArray();
+            }
+            else
+            {
+                TitleMatchVariations = GenerateVariations(expectedTitle, mediaType).ToArray();
+            }
 
-                TitleMatchVariations = allTitleVariations.Distinct(StringComparer.InvariantCultureIgnoreCase).ToArray();
+            TitleSearchVariations = GenerateVariations($"{expectedAuthor} {expectedTitle}", mediaType).ToArray();
+            AuthorMatchVariations = GenerateVariations(expectedAuthor, mediaType).ToArray();
+
+            if (mediaType == "book" && (expectedAuthor?.Contains(' ') ?? false))
+            {
+                var nameParts = expectedAuthor.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                var lastName = nameParts.Last();
+                var firstNames = nameParts.Take(nameParts.Length - 1);
+
+                var alternativeExpectedAuthor = $"{lastName}, {string.Join(" ", firstNames)}";
+                AuthorMatchVariations = [.. AuthorMatchVariations, .. GenerateVariations(alternativeExpectedAuthor, mediaType)];
             }
         }
 
@@ -142,6 +164,7 @@ namespace UmlautAdaptarr.Models
             } else if (cleanTitle.StartsWith("A "))
             {
                 var cleanTitleWithoutArticle = title[2..].Trim();
+                baseVariations.AddRange(GenerateVariations(cleanTitleWithoutArticle, mediaType));
             }
 
             // Remove multiple spaces

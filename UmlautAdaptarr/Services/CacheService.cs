@@ -10,6 +10,7 @@ namespace UmlautAdaptarr.Services
     public partial class CacheService(IMemoryCache cache)
     {
         private readonly Dictionary<string, HashSet<string>> VariationIndex = [];
+        private readonly Dictionary<string, List<(HashSet<string> TitleVariations, string CacheKey)>> BookVariationIndex = [];
         private readonly Dictionary<string, List<(HashSet<string> TitleVariations, string CacheKey)>> AudioVariationIndex = [];
         private const int VARIATION_LOOKUP_CACHE_LENGTH = 5;
 
@@ -22,6 +23,11 @@ namespace UmlautAdaptarr.Services
             {
                 CacheAudioSearchItem(item, cacheKey);
                 return;
+            }
+            else if (item.MediaType == "book")
+            {
+                    CacheBookSearchItem(item, cacheKey);
+                    return;
             }
 
             var normalizedTitle = item.Title.RemoveAccentButKeepGermanUmlauts().ToLower();
@@ -61,13 +67,30 @@ namespace UmlautAdaptarr.Services
             }
         }
 
+        public void CacheBookSearchItem(SearchItem item, string cacheKey)
+        {
+            // Index author and title variations
+            foreach (var authorVariation in item.AuthorMatchVariations)
+            {
+                var normalizedAuthor = authorVariation.NormalizeForComparison();
+
+                if (!BookVariationIndex.ContainsKey(normalizedAuthor))
+                {
+                    BookVariationIndex[normalizedAuthor] = [];
+                }
+
+                var titleVariations = item.TitleMatchVariations.Select(titleMatchVariation => titleMatchVariation.NormalizeForComparison()).ToHashSet();
+                BookVariationIndex[normalizedAuthor].Add((titleVariations, cacheKey));
+            }
+        }
+
         public SearchItem? SearchItemByTitle(string mediaType, string title)
         {
             var normalizedTitle = title.RemoveAccentButKeepGermanUmlauts().ToLower();
 
-            if (mediaType == "audio")
+            if (mediaType == "audio" || mediaType == "book")
             {
-                return FindBestMatchForAudio(normalizedTitle.NormalizeForComparison());
+                return FindBestMatchForBooksAndAudio(normalizedTitle.NormalizeForComparison(), mediaType);
             }
 
             // Use the first few characters of the normalized title for cache prefix search
@@ -126,9 +149,11 @@ namespace UmlautAdaptarr.Services
             return item;
         }
 
-        private SearchItem? FindBestMatchForAudio(string normalizedOriginalTitle)
+        private SearchItem? FindBestMatchForBooksAndAudio(string normalizedOriginalTitle, string mediaType)
         {
-            foreach (var authorEntry in AudioVariationIndex)
+            var index = mediaType == "audio" ? AudioVariationIndex : BookVariationIndex;
+            
+            foreach (var authorEntry in index)
             {
                 if (normalizedOriginalTitle.Contains(authorEntry.Key))
                 {

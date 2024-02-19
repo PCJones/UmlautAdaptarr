@@ -51,6 +51,7 @@ internal class Program
         builder.Services.AddSingleton<TitleMatchingService>();
         builder.Services.AddSingleton<SonarrClient>();
         builder.Services.AddSingleton<LidarrClient>();
+        builder.Services.AddSingleton<ReadarrClient>();
         builder.Services.AddSingleton<CacheService>();
         builder.Services.AddSingleton<ProxyService>();
 

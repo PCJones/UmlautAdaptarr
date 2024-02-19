@@ -42,6 +42,7 @@ namespace UmlautAdaptarr.Providers
 
                     var lidarrAlbumUrl = $"{_lidarrHost}/api/v1/album?artistId={artistId}&apikey={_lidarrApiKey}";
 
+                    // TODO add caching here
                     // Disable cache for now as it can result in problems when adding new albums that aren't displayed on the artists page initially
                     //if (cache.TryGetValue(lidarrAlbumUrl, out List<dynamic>? albums))
                     //{
@@ -49,7 +50,7 @@ namespace UmlautAdaptarr.Providers
                     //}
                     //else
                     //{
-                    logger.LogInformation($"Fetching all albums from artistId {artistId} from Lidarr: {UrlUtilities.RedactApiKey(lidarrArtistsUrl)}");
+                    logger.LogInformation($"Fetching all albums from artistId {artistId} from Lidarr: {UrlUtilities.RedactApiKey(lidarrAlbumUrl)}");
                     var albumApiResponse = await httpClient.GetStringAsync(lidarrAlbumUrl);
                     var albums = JsonConvert.DeserializeObject<List<dynamic>>(albumApiResponse);
                     //}
@@ -108,6 +109,7 @@ namespace UmlautAdaptarr.Providers
             try
             {
                 // For now we have to fetch all items every time
+                // TODO if possible look at the author in search query and only update for author
                 var searchItems = await FetchAllItemsAsync();
                 foreach (var searchItem in searchItems ?? [])
                 {

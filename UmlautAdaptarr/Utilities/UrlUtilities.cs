@@ -35,7 +35,7 @@ namespace UmlautAdaptarr.Utilities
 
             if (!string.IsNullOrEmpty(apiKey))
             {
-                queryParameters["apiKey"] = apiKey;
+                queryParameters["apikey"] = apiKey;
             }
 
             return BuildUrl(domain, queryParameters);
