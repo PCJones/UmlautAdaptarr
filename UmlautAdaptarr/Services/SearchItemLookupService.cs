@@ -3,10 +3,15 @@ using UmlautAdaptarr.Providers;
 
 namespace UmlautAdaptarr.Services
 {
-    public class SearchItemLookupService(CacheService cacheService, SonarrClient sonarrClient, LidarrClient lidarrClient, IConfiguration configuration)
+    public class SearchItemLookupService(CacheService cacheService,
+                                         SonarrClient sonarrClient,
+                                         ReadarrClient readarrClient,
+                                         LidarrClient lidarrClient,
+                                         IConfiguration configuration)
     {
         private readonly bool _sonarrEnabled = configuration.GetValue<bool>("SONARR_ENABLED");
         private readonly bool _lidarrEnabled = configuration.GetValue<bool>("LIDARR_ENABLED");
+        private readonly bool _readarrEnabled = configuration.GetValue<bool>("READARR_ENABLED");
         public async Task<SearchItem?> GetOrFetchSearchItemByExternalId(string mediaType, string externalId)
         {
             // Attempt to get the item from the cache first
@@ -30,6 +35,12 @@ namespace UmlautAdaptarr.Services
                     if (_lidarrEnabled)
                     {
                         fetchedItem = await lidarrClient.FetchItemByExternalIdAsync(externalId);
+                    }
+                    break;
+                case "book":
+                    if (_readarrEnabled)
+                    {
+                        fetchedItem = await readarrClient.FetchItemByExternalIdAsync(externalId);
                     }
                     break;
             }
@@ -63,6 +74,8 @@ namespace UmlautAdaptarr.Services
                     }
                     break;
                 case "audio":
+                    break;
+                case "book":
                     break;
                     // TODO add cases for other sources as needed, such as Radarr, Lidarr, etc.
             }

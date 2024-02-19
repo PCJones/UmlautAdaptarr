@@ -155,7 +155,8 @@ namespace UmlautAdaptarr.Controllers
                                   TitleMatchingService titleMatchingService,
                                   SearchItemLookupService searchItemLookupService) : SearchControllerBase(proxyService, titleMatchingService)
     {
-        public readonly string[] AUDIO_CATEGORY_IDS = ["3000", "3010", "3020", "3040", "3050"];
+        public readonly string[] LIDARR_CATEGORY_IDS = ["3000", "3010", "3020", "3040", "3050"];
+        public readonly string[] READARR_CATEGORY_IDS = ["3030", "3130", "7000", "7010", "7020", "7030", "7100", "7110", "7120", "7130"];
 
         [HttpGet]
         public async Task<IActionResult> MovieSearch([FromRoute] string options, [FromRoute] string domain)
@@ -180,8 +181,16 @@ namespace UmlautAdaptarr.Controllers
             {
                 if (queryParameters.TryGetValue("cat", out string? categories) && !string.IsNullOrEmpty(categories))
                 {
-                    // Search for audio
-                    if (categories.Split(',').Any(category => AUDIO_CATEGORY_IDS.Contains(category)))
+                    // look for (audio-)book
+                    if (categories.Split(',').Any(category => READARR_CATEGORY_IDS.Contains(category)))
+                    {
+                        var mediaType = "book";
+                        // TODO rename function or use own
+                        searchItem = await searchItemLookupService.GetOrFetchSearchItemByExternalId(mediaType, title.GetReadarrTitleForExternalId());
+                    }
+
+                    // look for audio (lidarr)
+                    if (searchItem == null && categories.Split(',').Any(category => LIDARR_CATEGORY_IDS.Contains(category)))
                     {
                         var mediaType = "audio";
                         searchItem = await searchItemLookupService.GetOrFetchSearchItemByExternalId(mediaType, title.GetLidarrTitleForExternalId());

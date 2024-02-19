@@ -52,7 +52,10 @@ namespace UmlautAdaptarr.Services
                             FindAndReplaceForMoviesAndTV(logger, searchItem, titleElement, originalTitle, cleanTitleSeperatedBySpace!);
                             break;
                         case "audio":
-                            FindAndReplaceForAudio(searchItem, titleElement, originalTitle!);
+                            FindAndReplaceForBooksAndAudio(searchItem, titleElement, originalTitle!);
+                            break;
+                        case "book":
+                            FindAndReplaceForBooksAndAudio(searchItem, titleElement, originalTitle!);
                             break;
                         default:
                             throw new NotImplementedException();
@@ -63,7 +66,7 @@ namespace UmlautAdaptarr.Services
             return xDoc.ToString();
         }
 
-        public void FindAndReplaceForAudio(SearchItem searchItem, XElement? titleElement, string originalTitle)
+        public void FindAndReplaceForBooksAndAudio(SearchItem searchItem, XElement? titleElement, string originalTitle)
         {
             var authorMatch = FindBestMatch(searchItem.AuthorMatchVariations, originalTitle.NormalizeForComparison(), originalTitle);
             var titleMatch = FindBestMatch(searchItem.TitleMatchVariations, originalTitle.NormalizeForComparison(), originalTitle);
@@ -83,7 +86,11 @@ namespace UmlautAdaptarr.Services
                 string suffix = originalTitle[matchEndPositionInOriginal..].TrimStart([' ', '-', '_', '.']).Trim();
 
                 // Concatenate the expected title with the remaining suffix
-                var updatedTitle = $"{searchItem.ExpectedAuthor} - {searchItem.ExpectedTitle}-[{suffix}]";
+                var updatedTitle = $"{searchItem.ExpectedAuthor} - {searchItem.ExpectedTitle}";
+                if (suffix.Length >= 3)
+                {
+                    updatedTitle += $"-[{suffix}]";
+                }
 
                 // Update the title element
                 titleElement.Value = updatedTitle;
@@ -91,7 +98,7 @@ namespace UmlautAdaptarr.Services
             }
             else
             {
-                logger.LogInformation("TitleMatchingService - No satisfactory fuzzy match found for both author and title.");
+                logger.LogDebug($"TitleMatchingService - No satisfactory fuzzy match found for both author and title for {originalTitle}.");
             }
         }
 
