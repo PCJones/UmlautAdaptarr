@@ -221,7 +221,7 @@ namespace UmlautAdaptarr.Services
                     */
 
                     // Construct the new title with the original suffix
-                    var newTitle = newTitlePrefix + (string.IsNullOrEmpty(suffix) ? "" : separator + suffix);
+                    var newTitle = newTitlePrefix + (string.IsNullOrEmpty(suffix) ? "" : suffix.StartsWith(separator) ? suffix : $"{separator}{suffix}");
 
                     // Update the title element's value with the new title
                     //titleElement.Value = newTitle + $"({originalTitle.Substring(0, variationLength)})";
