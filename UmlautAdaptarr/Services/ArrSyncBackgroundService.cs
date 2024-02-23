@@ -64,15 +64,18 @@ namespace UmlautAdaptarr.Services
                 var success = true;
                 if (_readarrEnabled)
                 {
-                    success = success && await FetchItemsFromReadarrAsync();
+                    var syncSuccess = await FetchItemsFromReadarrAsync();
+                    success = success && syncSuccess;
                 }
                 if (_sonarrEnabled)
                 {
-                    success = success && await FetchItemsFromSonarrAsync();
+                    var syncSuccess = await FetchItemsFromSonarrAsync();
+                    success = success && syncSuccess;
                 }
                 if (_lidarrEnabled)
                 {
-                    success = success && await FetchItemsFromLidarrAsync();
+                    var syncSuccess = await FetchItemsFromLidarrAsync();
+                    success = success && syncSuccess;
                 }
                 return success;
             }
