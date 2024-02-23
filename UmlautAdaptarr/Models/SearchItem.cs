@@ -43,7 +43,30 @@ namespace UmlautAdaptarr.Models
             }
             else
             {
-                GenerateVariationsForTV(germanTitle, mediaType, aliases);
+                // if mediatype is movie/tv and the Expected Title ends with a year but the german title doesn't then append the year to the german title and to aliases
+                // example: https://thetvdb.com/series/385925-avatar-the-last-airbender -> german Title is without 2024
+                var yearAtEndOfTitleMatch = YearAtEndOfTitleRegex().Match(expectedTitle);
+                if (yearAtEndOfTitleMatch.Success)
+                {
+                    string year = yearAtEndOfTitleMatch.Value[1..^1];
+                    if (GermanTitle != null && !GermanTitle.Contains(year))
+                    {
+                        GermanTitle = $"{germanTitle} {year}";
+                    }
+
+                    if (aliases != null)
+                    {
+                        for (int i = 0; i < aliases.Length; i++)
+                        {
+                            if (!aliases[i].Contains(year))
+                            {
+                                aliases[i] = $"{aliases[i]} {year}";
+                            }
+                        }
+                    }
+                }
+
+                GenerateVariationsForTV(GermanTitle, mediaType, aliases);
             }
         }
 
@@ -60,6 +83,12 @@ namespace UmlautAdaptarr.Models
                 foreach (var alias in aliases)
                 {
                     allTitleVariations.AddRange(GenerateVariations(alias, mediaType));
+
+                    // If title contains ":" also match for "-"
+                    if (alias.Contains(':'))
+                    {
+                        allTitleVariations.Add(alias.Replace(":", " -"));
+                    }
                 }
             }
 
@@ -77,6 +106,12 @@ namespace UmlautAdaptarr.Models
 
                 allTitleVariations.AddRange(GenerateVariations(germanTitle.Replace("(DE)", "").Trim(), mediaType));
 
+            }
+
+            // If title contains ":" also match for "-"
+            if (germanTitle?.Contains(':') ?? false)
+            {
+                allTitleVariations.Add(germanTitle.Replace(":", " -"));
             }
 
             TitleMatchVariations = allTitleVariations.Distinct(StringComparer.InvariantCultureIgnoreCase).ToArray();
@@ -123,6 +158,7 @@ namespace UmlautAdaptarr.Models
             {
                 return [];
             }
+
             var cleanTitle = title.GetCleanTitle();
 
             if (cleanTitle?.Length == 0)
@@ -180,5 +216,8 @@ namespace UmlautAdaptarr.Models
 
             return cleanedVariations.Distinct();
         }
+
+        [GeneratedRegex(@"\(\d{4}\)$")]
+        private static partial Regex YearAtEndOfTitleRegex();
     }
 }
