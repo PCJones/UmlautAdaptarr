@@ -100,4 +100,5 @@ Für andere Spendenmöglichkeiten gerne auf Discord oder Telegram melden - danke
 
 ### Feedback
 > UmlautAdaptarr ist ein cleveres Werkzeug, das die Funktionalität der Arrs verbessert und die Handhabung von Umlauten erleichtert. Es ermöglicht eine reibungslose Verarbeitung von Releases, unabhängig von der Sprache oder den Sonderzeichen im Titel. 🌟
-Bing Chat
+ 
+Bing Chat, 2024 :-)
