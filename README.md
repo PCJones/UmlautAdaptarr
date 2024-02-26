@@ -46,6 +46,8 @@ Einige Beispiele findet ihr unter Features.
 | Releases mit TVDB-Alias Titel werden erkannt  | ✓             |
 | Korrekte Suche und Erkennung von Titel mit Umlauten                            | ✓             |
 | Anfragen-Caching für 5 Minuten zur Reduzierung der API-Zugriffe   | ✓             |
+| Usenet (newznab) Support                                          |✓|
+| Torrent Support                                                   | Vorerst nicht geplant |
 | Radarr Support                                                    | Geplant       |
 | Prowlarr Unterstützung für "DE" SceneNZBs Kategorien              | Geplant       |
 | Unterstützung weiterer Sprachen neben Deutsch                     | Geplant       |
