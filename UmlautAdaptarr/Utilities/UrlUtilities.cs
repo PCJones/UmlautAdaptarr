@@ -12,7 +12,7 @@ namespace UmlautAdaptarr.Utilities
             // RegEx für eine einfache URL-Validierung ohne http:// und ohne abschließenden Schrägstrich
             // Erlaubt optionale Subdomains, Domainnamen und TLDs, aber keine Pfade oder Protokolle
             var regex = UrlMatchingRegex();
-            return regex.IsMatch(domain) && !domain.EndsWith("/");
+            return regex.IsMatch(domain);
         }
 
         public static string BuildUrl(string domain, IDictionary<string, string> queryParameters)
