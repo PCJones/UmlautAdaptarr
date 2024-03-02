@@ -39,7 +39,7 @@ namespace UmlautAdaptarr.Utilities
                 }
                 else
                 {
-                    Logger.LogDebug("No Proxy was setup");
+                    Logger.LogDebug("No proxy was set");
                 }
             }
             catch (Exception ex)
