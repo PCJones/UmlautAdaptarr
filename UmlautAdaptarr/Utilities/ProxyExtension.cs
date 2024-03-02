@@ -12,15 +12,15 @@ namespace UmlautAdaptarr.Utilities
         /// <summary>
         /// Logger instance for logging proxy configurations.
         /// </summary>
-        public static ILogger Logger = GlobalStaticLogger.Logger;
+        private static ILogger Logger = GlobalStaticLogger.Logger;
 
         /// <summary>
         /// Configures the proxy settings for the provided HttpClientHandler instance.
         /// </summary>
         /// <param name="handler">The HttpClientHandler instance to configure.</param>
-        /// <param name="proxyOptions">Proxy options to be used for configuration.</param>
+        /// <param name="proxyOptions">ProxyOptions options to be used for configuration.</param>
         /// <returns>The configured HttpClientHandler instance.</returns>
-        public static HttpClientHandler ConfigureProxy(this HttpClientHandler handler, Proxy? proxyOptions)
+        public static HttpClientHandler ConfigureProxy(this HttpClientHandler handler, ProxyOptions? proxyOptions)
         {
             try
             {
@@ -28,7 +28,7 @@ namespace UmlautAdaptarr.Utilities
                 {
                     Logger.LogInformation("Use Proxy {0}", proxyOptions.Address);
                     handler.UseProxy = true;
-                    handler.Proxy = new WebProxy(proxyOptions.Address, true);
+                    handler.Proxy = new WebProxy(proxyOptions.Address, proxyOptions.BypassOnLocal);
 
                     if (!string.IsNullOrEmpty(proxyOptions.Username) && !string.IsNullOrEmpty(proxyOptions.Password))
                     {
