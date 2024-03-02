@@ -1,5 +1,7 @@
 ﻿using Microsoft.Extensions.Caching.Memory;
 using System.Collections.Concurrent;
+using Microsoft.Extensions.Options;
+using UmlautAdaptarr.Options;
 using UmlautAdaptarr.Utilities;
 
 namespace UmlautAdaptarr.Services
@@ -10,14 +12,17 @@ namespace UmlautAdaptarr.Services
         private readonly string _userAgent;
         private readonly ILogger<ProxyService> _logger;
         private readonly IMemoryCache _cache;
+        private readonly GlobalOptions _options;
         private static readonly ConcurrentDictionary<string, DateTimeOffset> _lastRequestTimes = new();
 
-        public ProxyService(IHttpClientFactory clientFactory, IConfiguration configuration, ILogger<ProxyService> logger, IMemoryCache cache)
+        public ProxyService(IHttpClientFactory clientFactory, ILogger<ProxyService> logger, IMemoryCache cache, IOptions<GlobalOptions> options)
         {
+            _options = options.Value;
             _httpClient = clientFactory.CreateClient("HttpClient") ?? throw new ArgumentNullException(nameof(clientFactory));
-            _userAgent = configuration["Settings:UserAgent"] ?? throw new ArgumentException("UserAgent must be set in appsettings.json");
+            _userAgent =  _options.UserAgent ?? throw new ArgumentException("UserAgent must be set in appsettings.json");
             _logger = logger;
             _cache = cache;
+       
         }
 
         private static async Task EnsureMinimumDelayAsync(string targetUri)
