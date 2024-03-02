@@ -26,7 +26,7 @@ internal class Program
                 AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate | DecompressionMethods.Brotli
             };
 
-            var proxyOptions = configuration.GetSection("Proxy").Get<Proxy>();
+            var proxyOptions = configuration.GetSection("ProxyOptions").Get<ProxyOptions>();
             handler.ConfigureProxy(proxyOptions);
             return handler;
         });
