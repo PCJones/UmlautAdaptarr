@@ -1,8 +1,10 @@
 using Microsoft.Extensions.Configuration;
 using System.Net;
+using UmlautAdaptarr.Options;
 using UmlautAdaptarr.Providers;
 using UmlautAdaptarr.Routing;
 using UmlautAdaptarr.Services;
+using UmlautAdaptarr.Utilities;
 
 internal class Program
 {
@@ -24,6 +26,8 @@ internal class Program
                 AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate | DecompressionMethods.Brotli
             };
 
+            var proxyOptions = configuration.GetSection("Proxy").Get<Proxy>();
+            handler.ConfigureProxy(proxyOptions);
             return handler;
         });
 
@@ -57,6 +61,7 @@ internal class Program
 
         var app = builder.Build();
 
+        GlobalStaticLogger.Initialize(app.Services.GetService<ILoggerFactory>()!);
         app.UseHttpsRedirection();
 
         app.UseAuthorization();
