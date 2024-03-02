@@ -1,4 +1,15 @@
-# UmlautAdaptarr
+# UmlautAdaptarr Fork
+
+## Currently Changes
+
+- Http / Https proxy support has been added , To disguise the Ip address or if a proxy service is required
+- IOptions pattern has been implemented. Better options handling
+- Extensions methods have been implemented to make Program.cs smaller
+- Added a global logger for static and extension methods
+- appsettings.json now contains "default" data for the applications and proxy settings. The Docker variables are also specified above it. This also fixes the bug that you have to set all variables, although you only want to use Sonarr, for example
+
+
+**Note** : Not tested yet !
 
 ## English description coming soon
 
