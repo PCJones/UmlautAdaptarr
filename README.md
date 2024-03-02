@@ -9,7 +9,21 @@
 - appsettings.json now contains "default" data for the applications and proxy settings. The Docker variables are also specified above it. This also fixes the bug that you have to set all variables, although you only want to use Sonarr, for example
 
 
-**Note** : Not tested yet !
+**Breaking Change** : 
+
+Because Microsoft parses the Env variables differently for IOptions. The following changes must be made for existing users.
+
+Wherever "_" is used, "__" must now be used
+
+Example :
+
+SONARR_ENABLED becomes SONARR__ENABLED
+
+Further examples can be found in appsettings.json
+
+I don't know if there is a way to customise the format. But this is the standard that Microsoft recommends
+
+**Note** : Only tested with Sonarr , but the Others should work too
 
 ## English description coming soon
 
@@ -20,7 +34,7 @@ Es sollte mit allen *arrs funktionieren, hat aber nur bei Sonarr, Readarr und Li
 
 Momentan ist docker dafür nötig, wer kein Docker nutzt muss sich noch etwas gedulden. 
 
-[Link zum Docker Image](https://hub.docker.com/r/pcjones/umlautadaptarr)
+[Link zum Docker Image](https://hub.docker.com/r/lexfi/umlautadaptarr)
 
 Zusätzlich müsst ihr in Sonarr oder Prowlarr einen neuen Indexer hinzufügen (für jeden Indexer, bei dem UmlautAdapdarr greifen soll).
 
