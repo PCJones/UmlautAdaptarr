@@ -98,7 +98,7 @@ namespace UmlautAdaptarr.Providers
                         mediaType: _mediaType
                     );
 
-                    logger.LogInformation($"Successfully fetched show {searchItem} from Sonarr.");
+                    logger.LogInformation($"Successfully fetched show {searchItem.Title} from Sonarr.");
                     return searchItem;
                 }
             }
@@ -156,7 +156,7 @@ namespace UmlautAdaptarr.Providers
                     mediaType: _mediaType
                 );
 
-                logger.LogInformation($"Successfully fetched show {searchItem} from Sonarr.");
+                logger.LogInformation($"Successfully fetched show {searchItem.Title} from Sonarr.");
                 return searchItem;
             }
             catch (Exception ex)
