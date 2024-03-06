@@ -262,23 +262,23 @@ namespace UmlautAdaptarr.Services
                 return null;
             }
 
-            if (category.StartsWith("EBook", StringComparison.OrdinalIgnoreCase) || category.StartsWith("Book", StringComparison.OrdinalIgnoreCase))
+            if (category == "7000" || category.StartsWith("EBook", StringComparison.OrdinalIgnoreCase) || category.StartsWith("Book", StringComparison.OrdinalIgnoreCase))
             {
                 return "book";
             }
-            else if (category.StartsWith("Movies", StringComparison.OrdinalIgnoreCase))
+            else if (category == "2000" || category.StartsWith("Movies", StringComparison.OrdinalIgnoreCase))
             {
                 return "movies";
             }
-            else if (category.StartsWith("TV", StringComparison.OrdinalIgnoreCase))
+            else if (category == "5000" || category.StartsWith("TV", StringComparison.OrdinalIgnoreCase))
             {
                 return "tv";
             }
-            else if (category.Contains("Audiobook", StringComparison.OrdinalIgnoreCase))
+            else if (category == "3030" || category.Contains("Audiobook", StringComparison.OrdinalIgnoreCase))
             {
                 return "book";
             }
-            else if (category.StartsWith("Audio"))
+            else if (category == "3000" || category.StartsWith("Audio"))
             {
                 return "audio";
             }
