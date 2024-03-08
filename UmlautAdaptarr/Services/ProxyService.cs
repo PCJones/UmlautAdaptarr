@@ -11,6 +11,7 @@ namespace UmlautAdaptarr.Services
         private readonly ILogger<ProxyService> _logger;
         private readonly IMemoryCache _cache;
         private static readonly ConcurrentDictionary<string, DateTimeOffset> _lastRequestTimes = new();
+        private static readonly TimeSpan MINIMUM_DELAY_FOR_SAME_HOST = new(0, 0, 0, 1);
 
         public ProxyService(IHttpClientFactory clientFactory, IConfiguration configuration, ILogger<ProxyService> logger, IMemoryCache cache)
         {
@@ -26,9 +27,9 @@ namespace UmlautAdaptarr.Services
             if (_lastRequestTimes.TryGetValue(host, out var lastRequestTime))
             {
                 var timeSinceLastRequest = DateTimeOffset.Now - lastRequestTime;
-                if (timeSinceLastRequest < TimeSpan.FromMilliseconds(1500))
+                if (timeSinceLastRequest < MINIMUM_DELAY_FOR_SAME_HOST)
                 {
-                    await Task.Delay(TimeSpan.FromMilliseconds(1500) - timeSinceLastRequest);
+                    await Task.Delay(MINIMUM_DELAY_FOR_SAME_HOST - timeSinceLastRequest);
                 }
             }
             _lastRequestTimes[host] = DateTimeOffset.Now;
