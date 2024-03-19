@@ -96,30 +96,51 @@ namespace UmlautAdaptarr.Services
             // Use the first few characters of the normalized title for cache prefix search
             var cacheSearchPrefix = normalizedTitle[..Math.Min(VARIATION_LOOKUP_CACHE_LENGTH, normalizedTitle.Length)];
 
+            SearchItem? bestSearchItemMatch = null;
+            var bestVariationMatchLength = 0;
+            HashSet<string> checkedSearchItems = [];
+
             if (VariationIndex.TryGetValue(cacheSearchPrefix, out var cacheKeys))
             {
                 foreach (var cacheKey in cacheKeys)
                 {
                     if (cache.TryGetValue(cacheKey, out SearchItem? item))
                     {
-                        if (item?.MediaType != mediaType)
+                        if (item == null || item.MediaType != mediaType)
                         {
                             continue;
                         }
+
+                        var searchItemIdentifier = $"{item.MediaType}_{item.ExternalId}";
+
+                        if (checkedSearchItems.Contains(searchItemIdentifier))
+                        {
+                            continue;
+                        }
+                        else
+                        {
+                            checkedSearchItems.Add(searchItemIdentifier);
+                        }
+
                         // After finding a potential item, compare normalizedTitle with each German title variation
-                        foreach (var variation in item?.TitleMatchVariations ?? [])
+                        foreach (var variation in item.TitleMatchVariations ?? [])
                         {
                             var normalizedVariation = variation.RemoveAccentButKeepGermanUmlauts().ToLower();
                             if (normalizedTitle.StartsWith(variation, StringComparison.OrdinalIgnoreCase))
                             {
-                                return item;
+                                // If we find a variation match that is "longer" then most likely that one is correct and the earlier match was wrong (if it was from another searchItem)
+                                if (variation.Length > bestVariationMatchLength)
+                                {
+                                    bestSearchItemMatch = item;
+                                    bestVariationMatchLength = variation.Length;
+                                }
                             }
                         }
                     }
                 }
             }
 
-            return null;
+            return bestSearchItemMatch;
         }
 
         public SearchItem? GetSearchItemByExternalId(string mediaType, string externalId)

@@ -55,7 +55,7 @@ UmlautAdaptarr löst mehrere Probleme:
 
 # Wie macht UmlautAdaptarr das?
 UmlautAdaptarr tut so, als wäre es ein Indexer. In Wahrheit schaltet sich UmlautAdaptarr aber nur zwischen die *arrs und den echten Indexer und kann somit die Suchen sowie die Ergebnisse abfangen und bearbeiten.
-Am Ende werden die gefundenen Releases immer so umbenannt, das die Arrs sie einwandfrei erkennen.
+Am Ende werden die gefundenen Releases immer so umbenannt, dass die Arrs sie einwandfrei erkennen.
 Einige Beispiele findet ihr unter Features.
 
 
@@ -71,6 +71,8 @@ Einige Beispiele findet ihr unter Features.
 | Releases mit TVDB-Alias Titel werden erkannt  | ✓             |
 | Korrekte Suche und Erkennung von Titel mit Umlauten                            | ✓             |
 | Anfragen-Caching für 5 Minuten zur Reduzierung der API-Zugriffe   | ✓             |
+| Usenet (newznab) Support                                          |✓|
+| Torrent Support                                                   | Vorerst nicht geplant |
 | Radarr Support                                                    | Geplant       |
 | Prowlarr Unterstützung für "DE" SceneNZBs Kategorien              | Geplant       |
 | Unterstützung weiterer Sprachen neben Deutsch                     | Geplant       |
