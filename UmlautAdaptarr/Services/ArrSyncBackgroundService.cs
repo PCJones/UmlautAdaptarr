@@ -19,9 +19,6 @@ namespace UmlautAdaptarr.Services
         IConfiguration configuration,
         ILogger<ArrSyncBackgroundService> logger) : BackgroundService
     {
-        private readonly bool _sonarrEnabled = configuration.GetValue<bool>("SONARR_ENABLED");
-        private readonly bool _lidarrEnabled = configuration.GetValue<bool>("LIDARR_ENABLED");
-        private readonly bool _readarrEnabled = configuration.GetValue<bool>("READARR_ENABLED");
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             logger.LogInformation("ArrSyncBackgroundService is starting.");
@@ -62,17 +59,17 @@ namespace UmlautAdaptarr.Services
             try
             {
                 var success = true;
-                if (_readarrEnabled)
+                if (readarrClient.ReadarrOptions.Enabled)
                 {
                     var syncSuccess = await FetchItemsFromReadarrAsync();
                     success = success && syncSuccess;
                 }
-                if (_sonarrEnabled)
+                if (sonarrClient.SonarrOptions.Enabled)
                 {
                     var syncSuccess = await FetchItemsFromSonarrAsync();
                     success = success && syncSuccess;
                 }
-                if (_lidarrEnabled)
+                if (lidarrClient.LidarrOptions.Enabled)
                 {
                     var syncSuccess = await FetchItemsFromLidarrAsync();
                     success = success && syncSuccess;
