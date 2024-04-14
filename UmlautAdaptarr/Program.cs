@@ -56,7 +56,7 @@ internal class Program
         builder.AddLidarrSupport();
         builder.AddReadarrSupport();
         builder.Services.AddSingleton<CacheService>();
-        builder.AddProxyService();
+        builder.AddProxyRequestService();
 
         var app = builder.Build();
 

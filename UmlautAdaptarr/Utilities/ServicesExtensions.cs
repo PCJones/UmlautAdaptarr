@@ -80,13 +80,13 @@ namespace UmlautAdaptarr.Utilities
         }
 
         /// <summary>
-        /// Adds a proxy service to the service collection.
+        /// Adds a proxy request service to the service collection.
         /// </summary>
         /// <param name="builder">The <see cref="WebApplicationBuilder"/> to configure the service collection.</param>
         /// <returns>The configured <see cref="WebApplicationBuilder"/>.</returns>
-        public static WebApplicationBuilder AddProxyService(this WebApplicationBuilder builder)
+        public static WebApplicationBuilder AddProxyRequestService(this WebApplicationBuilder builder)
         {
-            return builder.AddServiceWithOptions<GlobalOptions, ProxyService>("Settings");
+            return builder.AddServiceWithOptions<GlobalOptions, ProxyRequestService>("Settings");
         }
     }
 }

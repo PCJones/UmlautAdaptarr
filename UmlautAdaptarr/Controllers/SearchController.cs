@@ -6,7 +6,7 @@ using UmlautAdaptarr.Utilities;
 
 namespace UmlautAdaptarr.Controllers
 {
-    public abstract class SearchControllerBase(ProxyService proxyService, TitleMatchingService titleMatchingService) : ControllerBase
+    public abstract class SearchControllerBase(ProxyRequestService proxyRequestService, TitleMatchingService titleMatchingService) : ControllerBase
     {
         // TODO evaluate if this should be set to true by default
         private readonly bool TODO_FORCE_TEXT_SEARCH_ORIGINAL_TITLE = true;
@@ -96,7 +96,7 @@ namespace UmlautAdaptarr.Controllers
         private async Task<IActionResult> PerformSingleSearchRequest(string domain, IDictionary<string, string> queryParameters)
         {
             var requestUrl = UrlUtilities.BuildUrl(domain, queryParameters);
-            var responseMessage = await proxyService.ProxyRequestAsync(HttpContext, requestUrl);
+            var responseMessage = await proxyRequestService.ProxyRequestAsync(HttpContext, requestUrl);
             var content = await responseMessage.Content.ReadAsStringAsync();
 
             var encoding = responseMessage.Content.Headers.ContentType?.CharSet != null ?
@@ -130,7 +130,7 @@ namespace UmlautAdaptarr.Controllers
             {
                 queryParameters["q"] = titleVariation; // Replace the "q" parameter for each variation
                 var requestUrl = UrlUtilities.BuildUrl(domain, queryParameters);
-                var responseMessage = await proxyService.ProxyRequestAsync(HttpContext, requestUrl);
+                var responseMessage = await proxyRequestService.ProxyRequestAsync(HttpContext, requestUrl);
                 var content = await responseMessage.Content.ReadAsStringAsync();
 
                 // Only update encoding from the first response
@@ -152,9 +152,9 @@ namespace UmlautAdaptarr.Controllers
         }
     }
 
-    public class SearchController(ProxyService proxyService,
+    public class SearchController(ProxyRequestService proxyRequestService,
                                   TitleMatchingService titleMatchingService,
-                                  SearchItemLookupService searchItemLookupService) : SearchControllerBase(proxyService, titleMatchingService)
+                                  SearchItemLookupService searchItemLookupService) : SearchControllerBase(proxyRequestService, titleMatchingService)
     {
         public readonly string[] LIDARR_CATEGORY_IDS = ["3000", "3010", "3020", "3040", "3050"];
         public readonly string[] READARR_CATEGORY_IDS = ["3030", "3130", "7000", "7010", "7020", "7030", "7100", "7110", "7120", "7130"];
