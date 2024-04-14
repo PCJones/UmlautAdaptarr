@@ -56,13 +56,13 @@ internal class Program
         builder.AddLidarrSupport();
         builder.AddReadarrSupport();
         builder.Services.AddSingleton<CacheService>();
-        builder.AddProxyRequestService();
+        builder.Services.AddSingleton<ProxyRequestService>();
+        builder.Services.AddSingleton<IHostedService, HttpProxyService>();
 
         var app = builder.Build();
 
         GlobalStaticLogger.Initialize(app.Services.GetService<ILoggerFactory>()!);
         app.UseHttpsRedirection();
-
         app.UseAuthorization();
 
         app.MapControllerRoute(name: "caps",
