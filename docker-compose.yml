@@ -20,5 +20,3 @@ services:
       - LIDARR_ENABLED=false
       - LIDARR_HOST=http://localhost:8686
       - LIDARR_API_KEY=API_KEY
-    ports:
-      - "5005":"5005"
