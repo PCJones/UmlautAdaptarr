@@ -2,6 +2,8 @@
 {
     public static class ArrClientFactory
     {
+        // TODO, still uses old IConfiguration
+        // TODO not used yet
         public static IEnumerable<TClient> CreateClients<TClient>(
             Func<string, TClient> constructor, IConfiguration configuration, string configKey) where TClient : ArrClientBase
         {
