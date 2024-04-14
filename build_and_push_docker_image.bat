@@ -1,5 +1,5 @@
 @echo off
-SET IMAGE_NAME=lexfi/umlautadaptarr
+SET IMAGE_NAME=pcjones/umlautadaptarr
 
 echo Enter the version number for the Docker image:
 set /p VERSION="Version: "
