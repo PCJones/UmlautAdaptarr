@@ -33,6 +33,7 @@ internal class Program
 
         builder.Services.AddMemoryCache(options =>
         {
+            // TODO cache size limit? option?
             //options.SizeLimit = 20000;
         });
 
