@@ -228,7 +228,7 @@ namespace UmlautAdaptarr.Services
                     titleElement.Value = newTitle;
 
                     logger.LogInformation($"TitleMatchingService - Title changed: '{originalTitle}' to '{newTitle}'");
-                    break; // Break after the first successful match and modification
+                    break;
                 }
             }
         }
@@ -242,7 +242,7 @@ namespace UmlautAdaptarr.Services
         private static char FindFirstSeparator(string title)
         {
             var match = WordSeperationCharRegex().Match(title);
-            return match.Success ? match.Value.First() : ' '; // Default to space if no separator found
+            return match.Success ? match.Value.First() : ' ';
         }
 
         private static string ReconstructTitleWithSeparator(string title, char separator)

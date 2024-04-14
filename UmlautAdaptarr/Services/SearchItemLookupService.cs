@@ -30,7 +30,7 @@ namespace UmlautAdaptarr.Services
                 case "audio":
                     if (lidarrClient.LidarrOptions.Enabled)
                     {
-                        fetchedItem = await lidarrClient.FetchItemByExternalIdAsync(externalId);
+                        await lidarrClient.FetchItemByExternalIdAsync(externalId);
                         fetchedItem = cacheService.GetSearchItemByExternalId(mediaType, externalId);
                     }
                     break;

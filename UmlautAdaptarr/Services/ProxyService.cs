@@ -23,7 +23,6 @@ namespace UmlautAdaptarr.Services
             _userAgent =  _options.UserAgent ?? throw new ArgumentException("UserAgent must be set in appsettings.json");
             _logger = logger;
             _cache = cache;
-       
         }
 
         private static async Task EnsureMinimumDelayAsync(string targetUri)
@@ -91,7 +90,6 @@ namespace UmlautAdaptarr.Services
             {
                 _logger.LogError(ex, $"Error proxying request: {UrlUtilities.RedactApiKey(targetUri)}. Error: {ex.Message}");
 
-                // Create a response message indicating an internal server error
                 var errorResponse = new HttpResponseMessage(System.Net.HttpStatusCode.InternalServerError)
                 {
                     Content = new StringContent($"An error occurred while processing your request: {ex.Message}")

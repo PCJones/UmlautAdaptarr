@@ -11,7 +11,6 @@ namespace UmlautAdaptarr.Providers
 {
     public class ReadarrClient(
         IHttpClientFactory clientFactory,
-        IConfiguration configuration,
         CacheService cacheService,
         IMemoryCache cache,
         IOptions<ReadarrInstanceOptions> options,

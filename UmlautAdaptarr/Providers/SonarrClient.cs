@@ -9,14 +9,11 @@ namespace UmlautAdaptarr.Providers
 {
     public class SonarrClient(
         IHttpClientFactory clientFactory,
-        IConfiguration configuration,
         TitleApiService titleService,
         IOptions<SonarrInstanceOptions> options,
         ILogger<SonarrClient> logger) : ArrClientBase()
     {
         public SonarrInstanceOptions SonarrOptions { get; } = options.Value;
-        //private readonly string _sonarrHost = configuration.GetValue<string>("SONARR_HOST") ?? throw new ArgumentException("SONARR_HOST environment variable must be set");
-        //private readonly string _sonarrApiKey = configuration.GetValue<string>("SONARR_API_KEY") ?? throw new ArgumentException("SONARR_API_KEY environment variable must be set");
         private readonly string _mediaType = "tv";
 
         public override async Task<IEnumerable<SearchItem>> FetchAllItemsAsync()

@@ -1,7 +1,5 @@
-using Microsoft.Extensions.Configuration;
 using System.Net;
 using UmlautAdaptarr.Options;
-using UmlautAdaptarr.Providers;
 using UmlautAdaptarr.Routing;
 using UmlautAdaptarr.Services;
 using UmlautAdaptarr.Utilities;

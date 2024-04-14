@@ -16,7 +16,6 @@ namespace UmlautAdaptarr.Services
         LidarrClient lidarrClient,
         ReadarrClient readarrClient,
         CacheService cacheService,
-        IConfiguration configuration,
         ILogger<ArrSyncBackgroundService> logger) : BackgroundService
     {
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)

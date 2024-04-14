@@ -11,7 +11,6 @@ namespace UmlautAdaptarr.Providers
 {
     public class LidarrClient(
         IHttpClientFactory clientFactory,
-        IConfiguration configuration,
         CacheService cacheService,
         IMemoryCache cache,
         ILogger<LidarrClient> logger, IOptions<LidarrInstanceOptions> options) : ArrClientBase()
@@ -136,7 +135,7 @@ namespace UmlautAdaptarr.Providers
         {
             try
             {
-               // this should never be called at the moment
+                // this should never be called at the moment
                 throw new NotImplementedException();
             }
             catch (Exception ex)

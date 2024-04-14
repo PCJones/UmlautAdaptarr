@@ -1,6 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using UmlautAdaptarr.Options;
+﻿using UmlautAdaptarr.Options;
 using UmlautAdaptarr.Options.ArrOptions;
 using UmlautAdaptarr.Providers;
 using UmlautAdaptarr.Services;
@@ -91,6 +89,4 @@ namespace UmlautAdaptarr.Utilities
             return builder.AddServiceWithOptions<GlobalOptions, ProxyService>("Settings");
         }
     }
-
-
 }
