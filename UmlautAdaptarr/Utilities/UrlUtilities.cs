@@ -43,6 +43,7 @@ namespace UmlautAdaptarr.Utilities
 
         public static string RedactApiKey(string targetUri)
         {
+            return targetUri;
             var apiKeyPattern = @"(apikey=)[^&]*";
 
             var redactedUri = Regex.Replace(targetUri, apiKeyPattern, "$1[REDACTED]");
