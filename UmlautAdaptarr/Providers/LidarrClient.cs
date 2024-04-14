@@ -1,7 +1,9 @@
 ﻿using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using UmlautAdaptarr.Models;
+using UmlautAdaptarr.Options.ArrOptions;
 using UmlautAdaptarr.Services;
 using UmlautAdaptarr.Utilities;
 
@@ -12,10 +14,9 @@ namespace UmlautAdaptarr.Providers
         IConfiguration configuration,
         CacheService cacheService,
         IMemoryCache cache,
-        ILogger<LidarrClient> logger) : ArrClientBase()
+        ILogger<LidarrClient> logger, IOptions<LidarrInstanceOptions> options) : ArrClientBase()
     {
-        private readonly string _lidarrHost = configuration.GetValue<string>("LIDARR_HOST") ?? throw new ArgumentException("LIDARR_HOST environment variable must be set");
-        private readonly string _lidarrApiKey = configuration.GetValue<string>("LIDARR_API_KEY") ?? throw new ArgumentException("LIDARR_API_KEY environment variable must be set");
+        public LidarrInstanceOptions LidarrOptions { get; } = options.Value;
         private readonly string _mediaType = "audio";
 
         public override async Task<IEnumerable<SearchItem>> FetchAllItemsAsync()
@@ -25,7 +26,7 @@ namespace UmlautAdaptarr.Providers
 
             try
             {
-                var lidarrArtistsUrl = $"{_lidarrHost}/api/v1/artist?apikey={_lidarrApiKey}";
+                var lidarrArtistsUrl = $"{LidarrOptions.Host}/api/v1/artist?apikey={LidarrOptions.ApiKey}";
                 logger.LogInformation($"Fetching all artists from Lidarr: {UrlUtilities.RedactApiKey(lidarrArtistsUrl)}");
                 var artistsApiResponse = await httpClient.GetStringAsync(lidarrArtistsUrl);
                 var artists = JsonConvert.DeserializeObject<List<dynamic>>(artistsApiResponse);
@@ -40,7 +41,7 @@ namespace UmlautAdaptarr.Providers
                 {
                     var artistId = (int)artist.id;
 
-                    var lidarrAlbumUrl = $"{_lidarrHost}/api/v1/album?artistId={artistId}&apikey={_lidarrApiKey}";
+                    var lidarrAlbumUrl = $"{LidarrOptions.Host}/api/v1/album?artistId={artistId}&apikey={LidarrOptions.ApiKey}";
 
                     // TODO add caching here
                     // Disable cache for now as it can result in problems when adding new albums that aren't displayed on the artists page initially

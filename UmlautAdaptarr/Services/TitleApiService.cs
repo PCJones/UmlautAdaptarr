@@ -1,13 +1,15 @@
-﻿using Newtonsoft.Json;
+﻿using Microsoft.Extensions.Options;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using UmlautAdaptarr.Options;
 using UmlautAdaptarr.Utilities;
 
 namespace UmlautAdaptarr.Services
 {
-    public class TitleApiService(IHttpClientFactory clientFactory, IConfiguration configuration, ILogger<TitleApiService> logger)
+    public class TitleApiService(IHttpClientFactory clientFactory, ILogger<TitleApiService> logger, IOptions<GlobalOptions> options)
     {
-        private readonly string _umlautAdaptarrApiHost = configuration["Settings:UmlautAdaptarrApiHost"]
-                                                         ?? throw new ArgumentException("UmlautAdaptarrApiHost must be set in appsettings.json");
+        public GlobalOptions Options { get; } = options.Value;
+
         private DateTime lastRequestTime = DateTime.MinValue;
 
         private async Task EnsureMinimumDelayAsync()
@@ -28,7 +30,7 @@ namespace UmlautAdaptarr.Services
                 await EnsureMinimumDelayAsync();
 
                 var httpClient = clientFactory.CreateClient();
-                var titleApiUrl = $"{_umlautAdaptarrApiHost}/tvshow_german.php?tvdbid={externalId}";
+                var titleApiUrl = $"{Options.UmlautAdaptarrApiHost}/tvshow_german.php?tvdbid={externalId}";
                 logger.LogInformation($"TitleApiService GET {UrlUtilities.RedactApiKey(titleApiUrl)}");
                 var response = await httpClient.GetStringAsync(titleApiUrl);
                 var titleApiResponseData = JsonConvert.DeserializeObject<dynamic>(response);
@@ -74,7 +76,7 @@ namespace UmlautAdaptarr.Services
 
                 var httpClient = clientFactory.CreateClient();
                 var tvdbCleanTitle = title.Replace("ß", "ss");
-                var titleApiUrl = $"{_umlautAdaptarrApiHost}/tvshow_german.php?title={tvdbCleanTitle}";
+                var titleApiUrl = $"{Options.UmlautAdaptarrApiHost}/tvshow_german.php?title={tvdbCleanTitle}";
                 logger.LogInformation($"TitleApiService GET {UrlUtilities.RedactApiKey(titleApiUrl)}");
                 var titleApiResponse = await httpClient.GetStringAsync(titleApiUrl);
                 var titleApiResponseData = JsonConvert.DeserializeObject<dynamic>(titleApiResponse);
