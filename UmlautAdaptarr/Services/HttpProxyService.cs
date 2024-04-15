@@ -50,7 +50,8 @@ namespace UmlautAdaptarr.Services
             var targetInfo = ParseTargetInfo(requestString);
             if (targetInfo.host != "prowlarr.servarr.com")
             {
-                _logger.LogWarning($"Indexer {targetInfo.host} needs to be set to http:// instead of https://");
+                _logger.LogWarning($"IMPORTANT! {Environment.NewLine} Indexer {targetInfo.host} needs to be set to http:// instead of https:// {Environment.NewLine}" +
+                    $"UmlautAdaptarr will not work for {targetInfo.host}!");
             }
             using var targetSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             try
