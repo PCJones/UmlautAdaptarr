@@ -10,11 +10,15 @@ namespace UmlautAdaptarr.Services
         private readonly ILogger<HttpProxyService> _logger;
         private readonly int _proxyPort = 5006; // TODO move to appsettings.json
         private readonly IHttpClientFactory _clientFactory;
+        private HashSet<string> _knownHosts = [];
+        private readonly object _hostsLock = new object();
+
 
         public HttpProxyService(ILogger<HttpProxyService> logger, IHttpClientFactory clientFactory)
         {
             _logger = logger;
             _clientFactory = clientFactory;
+            _knownHosts.Add("prowlarr.servarr.com");
         }
 
         private async Task HandleRequests(CancellationToken stoppingToken)
@@ -47,16 +51,18 @@ namespace UmlautAdaptarr.Services
 
         private async Task HandleHttpsConnect(string requestString, NetworkStream clientStream, Socket clientSocket)
         {
-            var targetInfo = ParseTargetInfo(requestString);
-            if (targetInfo.host != "prowlarr.servarr.com")
+            var (host, port) = ParseTargetInfo(requestString);
+
+            // Prowlarr will send grab requests via https which cannot be changed
+            if (!_knownHosts.Contains(host))
             {
-                _logger.LogWarning($"IMPORTANT! {Environment.NewLine} Indexer {targetInfo.host} needs to be set to http:// instead of https:// {Environment.NewLine}" +
-                    $"UmlautAdaptarr will not work for {targetInfo.host}!");
+                _logger.LogWarning($"IMPORTANT! {Environment.NewLine} Indexer {host} needs to be set to http:// instead of https:// {Environment.NewLine}" +
+                    $"UmlautAdaptarr will not work for {host}!");
             }
             using var targetSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             try
             {
-                await targetSocket.ConnectAsync(targetInfo.host, targetInfo.port);
+                await targetSocket.ConnectAsync(host, port);
                 await clientStream.WriteAsync(Encoding.ASCII.GetBytes("HTTP/1.1 200 Connection Established\r\n\r\n"));
                 using var targetStream = new NetworkStream(targetSocket, ownsSocket: true);
                 await RelayTraffic(clientStream, targetStream);
@@ -74,8 +80,17 @@ namespace UmlautAdaptarr.Services
             {
                 var headers = ParseHeaders(buffer, bytesRead);
                 string userAgent = headers.FirstOrDefault(h => h.Key == "User-Agent").Value;
-
                 var uri = new Uri(requestString.Split(' ')[1]);
+
+                // Add to known hosts if not already present
+                lock (_hostsLock)
+                {
+                    if (!_knownHosts.Contains(uri.Host))
+                    {
+                        _knownHosts.Add(uri.Host);
+                    }
+                }
+
                 var modifiedUri = $"http://localhost:5005/_/{uri.Host}{uri.PathAndQuery}";  // TODO read port from appsettings?
                 using var client = _clientFactory.CreateClient();
                 var httpRequestMessage = new HttpRequestMessage(HttpMethod.Get, modifiedUri);
