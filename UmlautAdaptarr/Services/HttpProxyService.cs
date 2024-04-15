@@ -50,6 +50,7 @@ namespace UmlautAdaptarr.Services
             var targetInfo = ParseTargetInfo(requestString);
             if (targetInfo.host != "prowlarr.servarr.com")
             {
+                // TODO check why this is not logging in docker
                 _logger.LogWarning($"Indexer {targetInfo.host} needs to be set to http:// instead of https://");
             }
             using var targetSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
