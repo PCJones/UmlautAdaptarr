@@ -41,7 +41,7 @@ namespace UmlautAdaptarr.Services
             else
             {
                 // Handle HTTP request
-                await HandleHttp(requestString, clientStream, clientSocket);
+                await HandleHttp(requestString, clientStream, clientSocket, buffer, bytesRead);
             }
         }
 
@@ -68,14 +68,18 @@ namespace UmlautAdaptarr.Services
             }
         }
 
-        private async Task HandleHttp(string requestString, NetworkStream clientStream, Socket clientSocket)
+        private async Task HandleHttp(string requestString, NetworkStream clientStream, Socket clientSocket, byte[] buffer, int bytesRead)
         {
             try
             {
+                var headers = ParseHeaders(buffer, bytesRead);
+                string userAgent = headers.FirstOrDefault(h => h.Key == "User-Agent").Value;
+
                 var uri = new Uri(requestString.Split(' ')[1]);
                 var modifiedUri = $"http://localhost:5005/_/{uri.Host}{uri.PathAndQuery}";  // TODO read port from appsettings?
                 using var client = _clientFactory.CreateClient();
                 var httpRequestMessage = new HttpRequestMessage(HttpMethod.Get, modifiedUri);
+                httpRequestMessage.Headers.Add("User-Agent", userAgent);
                 var result = await client.SendAsync(httpRequestMessage);
 
                 if (result.IsSuccessStatusCode)
@@ -98,6 +102,24 @@ namespace UmlautAdaptarr.Services
             {
                 clientSocket.Close();
             }
+        }
+
+        private Dictionary<string, string> ParseHeaders(byte[] buffer, int length)
+        {
+            var headers = new Dictionary<string, string>();
+            var headerString = Encoding.ASCII.GetString(buffer, 0, length);
+            var lines = headerString.Split(new string[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
+            foreach (var line in lines.Skip(1)) // Skip the request line
+            {
+                var colonIndex = line.IndexOf(':');
+                if (colonIndex > 0)
+                {
+                    var key = line.Substring(0, colonIndex).Trim();
+                    var value = line.Substring(colonIndex + 1).Trim();
+                    headers[key] = value;
+                }
+            }
+            return headers;
         }
 
         private (string host, int port) ParseTargetInfo(string requestLine)
