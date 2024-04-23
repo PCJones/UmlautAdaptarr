@@ -80,7 +80,7 @@ Am Beispiel von sceneNZBs:
 Also alles wie immer, nur dass als API-URL nicht direkt z.B. `https://scenenzbs.com` gesetzt wird, sondern 
 `http://localhost:5005/_/scenenzbs.com`
 
-Den API-Key muss natürlich auch ganz normal gesetzt werden.
+Der API-Key muss natürlich auch ganz normal gesetzt werden.
 
 ## Beispiel-Funktionalität
 In den Klammern am Ende des Releasenamens (Bild 2 & 4) steht zu Anschauungszwecken der deutsche Titel der vorher nicht gefunden bzw. akzeptiert wurde. Das bleibt natürlich nicht so ;)
