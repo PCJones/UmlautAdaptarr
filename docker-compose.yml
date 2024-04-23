@@ -8,17 +8,20 @@ services:
     restart: unless-stopped
     environment:
       - TZ=Europe/Berlin
-      - SONARR_ENABLED=false
-      - SONARR_HOST=http://localhost:8989
-      - SONARR_API_KEY=API_KEY
-      - RADARR_ENABLED=false
-      - RADARR_HOST=http://localhost:7878
-      - RADARR_API_KEY=API_KEY
-      - READARR_ENABLED=false
-      - READARR_HOST=http://localhost:8787
-      - READARR_API_KEY=API_KEY
-      - LIDARR_ENABLED=false
-      - LIDARR_HOST=http://localhost:8686
-      - LIDARR_API_KEY=API_KEY
-    ports:
-      - "5005":"5005"
+      - SONARR__ENABLED=false
+      - SONARR__HOST=http://localhost:8989
+      - SONARR__APIKEY=APIKEY
+      - RADARR__ENABLED=false
+      - RADARR__HOST=http://localhost:7878
+      - RADARR__APIKEY=APIKEY
+      - READARR__ENABLED=false
+      - READARR__HOST=http://localhost:8787
+      - READARR__APIKEY=APIKEY
+      - LIDARR__ENABLED=false
+      - LIDARR__HOST=http://localhost:8686
+      - LIDARR__APIKEY=APIKEY
+      #- Proxy__Enabled: false
+      #- Proxy__Address: http://yourproxyaddress:port
+      #- Proxy__Username: your_proxy_username
+      #- Proxy__Password: your_proxy_password
+      #- Proxy__BypassOnLocal: true (set to false to not bypass local IP addresses)

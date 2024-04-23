@@ -1,8 +1,8 @@
-using Microsoft.Extensions.Configuration;
 using System.Net;
-using UmlautAdaptarr.Providers;
+using UmlautAdaptarr.Options;
 using UmlautAdaptarr.Routing;
 using UmlautAdaptarr.Services;
+using UmlautAdaptarr.Utilities;
 
 internal class Program
 {
@@ -24,11 +24,14 @@ internal class Program
                 AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate | DecompressionMethods.Brotli
             };
 
+            var proxyOptions = configuration.GetSection("Proxy").Get<ProxyOptions>();
+            handler.ConfigureProxy(proxyOptions);
             return handler;
         });
 
         builder.Services.AddMemoryCache(options =>
         {
+            // TODO cache size limit? option?
             //options.SizeLimit = 20000;
         });
 
@@ -46,19 +49,20 @@ internal class Program
 
         builder.Services.AddControllers();
         builder.Services.AddHostedService<ArrSyncBackgroundService>();
-        builder.Services.AddSingleton<TitleApiService>();
+        builder.AddTitleLookupService();
         builder.Services.AddSingleton<SearchItemLookupService>();
         builder.Services.AddSingleton<TitleMatchingService>();
-        builder.Services.AddSingleton<SonarrClient>();
-        builder.Services.AddSingleton<LidarrClient>();
-        builder.Services.AddSingleton<ReadarrClient>();
+        builder.AddSonarrSupport();
+        builder.AddLidarrSupport();
+        builder.AddReadarrSupport();
         builder.Services.AddSingleton<CacheService>();
-        builder.Services.AddSingleton<ProxyService>();
+        builder.Services.AddSingleton<ProxyRequestService>();
+        builder.Services.AddSingleton<IHostedService, HttpProxyService>();
 
         var app = builder.Build();
 
+        GlobalStaticLogger.Initialize(app.Services.GetService<ILoggerFactory>()!);
         app.UseHttpsRedirection();
-
         app.UseAuthorization();
 
         app.MapControllerRoute(name: "caps",

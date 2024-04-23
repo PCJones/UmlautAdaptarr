@@ -1,22 +1,26 @@
 ﻿using Microsoft.Extensions.Caching.Memory;
 using System.Collections.Concurrent;
+using Microsoft.Extensions.Options;
+using UmlautAdaptarr.Options;
 using UmlautAdaptarr.Utilities;
 
 namespace UmlautAdaptarr.Services
 {
-    public class ProxyService
+    public class ProxyRequestService
     {
         private readonly HttpClient _httpClient;
         private readonly string _userAgent;
-        private readonly ILogger<ProxyService> _logger;
+        private readonly ILogger<ProxyRequestService> _logger;
         private readonly IMemoryCache _cache;
+        private readonly GlobalOptions _options;
         private static readonly ConcurrentDictionary<string, DateTimeOffset> _lastRequestTimes = new();
         private static readonly TimeSpan MINIMUM_DELAY_FOR_SAME_HOST = new(0, 0, 0, 1);
 
-        public ProxyService(IHttpClientFactory clientFactory, IConfiguration configuration, ILogger<ProxyService> logger, IMemoryCache cache)
+        public ProxyRequestService(IHttpClientFactory clientFactory, ILogger<ProxyRequestService> logger, IMemoryCache cache, IOptions<GlobalOptions> options)
         {
+            _options = options.Value;
             _httpClient = clientFactory.CreateClient("HttpClient") ?? throw new ArgumentNullException(nameof(clientFactory));
-            _userAgent = configuration["Settings:UserAgent"] ?? throw new ArgumentException("UserAgent must be set in appsettings.json");
+            _userAgent =  _options.UserAgent ?? throw new ArgumentException("UserAgent must be set in appsettings.json");
             _logger = logger;
             _cache = cache;
         }
@@ -72,12 +76,12 @@ namespace UmlautAdaptarr.Services
 
             try
             {
-                _logger.LogInformation($"ProxyService GET {UrlUtilities.RedactApiKey(targetUri)}");
+                _logger.LogInformation($"ProxyRequestService GET {UrlUtilities.RedactApiKey(targetUri)}");
                 var responseMessage = await _httpClient.SendAsync(requestMessage, HttpCompletionOption.ResponseHeadersRead, context.RequestAborted);
 
                 if (responseMessage.IsSuccessStatusCode)
                 {
-                    _cache.Set(targetUri, responseMessage, TimeSpan.FromMinutes(5));
+                    _cache.Set(targetUri, responseMessage, TimeSpan.FromMinutes(12));
                 }
 
                 return responseMessage;
@@ -86,7 +90,6 @@ namespace UmlautAdaptarr.Services
             {
                 _logger.LogError(ex, $"Error proxying request: {UrlUtilities.RedactApiKey(targetUri)}. Error: {ex.Message}");
 
-                // Create a response message indicating an internal server error
                 var errorResponse = new HttpResponseMessage(System.Net.HttpStatusCode.InternalServerError)
                 {
                     Content = new StringContent($"An error occurred while processing your request: {ex.Message}")

@@ -1,7 +1,9 @@
 ﻿using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using UmlautAdaptarr.Models;
+using UmlautAdaptarr.Options.ArrOptions;
 using UmlautAdaptarr.Services;
 using UmlautAdaptarr.Utilities;
 
@@ -9,13 +11,13 @@ namespace UmlautAdaptarr.Providers
 {
     public class ReadarrClient(
         IHttpClientFactory clientFactory,
-        IConfiguration configuration,
         CacheService cacheService,
         IMemoryCache cache,
+        IOptions<ReadarrInstanceOptions> options,
         ILogger<ReadarrClient> logger) : ArrClientBase()
     {
-        private readonly string _readarrHost = configuration.GetValue<string>("READARR_HOST") ?? throw new ArgumentException("READARR_HOST environment variable must be set");
-        private readonly string _readarrApiKey = configuration.GetValue<string>("READARR_API_KEY") ?? throw new ArgumentException("READARR_API_KEY environment variable must be set");
+
+        public ReadarrInstanceOptions ReadarrOptions { get; } = options.Value;
         private readonly string _mediaType = "book";
 
         public override async Task<IEnumerable<SearchItem>> FetchAllItemsAsync()
@@ -25,7 +27,7 @@ namespace UmlautAdaptarr.Providers
 
             try
             {
-                var readarrAuthorUrl = $"{_readarrHost}/api/v1/author?apikey={_readarrApiKey}";
+                var readarrAuthorUrl = $"{ReadarrOptions.Host}/api/v1/author?apikey={ReadarrOptions.ApiKey}";
                 logger.LogInformation($"Fetching all authors from Readarr: {UrlUtilities.RedactApiKey(readarrAuthorUrl)}");
                 var authorApiResponse = await httpClient.GetStringAsync(readarrAuthorUrl);
                 var authors = JsonConvert.DeserializeObject<List<dynamic>>(authorApiResponse);
@@ -40,7 +42,7 @@ namespace UmlautAdaptarr.Providers
                 {
                     var authorId = (int)author.id;
 
-                    var readarrBookUrl = $"{_readarrHost}/api/v1/book?authorId={authorId}&apikey={_readarrApiKey}";
+                    var readarrBookUrl = $"{ReadarrOptions.Host}/api/v1/book?authorId={authorId}&apikey={ReadarrOptions.ApiKey}";
 
                     // TODO add caching here
                     logger.LogInformation($"Fetching all books from authorId {authorId} from Readarr: {UrlUtilities.RedactApiKey(readarrBookUrl)}");

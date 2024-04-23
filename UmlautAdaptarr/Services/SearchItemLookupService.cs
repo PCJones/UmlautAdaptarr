@@ -6,12 +6,8 @@ namespace UmlautAdaptarr.Services
     public class SearchItemLookupService(CacheService cacheService,
                                          SonarrClient sonarrClient,
                                          ReadarrClient readarrClient,
-                                         LidarrClient lidarrClient,
-                                         IConfiguration configuration)
+                                         LidarrClient lidarrClient)
     {
-        private readonly bool _sonarrEnabled = configuration.GetValue<bool>("SONARR_ENABLED");
-        private readonly bool _lidarrEnabled = configuration.GetValue<bool>("LIDARR_ENABLED");
-        private readonly bool _readarrEnabled = configuration.GetValue<bool>("READARR_ENABLED");
         public async Task<SearchItem?> GetOrFetchSearchItemByExternalId(string mediaType, string externalId)
         {
             // Attempt to get the item from the cache first
@@ -26,20 +22,20 @@ namespace UmlautAdaptarr.Services
             switch (mediaType)
             {
                 case "tv":
-                    if (_sonarrEnabled)
+                    if (sonarrClient.SonarrOptions.Enabled)
                     {
                         fetchedItem = await sonarrClient.FetchItemByExternalIdAsync(externalId);
                     }
                     break;
                 case "audio":
-                    if (_lidarrEnabled)
+                    if (lidarrClient.LidarrOptions.Enabled)
                     {
-                        fetchedItem = await lidarrClient.FetchItemByExternalIdAsync(externalId);
+                        await lidarrClient.FetchItemByExternalIdAsync(externalId);
                         fetchedItem = cacheService.GetSearchItemByExternalId(mediaType, externalId);
                     }
                     break;
                 case "book":
-                    if (_readarrEnabled)
+                    if (readarrClient.ReadarrOptions.Enabled)
                     {
                         await readarrClient.FetchItemByExternalIdAsync(externalId);
                         fetchedItem = cacheService.GetSearchItemByExternalId(mediaType, externalId);
@@ -70,7 +66,7 @@ namespace UmlautAdaptarr.Services
             switch (mediaType)
             {
                 case "tv":
-                    if (_sonarrEnabled)
+                    if (sonarrClient.SonarrOptions.Enabled)
                     {
                         fetchedItem = await sonarrClient.FetchItemByTitleAsync(title);
                     }

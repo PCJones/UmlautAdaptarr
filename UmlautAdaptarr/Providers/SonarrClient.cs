@@ -1,5 +1,7 @@
-﻿using Newtonsoft.Json;
+﻿using Microsoft.Extensions.Options;
+using Newtonsoft.Json;
 using UmlautAdaptarr.Models;
+using UmlautAdaptarr.Options.ArrOptions;
 using UmlautAdaptarr.Services;
 using UmlautAdaptarr.Utilities;
 
@@ -7,12 +9,11 @@ namespace UmlautAdaptarr.Providers
 {
     public class SonarrClient(
         IHttpClientFactory clientFactory,
-        IConfiguration configuration,
         TitleApiService titleService,
+        IOptions<SonarrInstanceOptions> options,
         ILogger<SonarrClient> logger) : ArrClientBase()
     {
-        private readonly string _sonarrHost = configuration.GetValue<string>("SONARR_HOST") ?? throw new ArgumentException("SONARR_HOST environment variable must be set");
-        private readonly string _sonarrApiKey = configuration.GetValue<string>("SONARR_API_KEY") ?? throw new ArgumentException("SONARR_API_KEY environment variable must be set");
+        public SonarrInstanceOptions SonarrOptions { get; } = options.Value;
         private readonly string _mediaType = "tv";
 
         public override async Task<IEnumerable<SearchItem>> FetchAllItemsAsync()
@@ -22,7 +23,7 @@ namespace UmlautAdaptarr.Providers
 
             try
             {
-                var sonarrUrl = $"{_sonarrHost}/api/v3/series?includeSeasonImages=false&apikey={_sonarrApiKey}";
+                var sonarrUrl = $"{SonarrOptions.Host}/api/v3/series?includeSeasonImages=false&apikey={SonarrOptions.ApiKey}";
                 logger.LogInformation($"Fetching all items from Sonarr: {UrlUtilities.RedactApiKey(sonarrUrl)}");
                 var response = await httpClient.GetStringAsync(sonarrUrl);
                 var shows = JsonConvert.DeserializeObject<List<dynamic>>(response);
@@ -71,7 +72,7 @@ namespace UmlautAdaptarr.Providers
 
             try
             {
-                var sonarrUrl = $"{_sonarrHost}/api/v3/series?tvdbId={externalId}&includeSeasonImages=false&apikey={_sonarrApiKey}";
+                var sonarrUrl = $"{SonarrOptions.Host}/api/v3/series?tvdbId={externalId}&includeSeasonImages=false&apikey={SonarrOptions.ApiKey}";
                 logger.LogInformation($"Fetching item by external ID from Sonarr: {UrlUtilities.RedactApiKey(sonarrUrl)}");
                 var response = await httpClient.GetStringAsync(sonarrUrl);
                 var shows = JsonConvert.DeserializeObject<dynamic>(response);
@@ -123,7 +124,7 @@ namespace UmlautAdaptarr.Providers
                     return null;
                 }
 
-                var sonarrUrl = $"{_sonarrHost}/api/v3/series?tvdbId={tvdbId}&includeSeasonImages=false&apikey={_sonarrApiKey}";
+                var sonarrUrl = $"{SonarrOptions.Host}/api/v3/series?tvdbId={tvdbId}&includeSeasonImages=false&apikey={SonarrOptions.ApiKey}";
                 var sonarrApiResponse = await httpClient.GetStringAsync(sonarrUrl);
                 var shows = JsonConvert.DeserializeObject<dynamic>(sonarrApiResponse);
 

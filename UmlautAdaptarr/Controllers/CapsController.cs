@@ -6,9 +6,9 @@ using UmlautAdaptarr.Utilities;
 
 namespace UmlautAdaptarr.Controllers
 {
-    public class CapsController(ProxyService proxyService) : ControllerBase
+    public class CapsController(ProxyRequestService proxyRequestService) : ControllerBase
     {
-        private readonly ProxyService _proxyService = proxyService;
+        private readonly ProxyRequestService _proxyRequestService = proxyRequestService;
 
         [HttpGet]
         public async Task<IActionResult> Caps([FromRoute] string options, [FromRoute] string domain, [FromQuery] string? apikey)
@@ -20,7 +20,7 @@ namespace UmlautAdaptarr.Controllers
 
             var requestUrl = UrlUtilities.BuildUrl(domain, "caps", apikey);
 
-            var responseMessage = await _proxyService.ProxyRequestAsync(HttpContext, requestUrl);
+            var responseMessage = await _proxyRequestService.ProxyRequestAsync(HttpContext, requestUrl);
 
             var content = await responseMessage.Content.ReadAsStringAsync();
             var encoding = responseMessage.Content.Headers.ContentType?.CharSet != null ?
