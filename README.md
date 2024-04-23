@@ -54,7 +54,7 @@ Das ist die **empfohlene** Methode um den UmlautAdaptarr einzurichten. Sie hat d
 
 ![Image](https://github.com/PCJones/UmlautAdaptarr/assets/377223/b97418d8-d972-4e3c-9d2f-3a830a5ac0a3)
 
-- Name UmlautAdaptarr HTTP Proxy (Beispiel)
+- Name: UmlautAdaptarr HTTP Proxy (Beispiel)
 - Port: `5006` (Port beachten!) 
 - Tag: `umlautadaptarr`
 - Host: Je nachdem, wie deine Docker-Konfiguration ist, kann es sein, dass du entweder `umlautadaptarr` oder `localhost`, oder ggf. die IP des Host setzen musst. Probiere es sonst einfach aus, indem du auf Test klickst.
@@ -67,8 +67,6 @@ Das ist die **empfohlene** Methode um den UmlautAdaptarr einzurichten. Sie hat d
   - Füge den `umlautadaptarr` Tag hinzu
   - **Wichtig:** Ändere die URL von `https` zu `http`. (Dies ist erforderlich, damit der UmlautAdaptarr die Anfragen **lokal** abfangen kann. **Ausgehende** Anfragen an den Indexer verwenden natürlich weiterhin https).
 5) Klicke danach auf `Test All Indexers` bzw `Alle Indexer Testen`. Falls du irgendwo noch `https` statt `http` stehen hast, sollte in den UmlautAdaptarr logs eine Warnung auftauchen. Mindestens solltest du aber noch ein zweites Mal alle Indexer durchgehen und überprüfen, ob überall `http` eingestellt ist - Indexer, bei denen noch `https` steht, werden nämlich einwandfrei funktionieren - allerdings ohne, dass der UmlautAdaptarr bei diesen wirken kann.
-
-6) Je nachdem, wie du das Sync-Level von Prowlarr unter Settings>Apps bzw. Einstellungen>Anwendungen für die verschiedenen *arrs eingerichtet hast (Deaktiviert, Nur hinzufügen und entfernen, Vollständige Synchronisierung), musst du die Änderungen ggf. noch an deine *arrs syncen. 
 
 ### Konfiguration in Sonarr/Radarr oder Prowlarr ohne Proxy
 Falls du kein Prowlarr nutzt oder nur 1-3 Indexer nutzt, kannst du diese alternative Konfigurationsmöglichkeit nutzen.
