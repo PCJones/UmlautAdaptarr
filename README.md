@@ -40,23 +40,24 @@ Einige Beispiele finden sich [weiter unten](https://github.com/PCJones/UmlautAda
 
 
 ## Installation
-Momentan ist docker dafür nötig, wer kein Docker nutzt muss sich noch etwas gedulden. Eine Unraid-App gibt es auch, einfach nach `umlautadaptarr` suchen.
+Momentan ist Docker dafür nötig, wer kein Docker nutzt muss sich noch etwas gedulden. Eine Unraid-App gibt es auch, einfach nach `umlautadaptarr` suchen.
 
 [Link zum Docker Image](https://hub.docker.com/r/pcjones/umlautadaptarr)
 
-Nicht benötigte Umgebungsvariablen können entfernt werden.
+Nicht benötigte Umgebungsvariablen, z.B. wenn Readarr oder Lidarr nicht benötigt werden, können entfernt werden.
 
-### Konfiguration in Prowlarr (empfohlen)
-Das ist die empfohlene Methode um den UmlautAdaptarr einzurichten. Sie hat den Vorteil, dass es keinen Geschwindigkeitsverlust bei der Suche gibt, sofern man mehrere Indexer hat.
+### Konfiguration in Prowlarr (**empfohlen**)
+Das ist die **empfohlene** Methode um den UmlautAdaptarr einzurichten. Sie hat den Vorteil, dass es, sofern man mehrere Indexer nutzt, keinen Geschwindigkeitsverlust bei der Suche geben sollte.
 
 1) In Prowlarr: Settings>Indexers bzw. Einstellungen>Indexer öffnen
 2) Lege einen neuen HTTP-Proxy an:
 
 ![Image](https://github.com/PCJones/UmlautAdaptarr/assets/377223/b97418d8-d972-4e3c-9d2f-3a830a5ac0a3)
 
-- Port: `5006`
+- Name: UmlautAdaptarr HTTP Proxy (Beispiel)
+- Port: `5006` (Port beachten!) 
 - Tag: `umlautadaptarr`
-- Host: Je nachdem, wie deine Docker-Konfiguration ist, kann es sein, dass du entweder `umlautadaptarr` oder `localhost` als Host setzen muss. Probiere es sonst einfach aus, indem du auf Test klickst.
+- Host: Je nachdem, wie deine Docker-Konfiguration ist, kann es sein, dass du entweder `umlautadaptarr` oder `localhost`, oder ggf. die IP des Host setzen musst. Probiere es sonst einfach aus, indem du auf Test klickst.
 - Die Username- und Passwort-Felder können leergelassen werden.
 3) Gehe zur Indexer-Übersichtsseite
 4) Für alle Indexer/Tracker, die den UmlautAdaptarr nutzen sollen:
@@ -64,7 +65,7 @@ Das ist die empfohlene Methode um den UmlautAdaptarr einzurichten. Sie hat den V
 ![grafik](https://github.com/PCJones/UmlautAdaptarr/assets/377223/3daea3f1-7c7b-4982-84e2-ea6a42d90fba)
 
   - Füge den `umlautadaptarr` Tag hinzu
-  - **Wichtig:** Ändere die URL von `https` zu `http`. (Für die Experten: Dies ist erforderlich, damit der UmlautAdaptarr die Anfragen lokal abfangen kann. Ausgehende Anfragen an den Indexer verwenden natürlich weiterhin https).
+  - **Wichtig:** Ändere die URL von `https` zu `http`. (Dies ist erforderlich, damit der UmlautAdaptarr die Anfragen **lokal** abfangen kann. **Ausgehende** Anfragen an den Indexer verwenden natürlich weiterhin https).
 5) Klicke danach auf `Test All Indexers` bzw `Alle Indexer Testen`. Falls du irgendwo noch `https` statt `http` stehen hast, sollte in den UmlautAdaptarr logs eine Warnung auftauchen. Mindestens solltest du aber noch ein zweites Mal alle Indexer durchgehen und überprüfen, ob überall `http` eingestellt ist - Indexer, bei denen noch `https` steht, werden nämlich einwandfrei funktionieren - allerdings ohne, dass der UmlautAdaptarr bei diesen wirken kann.
 
 ### Konfiguration in Sonarr/Radarr oder Prowlarr ohne Proxy
