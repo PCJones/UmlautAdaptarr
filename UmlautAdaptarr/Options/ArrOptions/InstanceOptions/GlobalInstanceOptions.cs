@@ -8,6 +8,11 @@
         public bool Enabled { get; set; }
 
         /// <summary>
+        /// Name of the Instance
+        /// </summary>
+        public string Name { get; set; }
+
+        /// <summary>
         /// The host of the ARR application.
         /// </summary>
         public string Host { get; set; }

@@ -1,4 +1,5 @@
-﻿using UmlautAdaptarr.Interfaces;
+﻿using System.Linq.Expressions;
+using UmlautAdaptarr.Interfaces;
 using UmlautAdaptarr.Options;
 using UmlautAdaptarr.Options.ArrOptions.InstanceOptions;
 using UmlautAdaptarr.Providers;
@@ -45,19 +46,30 @@ public static class ServicesExtensions
             throw new InvalidOperationException(
                 $"{typeof(TService).Name} options could not be loaded from Configuration or ENV Variable.");
 
-        foreach (var options in optionsArray)
+        foreach (var option in optionsArray)
         {
-            var instanceState = (bool)(typeof(TOptions).GetProperty("Enabled")?.GetValue(options, null) ?? false);
+            var instanceState = (bool)(typeof(TOptions).GetProperty("Enabled")?.GetValue(option, null) ?? false);
 
             // We only want to create instances that are enabled in the Configs
             if (instanceState)
             {
                 // User can give the Instance a readable Name otherwise we use the Host Property
-                var instanceName = (string)(typeof(TOptions).GetProperty("Name")?.GetValue(options, null) ??
-                                            (string)typeof(TOptions).GetProperty("Host")?.GetValue(options, null)!);
-                instanceName = instanceName.Replace(".", "");
-                builder.Services.Configure(instanceName,
-                    delegate(TOptions serviceOptions) { serviceOptions = options; });
+                var instanceName = (string)(typeof(TOptions).GetProperty("Name")?.GetValue(option, null) ??
+                                            (string)typeof(TOptions).GetProperty("Host")?.GetValue(option, null)!);
+
+                // Dark Magic , we don't know the Property's of TOptions , and we won't cast them for each Options
+                var paraexpression = Expression.Parameter(option.GetType(), "x");
+
+                foreach (var prop in option.GetType().GetProperties())
+                {
+                    var val = Expression.Constant(prop.GetValue(option));
+                    var memberexpression = Expression.PropertyOrField(paraexpression, prop.Name);
+
+                    var assign = Expression.Assign(memberexpression, val);
+
+                    var exp = Expression.Lambda<Action<TOptions>>(assign, paraexpression);
+                    builder.Services.Configure(instanceName, exp.Compile());
+                }
 
                 builder.Services.AllowResolvingKeyedServicesAsDictionary();
                 builder.Services.AddKeyedSingleton<TInterface, TService>(instanceName);
@@ -100,6 +112,7 @@ public static class ServicesExtensions
     /// <returns>The configured <see cref="WebApplicationBuilder" />.</returns>
     public static WebApplicationBuilder AddSonarrSupport(this WebApplicationBuilder builder)
     {
+        //  builder.Serviceses.AddSingleton<IOptionsMonitoSonarrInstanceOptionsns>, OptionsMonitoSonarrInstanceOptionsns>>();
         return builder.AddServicesWithOptions<SonarrInstanceOptions, SonarrClient, IArrApplication>("Sonarr");
     }
 
