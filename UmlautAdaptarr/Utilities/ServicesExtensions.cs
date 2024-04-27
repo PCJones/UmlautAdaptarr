@@ -58,18 +58,26 @@ public static class ServicesExtensions
                                             (string)typeof(TOptions).GetProperty("Host")?.GetValue(option, null)!);
 
                 // Dark Magic , we don't know the Property's of TOptions , and we won't cast them for each Options
-                var paraexpression = Expression.Parameter(option.GetType(), "x");
+                // Todo eventuell schönere Lösung finden
+                var paraexpression = Expression.Parameter(Type.GetType(option.GetType().FullName), "x");
 
                 foreach (var prop in option.GetType().GetProperties())
                 {
                     var val = Expression.Constant(prop.GetValue(option));
                     var memberexpression = Expression.PropertyOrField(paraexpression, prop.Name);
 
-                    var assign = Expression.Assign(memberexpression, val);
-
-                    var exp = Expression.Lambda<Action<TOptions>>(assign, paraexpression);
-                    builder.Services.Configure(instanceName, exp.Compile());
+                    if (prop.PropertyType == typeof(int) || prop.PropertyType == typeof(string) || prop.PropertyType == typeof(bool))
+                    {
+                        var assign = Expression.Assign(memberexpression, Expression.Convert(val, prop.PropertyType));
+                        var exp = Expression.Lambda<Action<TOptions>>(assign, paraexpression);
+                        builder.Services.Configure(instanceName, exp.Compile());
+                    }
+                    else
+                    {
+                        Console.WriteLine(prop.PropertyType + "No Support");
+                    }
                 }
+
 
                 builder.Services.AllowResolvingKeyedServicesAsDictionary();
                 builder.Services.AddKeyedSingleton<TInterface, TService>(instanceName);
