@@ -1,12 +1,11 @@
 ﻿using UmlautAdaptarr.Models;
 using UmlautAdaptarr.Providers;
+using UmlautAdaptarr.Services.Factory;
 
 namespace UmlautAdaptarr.Services
 {
     public class SearchItemLookupService(CacheService cacheService,
-                                         SonarrClient sonarrClient,
-                                         ReadarrClient readarrClient,
-                                         LidarrClient lidarrClient)
+        RrApplicationFactory rrApplicationFactory)
     {
         public async Task<SearchItem?> GetOrFetchSearchItemByExternalId(string mediaType, string externalId)
         {
@@ -22,23 +21,40 @@ namespace UmlautAdaptarr.Services
             switch (mediaType)
             {
                 case "tv":
-                    if (sonarrClient.SonarrOptions.Enabled)
+
+                    var sonarrInstances = rrApplicationFactory.SonarrInstances;
+
+                    if (sonarrInstances.Any())
                     {
-                        fetchedItem = await sonarrClient.FetchItemByExternalIdAsync(externalId);
+                        foreach (var sonarrClient in sonarrInstances)
+                        {
+                            fetchedItem = await sonarrClient.FetchItemByExternalIdAsync(externalId);
+                        }
                     }
                     break;
                 case "audio":
-                    if (lidarrClient.LidarrOptions.Enabled)
+
+                    var lidarrInstances = rrApplicationFactory.LidarrInstances;
+
+                    if (lidarrInstances.Any())
                     {
-                        await lidarrClient.FetchItemByExternalIdAsync(externalId);
-                        fetchedItem = cacheService.GetSearchItemByExternalId(mediaType, externalId);
+                        foreach (var lidarrClient in lidarrInstances)
+                        {
+                            await lidarrClient.FetchItemByExternalIdAsync(externalId);
+                            fetchedItem = cacheService.GetSearchItemByExternalId(mediaType, externalId);
+                        }
                     }
                     break;
                 case "book":
-                    if (readarrClient.ReadarrOptions.Enabled)
+
+                    var readarrInstances = rrApplicationFactory.ReadarrInstances;
+                    if (readarrInstances.Any())
                     {
-                        await readarrClient.FetchItemByExternalIdAsync(externalId);
-                        fetchedItem = cacheService.GetSearchItemByExternalId(mediaType, externalId);
+                        foreach (var readarrClient in readarrInstances)
+                        {
+                            await readarrClient.FetchItemByExternalIdAsync(externalId);
+                            fetchedItem = cacheService.GetSearchItemByExternalId(mediaType, externalId);
+                        }
                     }
                     break;
             }
@@ -66,7 +82,9 @@ namespace UmlautAdaptarr.Services
             switch (mediaType)
             {
                 case "tv":
-                    if (sonarrClient.SonarrOptions.Enabled)
+
+                    var sonarrInstances = rrApplicationFactory.SonarrInstances;
+                    foreach (var sonarrClient in sonarrInstances)
                     {
                         fetchedItem = await sonarrClient.FetchItemByTitleAsync(title);
                     }

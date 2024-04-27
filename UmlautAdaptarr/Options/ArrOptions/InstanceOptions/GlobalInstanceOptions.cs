@@ -1,9 +1,6 @@
-﻿namespace UmlautAdaptarr.Options.ArrOptions
+﻿namespace UmlautAdaptarr.Options.ArrOptions.InstanceOptions
 {
-    /// <summary>
-    /// Base Options for ARR applications
-    /// </summary>
-    public class ArrApplicationBaseOptions
+    public class GlobalInstanceOptions
     {
         /// <summary>
         /// Indicates whether the Arr application is enabled.
