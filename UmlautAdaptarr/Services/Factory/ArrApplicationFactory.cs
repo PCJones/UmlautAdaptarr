@@ -6,9 +6,9 @@ namespace UmlautAdaptarr.Services.Factory
     /// <summary>
     /// Factory for creating RrApplication instances.
     /// </summary>
-    public class RrApplicationFactory
+    public class ArrApplicationFactory
     {
-        private readonly ILogger<RrApplicationFactory> _logger;
+        private readonly ILogger<ArrApplicationFactory> _logger;
 
         /// <summary>
         /// Get all IArrApplication instances.
@@ -31,10 +31,11 @@ namespace UmlautAdaptarr.Services.Factory
         public IEnumerable<ReadarrClient> ReadarrInstances { get; init; }
 
         /// <summary>
-        /// Constructor for the RrApplicationFactory.
+        /// Constructor for the ArrApplicationFactory.
         /// </summary>
         /// <param name="rrArrApplications">A dictionary of IArrApplication instances.</param>
-        public RrApplicationFactory(IDictionary<string, IArrApplication> rrArrApplications, ILogger<RrApplicationFactory> logger)
+        /// <param name="logger">Logger Instanz</param>
+        public ArrApplicationFactory(IDictionary<string, IArrApplication> rrArrApplications, ILogger<ArrApplicationFactory> logger)
         {
             _logger = logger;
             try
@@ -51,7 +52,7 @@ namespace UmlautAdaptarr.Services.Factory
             }
             catch (Exception e)
             {
-                _logger.LogError("Register RrFactory", e.Message);
+                _logger.LogError("Error while Register ArrFactory. This might be a Config Problem", e.Message);
                 throw;
             }
         }

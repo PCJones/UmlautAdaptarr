@@ -5,7 +5,7 @@ using UmlautAdaptarr.Services.Factory;
 namespace UmlautAdaptarr.Services
 {
     public class SearchItemLookupService(CacheService cacheService,
-        RrApplicationFactory rrApplicationFactory)
+        ArrApplicationFactory arrApplicationFactory)
     {
         public async Task<SearchItem?> GetOrFetchSearchItemByExternalId(string mediaType, string externalId)
         {
@@ -22,7 +22,7 @@ namespace UmlautAdaptarr.Services
             {
                 case "tv":
 
-                    var sonarrInstances = rrApplicationFactory.SonarrInstances;
+                    var sonarrInstances = arrApplicationFactory.SonarrInstances;
 
                     if (sonarrInstances.Any())
                     {
@@ -34,7 +34,7 @@ namespace UmlautAdaptarr.Services
                     break;
                 case "audio":
 
-                    var lidarrInstances = rrApplicationFactory.LidarrInstances;
+                    var lidarrInstances = arrApplicationFactory.LidarrInstances;
 
                     if (lidarrInstances.Any())
                     {
@@ -47,7 +47,7 @@ namespace UmlautAdaptarr.Services
                     break;
                 case "book":
 
-                    var readarrInstances = rrApplicationFactory.ReadarrInstances;
+                    var readarrInstances = arrApplicationFactory.ReadarrInstances;
                     if (readarrInstances.Any())
                     {
                         foreach (var readarrClient in readarrInstances)
@@ -83,7 +83,7 @@ namespace UmlautAdaptarr.Services
             {
                 case "tv":
 
-                    var sonarrInstances = rrApplicationFactory.SonarrInstances;
+                    var sonarrInstances = arrApplicationFactory.SonarrInstances;
                     foreach (var sonarrClient in sonarrInstances)
                     {
                         fetchedItem = await sonarrClient.FetchItemByTitleAsync(title);

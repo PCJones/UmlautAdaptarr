@@ -1,9 +1,11 @@
-﻿using System.Linq.Expressions;
+﻿using FluentValidation;
+using System.Linq.Expressions;
 using UmlautAdaptarr.Interfaces;
 using UmlautAdaptarr.Options;
 using UmlautAdaptarr.Options.ArrOptions.InstanceOptions;
 using UmlautAdaptarr.Providers;
 using UmlautAdaptarr.Services;
+using UmlautAdaptarr.Validator;
 
 namespace UmlautAdaptarr.Utilities;
 
@@ -12,6 +14,12 @@ namespace UmlautAdaptarr.Utilities;
 /// </summary>
 public static class ServicesExtensions
 {
+
+    /// <summary>
+    /// Logger instance for logging proxy configurations.
+    /// </summary>
+    private static ILogger Logger = GlobalStaticLogger.Logger;
+
     /// <summary>
     ///     Adds a service with specified options and service to the service collection.
     /// </summary>
@@ -27,64 +35,87 @@ public static class ServicesExtensions
         where TService : class, TInterface
         where TInterface : class
     {
-        if (builder.Services == null) throw new ArgumentNullException(nameof(builder), "Service collection is null.");
 
-
-        var singleInstance = builder.Configuration.GetSection(sectionName).Get<TOptions>();
-
-        var singleHost = (string?)typeof(TOptions).GetProperty("Host")?.GetValue(singleInstance, null);
-
-        // If we have no Single Instance , we try to parse for a Array
-        var optionsArray = singleHost == null
-            ? builder.Configuration.GetSection(sectionName).Get<TOptions[]>()
-            :
-            [
-                singleInstance
-            ];
-
-        if (optionsArray == null || !optionsArray.Any())
-            throw new InvalidOperationException(
-                $"{typeof(TService).Name} options could not be loaded from Configuration or ENV Variable.");
-
-        foreach (var option in optionsArray)
+        try
         {
-            var instanceState = (bool)(typeof(TOptions).GetProperty("Enabled")?.GetValue(option, null) ?? false);
+            if (builder.Services == null) throw new ArgumentNullException(nameof(builder), "Service collection is null.");
 
-            // We only want to create instances that are enabled in the Configs
-            if (instanceState)
+
+            var singleInstance = builder.Configuration.GetSection(sectionName).Get<TOptions>();
+
+            var singleHost = (string?)typeof(TOptions).GetProperty("Host")?.GetValue(singleInstance, null);
+
+            // If we have no Single Instance , we try to parse for a Array
+            var optionsArray = singleHost == null
+                ? builder.Configuration.GetSection(sectionName).Get<TOptions[]>()
+                :
+                [
+                    singleInstance
+                ];
+
+            if (optionsArray == null || !optionsArray.Any())
+                throw new InvalidOperationException(
+                    $"{typeof(TService).Name} options could not be loaded from Configuration or ENV Variable.");
+
+            foreach (var option in optionsArray)
             {
-                // User can give the Instance a readable Name otherwise we use the Host Property
-                var instanceName = (string)(typeof(TOptions).GetProperty("Name")?.GetValue(option, null) ??
-                                            (string)typeof(TOptions).GetProperty("Host")?.GetValue(option, null)!);
 
-                // Dark Magic , we don't know the Property's of TOptions , and we won't cast them for each Options
-                // Todo eventuell schönere Lösung finden
-                var paraexpression = Expression.Parameter(Type.GetType(option.GetType().FullName), "x");
+                GlobalInstanceOptionsValidator validator = new GlobalInstanceOptionsValidator();
 
-                foreach (var prop in option.GetType().GetProperties())
+              var results =  validator.Validate(option as GlobalInstanceOptions);
+
+                if (!results.IsValid)
                 {
-                    var val = Expression.Constant(prop.GetValue(option));
-                    var memberexpression = Expression.PropertyOrField(paraexpression, prop.Name);
+                    foreach (var failure in results.Errors)
+                    {
+                        Console.WriteLine(($"Property {failure.PropertyName } failed validation. Error was: {failure.ErrorMessage}"));
+                    }
 
-                    if (prop.PropertyType == typeof(int) || prop.PropertyType == typeof(string) || prop.PropertyType == typeof(bool))
-                    {
-                        var assign = Expression.Assign(memberexpression, Expression.Convert(val, prop.PropertyType));
-                        var exp = Expression.Lambda<Action<TOptions>>(assign, paraexpression);
-                        builder.Services.Configure(instanceName, exp.Compile());
-                    }
-                    else
-                    {
-                        Console.WriteLine(prop.PropertyType + "No Support");
-                    }
+                    throw new Exception("Please fix first you config and then Start UmlautAdaptarr again");
                 }
 
+                var instanceState = (bool)(typeof(TOptions).GetProperty("Enabled")?.GetValue(option, null) ?? false);
 
-                builder.Services.AllowResolvingKeyedServicesAsDictionary();
-                builder.Services.AddKeyedSingleton<TInterface, TService>(instanceName);
+                // We only want to create instances that are enabled in the Configs
+                if (instanceState)
+                {
+                    // User can give the Instance a readable Name otherwise we use the Host Property
+                    var instanceName = (string)(typeof(TOptions).GetProperty("Name")?.GetValue(option, null) ??
+                                                (string)typeof(TOptions).GetProperty("Host")?.GetValue(option, null)!);
+
+                    // Dark Magic , we don't know the Property's of TOptions , and we won't cast them for each Options
+                    // Todo eventuell schönere Lösung finden
+                    var paraexpression = Expression.Parameter(Type.GetType(option.GetType().FullName), "x");
+
+                    foreach (var prop in option.GetType().GetProperties())
+                    {
+                        var val = Expression.Constant(prop.GetValue(option));
+                        var memberexpression = Expression.PropertyOrField(paraexpression, prop.Name);
+
+                        if (prop.PropertyType == typeof(int) || prop.PropertyType == typeof(string) || prop.PropertyType == typeof(bool))
+                        {
+                            var assign = Expression.Assign(memberexpression, Expression.Convert(val, prop.PropertyType));
+                            var exp = Expression.Lambda<Action<TOptions>>(assign, paraexpression);
+                            builder.Services.Configure(instanceName, exp.Compile());
+                        }
+                        else
+                        {
+                            Logger.LogWarning((prop.PropertyType + "No Support"));
+                        }
+                    }
+
+                    builder.Services.AddKeyedSingleton<TInterface, TService>(instanceName);
+                }
             }
+
+            return builder;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine("Error while Init UmlautAdaptrr");
+            throw;
         }
 
-        return builder;
     }
 
     /// <summary>

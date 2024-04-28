@@ -4,12 +4,12 @@ using UmlautAdaptarr.Services.Factory;
 namespace UmlautAdaptarr.Services;
 
 public class ArrSyncBackgroundService(
-    RrApplicationFactory rrApplicationFactory,
+    ArrApplicationFactory arrApplicationFactory,
     CacheService cacheService,
     ILogger<ArrSyncBackgroundService> logger)
     : BackgroundService
 {
-    public RrApplicationFactory RrApplicationFactory { get; } = rrApplicationFactory;
+    public ArrApplicationFactory ArrApplicationFactory { get; } = arrApplicationFactory;
 
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -56,19 +56,19 @@ public class ArrSyncBackgroundService(
             var success = true;
 
 
-            if (RrApplicationFactory.SonarrInstances.Any())
+            if (ArrApplicationFactory.SonarrInstances.Any())
             {
                 var syncSuccess = await FetchItemsFromSonarrAsync();
                 success = success && syncSuccess;
             }
 
-            if (RrApplicationFactory.ReadarrInstances.Any())
+            if (ArrApplicationFactory.ReadarrInstances.Any())
             {
                 var syncSuccess = await FetchItemsFromReadarrAsync();
                 success = success && syncSuccess;
             }
 
-            if (RrApplicationFactory.ReadarrInstances.Any())
+            if (ArrApplicationFactory.ReadarrInstances.Any())
             {
                 var syncSuccess = await FetchItemsFromLidarrAsync();
                 success = success && syncSuccess;
@@ -91,7 +91,7 @@ public class ArrSyncBackgroundService(
         {
             var items = new List<SearchItem>();
 
-            foreach (var sonarrClient in RrApplicationFactory.SonarrInstances)
+            foreach (var sonarrClient in ArrApplicationFactory.SonarrInstances)
             {
                 var result = await sonarrClient.FetchAllItemsAsync();
                 items = items.Union(result).ToList();
@@ -115,7 +115,7 @@ public class ArrSyncBackgroundService(
         {
             var items = new List<SearchItem>();
 
-            foreach (var lidarrClient in RrApplicationFactory.LidarrInstances)
+            foreach (var lidarrClient in ArrApplicationFactory.LidarrInstances)
             {
                 var result = await lidarrClient.FetchAllItemsAsync();
                 items = items.Union(result).ToList();
@@ -138,7 +138,7 @@ public class ArrSyncBackgroundService(
         {
             var items = new List<SearchItem>();
 
-            foreach (var readarrClient in RrApplicationFactory.ReadarrInstances)
+            foreach (var readarrClient in ArrApplicationFactory.ReadarrInstances)
             {
                 var result = await readarrClient.FetchAllItemsAsync();
                 items = items.Union(result).ToList();

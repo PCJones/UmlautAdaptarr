@@ -53,7 +53,7 @@ internal class Program
             //options.SizeLimit = 20000;
         });
 
-
+        builder.Services.AllowResolvingKeyedServicesAsDictionary();
         builder.Services.AddControllers();
         builder.AddTitleLookupService();
         builder.Services.AddSingleton<SearchItemLookupService>();
@@ -63,7 +63,7 @@ internal class Program
         builder.AddReadarrSupport();
         builder.Services.AddSingleton<CacheService>();
         builder.Services.AddSingleton<ProxyRequestService>();
-        builder.Services.AddSingleton<RrApplicationFactory>();
+        builder.Services.AddSingleton<ArrApplicationFactory>();
         builder.Services.AddHostedService<ArrSyncBackgroundService>();
         builder.Services.AddSingleton<IHostedService, HttpProxyService>();
 
