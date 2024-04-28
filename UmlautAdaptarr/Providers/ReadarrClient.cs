@@ -61,7 +61,7 @@ public class ReadarrClient : ArrClientBase
 
                 // TODO add caching here
                 _logger.LogInformation(
-                    $"Fetching all books from authorId {authorId} from Readarr: {UrlUtilities.RedactApiKey(readarrBookUrl)}");
+                    $"Fetching all books from authorId {authorId} from Readarr ({InstanceName}) : {UrlUtilities.RedactApiKey(readarrBookUrl)}");
                 var bookApiResponse = await httpClient.GetStringAsync(readarrBookUrl);
                 var books = JsonConvert.DeserializeObject<List<dynamic>>(bookApiResponse);
 
