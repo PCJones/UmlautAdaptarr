@@ -15,8 +15,8 @@ namespace UmlautAdaptarr.Validator
 
                 RuleFor(x => x.Host)
                     .NotEmpty().WithMessage("Host is required when Enabled is true.")
-                    .Must(BeAValidUrl).WithMessage("Host must start with http:// or https:// and be a valid address.")
-                    .Must(BeReachable).WithMessage("Host is not reachable. Please check your Host or your UmlautAdaptrr Settings");
+                    .Must(BeAValidUrl).WithMessage("Host/Url must start with http:// or https:// and be a valid address.")
+                    .Must(BeReachable).WithMessage("Host/Url is not reachable. Please check your Host or your UmlautAdaptrr Settings");
 
                 RuleFor(x => x.ApiKey)
                     .NotEmpty().WithMessage("ApiKey is required when Enabled is true.");
@@ -29,18 +29,37 @@ namespace UmlautAdaptarr.Validator
                    && (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps);
         }
 
-        private bool BeReachable(string url)
+        private static bool BeReachable(string url)
         {
-            try
+            DateTime endTime = DateTime.Now.AddMinutes(3);
+            bool reachable = false;
+            var request = WebRequest.Create(url);
+
+            while (DateTime.Now < endTime)
             {
-                var request = WebRequest.Create(url);
-                var response = (HttpWebResponse)request.GetResponse();
-                return response.StatusCode == HttpStatusCode.OK;
+                try
+                {
+                  
+                    var response = (HttpWebResponse)request.GetResponse();
+                    reachable = response.StatusCode == HttpStatusCode.OK;
+                    if (reachable)
+                    {
+                        break;
+                    }
+                    else
+                    {
+                        Console.WriteLine($"The URL \"{url}\" is not reachable. Next attempt in 15 seconds...");
+                    }
+                }
+                catch
+                {
+                    return false;
+                }
+                // Wait for 15 seconds
+                System.Threading.Thread.Sleep(15000); 
             }
-            catch
-            {
-                return false;
-            }
+
+            return reachable;
         }
     }
 }
