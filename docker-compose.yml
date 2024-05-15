@@ -6,6 +6,9 @@ services:
     build: https://github.com/PCJones/UmlautAdaptarr.git#master
     image: umlautadaptarr
     restart: unless-stopped
+    ports:
+      - "5005:5005" # can be removed if you use the recommended prowlarr+proxy configuration 
+      - "5006:5006" # can be removed if you use the alternative, non-proxy configuration
     environment:
       - TZ=Europe/Berlin
       - SONARR__ENABLED=false
