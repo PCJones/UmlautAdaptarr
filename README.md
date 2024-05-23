@@ -16,7 +16,7 @@ UmlautAdaptarr löst mehrere Probleme:
 ## Wie macht UmlautAdaptarr das?
 UmlautAdaptarr tut so, als wäre es ein Indexer. In Wahrheit schaltet sich UmlautAdaptarr aber nur zwischen die *arrs und den echten Indexer und kann somit die Suchen sowie die Ergebnisse abfangen und bearbeiten.
 Am Ende werden die gefundenen Releases immer so umbenannt, dass die Arrs sie einwandfrei erkennen.
-Einige Beispiele finden sich [weiter unten](https://github.com/PCJones/UmlautAdaptarr/edit/develop/README.md#beispiel-funktionalit%C3%A4t).
+Einige Beispiele finden sich [weiter unten](https://github.com/PCJones/UmlautAdaptarr?tab=readme-ov-file#beispiel-funktionalit%C3%A4t).
 
 
 ## Features
