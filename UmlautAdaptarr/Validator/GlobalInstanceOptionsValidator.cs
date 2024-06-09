@@ -39,6 +39,7 @@ public class GlobalInstanceOptionsValidator : AbstractValidator<GlobalInstanceOp
             try
             {
                 var request = WebRequest.Create(url);
+                request.Timeout = 3000;
                 using var response = (HttpWebResponse)request.GetResponse();
                 reachable = response.StatusCode == HttpStatusCode.OK;
                 if (reachable)
