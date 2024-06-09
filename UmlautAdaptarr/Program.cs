@@ -14,7 +14,7 @@ internal class Program
 
 
         Helper.ShowLogo();
-
+        Helper.ShowInformation();
         // TODO:
         // add option to sort by nzb age
         var builder = WebApplication.CreateBuilder(args);
