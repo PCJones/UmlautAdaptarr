@@ -33,27 +33,28 @@ public class GlobalInstanceOptionsValidator : AbstractValidator<GlobalInstanceOp
     {
         var endTime = DateTime.Now.AddMinutes(3);
         var reachable = false;
-        var request = WebRequest.Create(url);
 
         while (DateTime.Now < endTime)
         {
             try
             {
-                var response = (HttpWebResponse)request.GetResponse();
+                var request = WebRequest.Create(url);
+                using var response = (HttpWebResponse)request.GetResponse();
                 reachable = response.StatusCode == HttpStatusCode.OK;
                 if (reachable)
                     break;
-                Console.WriteLine($"The URL \"{url}\" is not reachable. Next attempt in 15 seconds...");
             }
             catch
             {
-                return false;
+              
             }
 
-            // Wait for 15 seconds
+            // Wait for 15 seconds for next try
+            Console.WriteLine($"The URL \"{url}\" is not reachable. Next attempt in 15 seconds...");
             Thread.Sleep(15000);
         }
 
         return reachable;
     }
+
 }
