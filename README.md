@@ -33,6 +33,7 @@ Einige Beispiele finden sich [weiter unten](https://github.com/PCJones/UmlautAda
 | Anfragen-Caching für 12 Minuten zur Reduzierung der API-Zugriffe   | ✓             |
 | Usenet (newznab) Support                                          |✓|
 | Torrent (torznab) Support                                         |✓|
+| Support von meheren *arrs Instanzen                               | ✓             
 | Radarr Support                                                    | Geplant       |
 | Prowlarr Unterstützung für "DE" SceneNZBs Kategorien              | Geplant       |
 | Unterstützung weiterer Sprachen neben Deutsch                     | Geplant       |
