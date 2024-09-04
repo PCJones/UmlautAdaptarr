@@ -209,16 +209,8 @@ namespace UmlautAdaptarr.Services
                     // Clean up any leading separator from the suffix
                     suffix = Regex.Replace(suffix, "^ +", "");
 
-                    // TODO EVALUTE! definitely make this optional - this adds GERMAN to the title is the title is german to make sure it's recognized as german
-                    // can lead to problems with shows such as "dark" that have international dubs
-                    /*
-                    // Check if "german" is not in the original title, ignoring case
-                    if (!Regex.IsMatch(originalTitle, "german", RegexOptions.IgnoreCase))
-                    {
-                        // Insert "GERMAN" after the newTitlePrefix
-                        newTitlePrefix += separator + "GERMAN";
-                    }
-                    */
+                    // TODO add this when radarr is implemented
+                    // FixBadReleaseNaming
 
                     // Construct the new title with the original suffix
                     var newTitle = newTitlePrefix + (string.IsNullOrEmpty(suffix) ? "" : suffix.StartsWith(separator) ? suffix : $"{separator}{suffix}");
@@ -231,6 +223,50 @@ namespace UmlautAdaptarr.Services
                     break;
                 }
             }
+        }
+
+        private static string[] MissingGermanTagReleaseGroups = ["tvr"];
+        private static string[] HEVCInsteadOfx265TagReleaseGroups = ["eisbaer"];
+        private static string[] WrongTagsReleaseGroups = ["eisbaer"];
+        private static string FixBadReleaseNaming(string title, string seperator, ILogger<TitleMatchingService> logger)
+        {
+            var releaseGroup = GetReleaseGroup(title);
+            if (MissingGermanTagReleaseGroups.Contains(releaseGroup))
+            {
+                // Check if "german" is not in the title, ignoring case
+                if (!Regex.IsMatch(title, "german", RegexOptions.IgnoreCase))
+                {
+                    logger.LogInformation($"FixBadReleaseNaming - found missing GERMAN tag for {title}");
+                    // TODO not finished
+                    // Insert "GERMAN" after the newTitlePrefix
+                    //newTitlePrefix += separator + "GERMAN";
+                }
+            }
+
+            if (HEVCInsteadOfx265TagReleaseGroups.Contains(releaseGroup))
+            {
+                if (!title.Contains("REMUX", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    logger.LogInformation($"FixBadReleaseNaming - found HEVC instead of x265 for {title}");
+                    title = title.Replace("HEVC", "x265");
+                }
+            }
+
+            if (WrongTagsReleaseGroups.Contains(releaseGroup))
+            {
+                if (title.Contains($"{seperator}RM{seperator}"))
+                {
+                    logger.LogInformation($"FixBadReleaseNaming - found bad Tag RM instead of REMASTERED for {title}");
+                    title = title.Replace($"{seperator}RM{seperator}", $"{seperator}REMASTERED{seperator}");
+                }
+            }
+
+            return "";
+        }
+
+        private static string? GetReleaseGroup(string title)
+        {
+            return title.Contains('-') ? title[(title.LastIndexOf('-') + 1)..].Trim() : null;
         }
 
         private static string ReplaceSeperatorsWithSpace(string title)
