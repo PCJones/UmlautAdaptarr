@@ -11,6 +11,7 @@ UmlautAdaptarr löst mehrere Probleme:
 - Releases mit Umlauten werden grundsätzlich nicht korrekt von den *Arrs importiert
 - Releases mit Umlauten werden oft nicht korrekt gefunden (*Arrs suchen nach "o" statt "ö" & es fehlt häufig die korrekte Zuordnung zur Serie/zum Film beim Indexer)
 - Sonarr & Radarr erwarten immer den englischen Titel von https://thetvdb.com/ bzw. https://www.themoviedb.org/. Das führt bei deutschen Produktionen oder deutschen Übersetzungen oft zu Problemen - falls die *arrs schon mal etwas mit der Meldung `Found matching series/movie via grab history, but release was matched to series by ID. Automatic import is not possible/` nicht importiert haben, dann war das der Grund.
+- Releases mit schlechtem Naming (z.B. von der Group TvR die kein "GERMAN" in den Releasename tun) werden korrigiert, so dass Sonarr&Radarr diese korrekt erkennen (optional)
 - Zusätzlich werden einige andere Fehler behoben, die häufig dazu führen, dass Titel nicht erfolgreich gefunden, geladen oder importiert werden.
 
 ## Wie macht UmlautAdaptarr das?
@@ -30,6 +31,7 @@ Einige Beispiele finden sich [weiter unten](https://github.com/PCJones/UmlautAda
 | Releases mit deutschem Titel werden erkannt   | ✓             |
 | Releases mit TVDB-Alias Titel werden erkannt  | ✓             |
 | Korrekte Suche und Erkennung von Titel mit Umlauten                            | ✓             |
+| Releases mit mit schlechtem Naming werden korrekt umbenannt (optional) | ✓             |
 | Anfragen-Caching für 12 Minuten zur Reduzierung der API-Zugriffe   | ✓             |
 | Usenet (newznab) Support                                          |✓|
 | Torrent (torznab) Support                                         |✓|
