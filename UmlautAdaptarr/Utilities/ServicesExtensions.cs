@@ -35,17 +35,15 @@ public static class ServicesExtensions
         where TService : class, TInterface
         where TInterface : class
     {
-
         try
         {
             if (builder.Services == null) throw new ArgumentNullException(nameof(builder), "Service collection is null.");
-
 
             var singleInstance = builder.Configuration.GetSection(sectionName).Get<TOptions>();
 
             var singleHost = (string?)typeof(TOptions).GetProperty("Host")?.GetValue(singleInstance, null);
 
-            // If we have no Single Instance , we try to parse for a Array
+            // If we have no Single Instance, we try to parse for an Array
             var optionsArray = singleHost == null
                 ? builder.Configuration.GetSection(sectionName).Get<TOptions[]>()
                 :
@@ -59,8 +57,7 @@ public static class ServicesExtensions
 
             foreach (var option in optionsArray)
             {
-
-                GlobalInstanceOptionsValidator validator = new GlobalInstanceOptionsValidator();
+              GlobalInstanceOptionsValidator validator = new GlobalInstanceOptionsValidator();
 
               var results =  validator.Validate(option as GlobalInstanceOptions);
 
@@ -100,7 +97,7 @@ public static class ServicesExtensions
                         }
                         else
                         {
-                            Logger.LogWarning((prop.PropertyType + "No Support"));
+                            Logger.LogWarning(prop.PropertyType + "No Support");
                         }
                     }
 
@@ -110,9 +107,9 @@ public static class ServicesExtensions
 
             return builder;
         }
-        catch (Exception e)
+        catch (Exception ex)
         {
-            Console.WriteLine("Error while Init UmlautAdaptrr");
+            Console.WriteLine($"Error in AddServicesWithOptions: {ex.Message}");
             throw;
         }
 
@@ -133,11 +130,8 @@ public static class ServicesExtensions
     {
         if (builder.Services == null) throw new ArgumentNullException(nameof(builder), "Service collection is null.");
 
-        var options = builder.Configuration.GetSection(sectionName).Get<TOptions>();
-        if (options == null)
-            throw new InvalidOperationException(
+        var options = builder.Configuration.GetSection(sectionName).Get<TOptions>() ?? throw new InvalidOperationException(
                 $"{typeof(TService).Name} options could not be loaded from Configuration or ENV Variable.");
-
         builder.Services.Configure<TOptions>(builder.Configuration.GetSection(sectionName));
         builder.Services.AddSingleton<TService>();
 

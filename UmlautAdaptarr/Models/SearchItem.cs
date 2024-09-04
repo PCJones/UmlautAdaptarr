@@ -166,7 +166,7 @@ namespace UmlautAdaptarr.Models
             }
         }
 
-        private IEnumerable<string> GenerateVariations(string? title, string mediaType)
+        private static IEnumerable<string> GenerateVariations(string? title, string mediaType)
         {
             if (title == null)
             {

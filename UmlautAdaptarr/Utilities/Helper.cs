@@ -38,21 +38,19 @@ public static class Helper
 
     private static async Task<IpInfo?> GetPublicIpAddressInfoAsync()
     {
-        using (var client = new HttpClient())
-        {
-            client.Timeout = TimeSpan.FromSeconds(10);
+        using var client = new HttpClient();
+        client.Timeout = TimeSpan.FromSeconds(10);
 
-            try
-            {
-                var response = await client.GetAsync("https://ipinfo.io/json");
-                response.EnsureSuccessStatusCode();
-                var content = await response.Content.ReadAsStringAsync();
-                return JsonSerializer.Deserialize<IpInfo>(content);
-            }
-            catch
-            {
-                return null;
-            }
+        try
+        {
+            var response = await client.GetAsync("https://ipinfo.io/json");
+            response.EnsureSuccessStatusCode();
+            var content = await response.Content.ReadAsStringAsync();
+            return JsonSerializer.Deserialize<IpInfo>(content);
+        }
+        catch
+        {
+            return null;
         }
     }
 }

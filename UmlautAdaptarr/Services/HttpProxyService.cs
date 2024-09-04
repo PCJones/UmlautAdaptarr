@@ -11,8 +11,8 @@ namespace UmlautAdaptarr.Services
         private readonly int _proxyPort = 5006; // TODO move to appsettings.json
         private readonly IHttpClientFactory _clientFactory;
         private readonly HashSet<string> _knownHosts = [];
-        private readonly object _hostsLock = new object();
-
+        private readonly object _hostsLock = new();
+        private static readonly string[] newLineSeparator = ["\r\n"];
 
         public HttpProxyService(ILogger<HttpProxyService> logger, IHttpClientFactory clientFactory)
         {
@@ -123,7 +123,7 @@ namespace UmlautAdaptarr.Services
         {
             var headers = new Dictionary<string, string>();
             var headerString = Encoding.ASCII.GetString(buffer, 0, length);
-            var lines = headerString.Split(new string[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
+            var lines = headerString.Split(newLineSeparator, StringSplitOptions.RemoveEmptyEntries);
             foreach (var line in lines.Skip(1)) // Skip the request line
             {
                 var colonIndex = line.IndexOf(':');
@@ -137,7 +137,7 @@ namespace UmlautAdaptarr.Services
             return headers;
         }
 
-        private (string host, int port) ParseTargetInfo(string requestLine)
+        private static (string host, int port) ParseTargetInfo(string requestLine)
         {
             var parts = requestLine.Split(' ')[1].Split(':');
             return (parts[0], int.Parse(parts[1]));
@@ -150,7 +150,7 @@ namespace UmlautAdaptarr.Services
             await Task.WhenAll(clientToTargetTask, targetToClientTask);
         }
 
-        private async Task RelayStream(NetworkStream input, NetworkStream output)
+        private static async Task RelayStream(NetworkStream input, NetworkStream output)
         {
             byte[] buffer = new byte[8192];
             int bytesRead;

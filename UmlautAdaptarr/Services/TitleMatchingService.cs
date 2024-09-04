@@ -69,11 +69,11 @@ namespace UmlautAdaptarr.Services
         public void FindAndReplaceForBooksAndAudio(SearchItem searchItem, XElement? titleElement, string originalTitle)
         {
             var authorMatch = FindBestMatch(searchItem.AuthorMatchVariations, originalTitle.NormalizeForComparison(), originalTitle);
-            var titleMatch = FindBestMatch(searchItem.TitleMatchVariations, originalTitle.NormalizeForComparison(), originalTitle);
+            var (foundMatch, bestStart, bestEndInOriginal) = FindBestMatch(searchItem.TitleMatchVariations, originalTitle.NormalizeForComparison(), originalTitle);
 
-            if (authorMatch.foundMatch && titleMatch.foundMatch)
+            if (authorMatch.foundMatch && foundMatch)
             {
-                int matchEndPositionInOriginal = Math.Max(authorMatch.bestEndInOriginal, titleMatch.bestEndInOriginal);
+                int matchEndPositionInOriginal = Math.Max(authorMatch.bestEndInOriginal, bestEndInOriginal);
 
                 // Check and adjust for immediate following delimiter
                 char[] delimiters = [' ', '-', '_', '.'];
@@ -103,7 +103,7 @@ namespace UmlautAdaptarr.Services
         }
 
 
-        private (bool foundMatch, int bestStart, int bestEndInOriginal) FindBestMatch(string[] variations, string normalizedOriginal, string originalTitle)
+        private static (bool foundMatch, int bestStart, int bestEndInOriginal) FindBestMatch(string[] variations, string normalizedOriginal, string originalTitle)
         {
             bool found = false;
             int bestStart = int.MaxValue;
@@ -131,7 +131,7 @@ namespace UmlautAdaptarr.Services
         }
 
         // Maps an index from the normalized string back to a corresponding index in the original string
-        private int MapNormalizedIndexToOriginal(string normalizedOriginal, string originalTitle, int normalizedIndex)
+        private static int MapNormalizedIndexToOriginal(string normalizedOriginal, string originalTitle, int normalizedIndex)
         {
             // Count non-special characters up to the given index in the normalized string
             int nonSpecialCharCount = 0;

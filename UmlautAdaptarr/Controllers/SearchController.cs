@@ -23,7 +23,7 @@ namespace UmlautAdaptarr.Controllers
                     return NotFound($"{domain} is not a valid URL.");
                 }
 
-                var initialSearchResult = await PerformSingleSearchRequest(domain, queryParameters) as ContentResult;
+                ContentResult? initialSearchResult = await PerformSingleSearchRequest(domain, queryParameters) as ContentResult;
                 if (initialSearchResult == null)
                 {
                     return null;
