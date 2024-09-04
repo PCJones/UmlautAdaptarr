@@ -11,8 +11,6 @@ internal class Program
 {
     private static void Main(string[] args)
     {
-
-
         Helper.ShowLogo();
         Helper.ShowInformation();
         // TODO:
@@ -26,9 +24,8 @@ internal class Program
             .WriteTo.Console(outputTemplate: "[{Timestamp:yyyy-MM-dd HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}")
             .Filter.ByExcluding(Matching.FromSource("System.Net.Http.HttpClient"))
             .Filter.ByExcluding(Matching.FromSource("Microsoft.Extensions.Http.DefaultHttpClientFactory"))
-            //.Enrich.With(new ApiKeyMaskingEnricher("appsettings.json")) // Not Work currently
+            //.Enrich.With(new ApiKeyMaskingEnricher("appsettings.json")) // TODO - Not working currently
             .CreateLogger();
-
 
 
         builder.Services.AddSerilog();

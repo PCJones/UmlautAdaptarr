@@ -225,9 +225,9 @@ namespace UmlautAdaptarr.Services
             }
         }
 
-        private static string[] MissingGermanTagReleaseGroups = ["tvr"];
-        private static string[] HEVCInsteadOfx265TagReleaseGroups = ["eisbaer"];
-        private static string[] WrongTagsReleaseGroups = ["eisbaer"];
+        private static readonly string[] MissingGermanTagReleaseGroups = ["tvr"];
+        private static readonly string[] HEVCInsteadOfx265TagReleaseGroups = ["eisbaer"];
+        private static readonly string[] WrongTagsReleaseGroups = ["eisbaer"];
         private static string FixBadReleaseNaming(string title, string seperator, ILogger<TitleMatchingService> logger)
         {
             var releaseGroup = GetReleaseGroup(title);

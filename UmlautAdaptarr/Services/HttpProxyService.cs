@@ -10,7 +10,7 @@ namespace UmlautAdaptarr.Services
         private readonly ILogger<HttpProxyService> _logger;
         private readonly int _proxyPort = 5006; // TODO move to appsettings.json
         private readonly IHttpClientFactory _clientFactory;
-        private HashSet<string> _knownHosts = [];
+        private readonly HashSet<string> _knownHosts = [];
         private readonly object _hostsLock = new object();
 
 
@@ -34,7 +34,7 @@ namespace UmlautAdaptarr.Services
         {
             using var clientStream = new NetworkStream(clientSocket, ownsSocket: true);
             var buffer = new byte[8192];
-            var bytesRead = await clientStream.ReadAsync(buffer, 0, buffer.Length);
+            var bytesRead = await clientStream.ReadAsync(buffer);
             var requestString = Encoding.ASCII.GetString(buffer, 0, bytesRead);
 
             if (requestString.StartsWith("CONNECT"))
@@ -129,8 +129,8 @@ namespace UmlautAdaptarr.Services
                 var colonIndex = line.IndexOf(':');
                 if (colonIndex > 0)
                 {
-                    var key = line.Substring(0, colonIndex).Trim();
-                    var value = line.Substring(colonIndex + 1).Trim();
+                    var key = line[..colonIndex].Trim();
+                    var value = line[(colonIndex + 1)..].Trim();
                     headers[key] = value;
                 }
             }
