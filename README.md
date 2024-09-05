@@ -37,6 +37,7 @@ Einige Beispiele finden sich [weiter unten](https://github.com/PCJones/UmlautAda
 | Support von mehreren *arr-Instanzen des gleichen Typs (z.B. 2x Sonarr)                               | ✓             
 | Releases mit mit schlechtem Naming werden korrekt umbenannt (optional) | in Arbeit             |
 | Radarr Support                                                    | in Arbeit       |
+| Webinterface              | Geplant       |
 | Prowlarr Unterstützung für "DE" SceneNZBs Kategorien              | Geplant       |
 | Unterstützung weiterer Sprachen neben Deutsch                     | Geplant       |
 | Wünsche?                                                          | Vorschläge?   |
