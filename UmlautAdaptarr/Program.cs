@@ -39,8 +39,6 @@ internal class Program
                                          DecompressionMethods.Brotli
             };
 
-            var proxyOptions = configuration.GetSection("Proxy").Get<ProxyOptions>();
-            handler.ConfigureProxy(proxyOptions);
             return handler;
         });
 
