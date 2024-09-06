@@ -23,8 +23,3 @@ services:
       - LIDARR__ENABLED=false
       - LIDARR__HOST=http://localhost:8686
       - LIDARR__APIKEY=APIKEY
-      #- Proxy__Enabled: false
-      #- Proxy__Address: http://yourproxyaddress:port
-      #- Proxy__Username: your_proxy_username
-      #- Proxy__Password: your_proxy_password
-      #- Proxy__BypassOnLocal: true (set to false to not bypass local IP addresses)
