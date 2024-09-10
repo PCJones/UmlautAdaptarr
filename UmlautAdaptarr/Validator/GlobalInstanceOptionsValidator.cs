@@ -38,7 +38,9 @@ public class GlobalInstanceOptionsValidator : AbstractValidator<GlobalInstanceOp
         {
             try
             {
-                var request = WebRequest.Create(url);
+                // TODO use HttpClient here
+                var request = (HttpWebRequest)WebRequest.Create(url);
+                request.AllowAutoRedirect = true;
                 request.Timeout = 3000;
                 using var response = (HttpWebResponse)request.GetResponse();
                 reachable = response.StatusCode == HttpStatusCode.OK;
