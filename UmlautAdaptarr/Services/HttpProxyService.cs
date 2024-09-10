@@ -12,11 +12,13 @@ namespace UmlautAdaptarr.Services
         private readonly IHttpClientFactory _clientFactory;
         private readonly HashSet<string> _knownHosts = [];
         private readonly object _hostsLock = new();
+        private readonly IConfiguration _configuration;
         private static readonly string[] newLineSeparator = ["\r\n"];
 
-        public HttpProxyService(ILogger<HttpProxyService> logger, IHttpClientFactory clientFactory)
+        public HttpProxyService(ILogger<HttpProxyService> logger, IHttpClientFactory clientFactory, IConfiguration configuration)
         {
             _logger = logger;
+            _configuration = configuration;
             _clientFactory = clientFactory;
             _knownHosts.Add("prowlarr.servarr.com");
         }
@@ -91,7 +93,10 @@ namespace UmlautAdaptarr.Services
                     }
                 }
 
-                var modifiedUri = $"http://localhost:5005/_/{uri.Host}{uri.PathAndQuery}";  // TODO read port from appsettings?
+                var url = _configuration["Kestrel:Endpoints:Http:Url"];
+                var port = new Uri(url).Port;
+
+                var modifiedUri = $"http://localhost:{port}/_/{uri.Host}{uri.PathAndQuery}";
                 using var client = _clientFactory.CreateClient();
                 var httpRequestMessage = new HttpRequestMessage(HttpMethod.Get, modifiedUri);
                 httpRequestMessage.Headers.Add("User-Agent", userAgent);
