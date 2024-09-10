@@ -40,16 +40,31 @@ public class GlobalInstanceOptionsValidator : AbstractValidator<GlobalInstanceOp
             {
                 // TODO use HttpClient here
                 var request = (HttpWebRequest)WebRequest.Create(url);
-                request.AllowAutoRedirect = true;
+                request.AllowAutoRedirect = false;
                 request.Timeout = 3000;
                 using var response = (HttpWebResponse)request.GetResponse();
                 reachable = response.StatusCode == HttpStatusCode.OK;
                 if (reachable)
+                {
                     break;
+                }
+                // If status is 301/302 (Found), follow the redirect manually
+                else if (response.StatusCode == HttpStatusCode.MovedPermanently || response.StatusCode == HttpStatusCode.Found)
+                {
+                    var redirectUrl = response.Headers["Location"];  // Get the redirect URL
+                    if (!string.IsNullOrEmpty(redirectUrl))
+                    {
+                        // Create a new request for the redirected URL
+                        var redirectRequest = (HttpWebRequest)WebRequest.Create(redirectUrl);
+                        redirectRequest.Timeout = 3000;
+                        using var redirectResponse = (HttpWebResponse)redirectRequest.GetResponse();
+                        reachable = redirectResponse.StatusCode == HttpStatusCode.OK;
+                    }
+                }
             }
             catch
             {
-              
+
             }
 
             // Wait for 15 seconds for next try
