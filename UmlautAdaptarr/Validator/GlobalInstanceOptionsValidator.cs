@@ -59,6 +59,10 @@ public class GlobalInstanceOptionsValidator : AbstractValidator<GlobalInstanceOp
                         redirectRequest.Timeout = 3000;
                         using var redirectResponse = (HttpWebResponse)redirectRequest.GetResponse();
                         reachable = redirectResponse.StatusCode == HttpStatusCode.OK;
+                        if (reachable)
+                        {
+                            break;
+                        }
                     }
                 }
             }
