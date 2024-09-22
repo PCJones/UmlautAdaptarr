@@ -196,9 +196,9 @@ namespace UmlautAdaptarr.Services
                     // Workaround for the rare case of e.g. "Frieren: Beyond Journey's End" that also has the alias "Frieren"
                     if (expectedTitle!.StartsWith(variation, StringComparison.OrdinalIgnoreCase))
                     {
-                        // See if we already matched the whole title by checking if S01E01 pattern is coming next to avoid false positives
+                        // See if we already matched the whole title by checking if S01E01/S2024E123 pattern is coming next to avoid false positives
                         // - that won't help with movies but with tv shows
-                        var seasonMatchingPattern = $"^{separator}S\\d{{1,2}}E\\d{{1,2}}";
+                        var seasonMatchingPattern = $"^{separator}S\\d{{1,4}}E\\d{{1,4}}";
                         if (!Regex.IsMatch(suffix, seasonMatchingPattern))
                         {
                             logger.LogWarning($"TitleMatchingService - Didn't rename: '{originalTitle}' because the expected title '{expectedTitle}' starts with the variation '{variation}'");
