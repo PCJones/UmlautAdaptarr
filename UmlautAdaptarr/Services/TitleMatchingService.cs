@@ -314,7 +314,7 @@ namespace UmlautAdaptarr.Services
             {
                 return "book";
             }
-            else if (category == "3000" || category.StartsWith("Audio"))
+            else if (category == "3000" || category.StartsWith("Audio", StringComparison.OrdinalIgnoreCase))
             {
                 return "audio";
             }
