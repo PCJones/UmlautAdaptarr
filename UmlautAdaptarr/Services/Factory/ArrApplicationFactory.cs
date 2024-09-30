@@ -4,7 +4,7 @@ using UmlautAdaptarr.Providers;
 namespace UmlautAdaptarr.Services.Factory
 {
     /// <summary>
-    /// Factory for creating RrApplication instances.
+    /// Factory for creating ArrApplication instances.
     /// </summary>
     public class ArrApplicationFactory
     {
