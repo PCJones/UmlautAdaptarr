@@ -17,16 +17,7 @@ internal class Program
         // add option to sort by nzb age
         var builder = WebApplication.CreateBuilder(args);
         var configuration = builder.Configuration;
-
-        // TODO workaround to not log api keys
-        Log.Logger = new LoggerConfiguration()
-            .ReadFrom.Configuration(configuration)
-            .WriteTo.Console(outputTemplate: "[{Timestamp:yyyy-MM-dd HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}")
-            .Filter.ByExcluding(Matching.FromSource("System.Net.Http.HttpClient"))
-            .Filter.ByExcluding(Matching.FromSource("Microsoft.Extensions.Http.DefaultHttpClientFactory"))
-            //.Enrich.With(new ApiKeyMaskingEnricher("appsettings.json")) // TODO - Not working currently
-            .CreateLogger();
-
+        ConfigureLogger(configuration);
 
         builder.Services.AddSerilog();
 
@@ -98,5 +89,25 @@ internal class Program
             new { controller = "Search", action = "GenericSearch" },
             new { t = new TRouteConstraint("search") });
         app.Run();
+    }
+
+    private static void ConfigureLogger(ConfigurationManager configuration)
+    {
+        Log.Logger = new LoggerConfiguration()
+            .ReadFrom.Configuration(configuration)
+            .WriteTo.Console(outputTemplate: "[{Timestamp:yyyy-MM-dd HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}")
+
+#if RELEASE
+                .Filter.ByExcluding(Matching.FromSource("Microsoft.AspNetCore.Mvc"))
+                .Filter.ByExcluding(Matching.FromSource("Microsoft.AspNetCore.Routing"))
+                .Filter.ByExcluding(Matching.FromSource("Microsoft.AspNetCore.Diagnostics"))
+                .Filter.ByExcluding(Matching.FromSource("Microsoft.AspNetCore.Hosting"))
+#endif
+
+            // TODO workaround to not log api keys
+            .Filter.ByExcluding(Matching.FromSource("System.Net.Http.HttpClient"))
+            .Filter.ByExcluding(Matching.FromSource("Microsoft.Extensions.Http.DefaultHttpClientFactory"))
+            //.Enrich.With(new ApiKeyMaskingEnricher("appsettings.json")) // TODO - Not working currently
+            .CreateLogger();
     }
 }
