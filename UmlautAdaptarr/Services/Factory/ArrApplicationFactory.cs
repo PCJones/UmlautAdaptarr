@@ -45,9 +45,9 @@ namespace UmlautAdaptarr.Services.Factory
                 ReadarrInstances = rrArrApplications.Values.OfType<ReadarrClient>();
                 AllInstances = rrArrApplications;
 
-                if (!AllInstances.Values.Any())
+                if (AllInstances.Values.Count == 0)
                 {
-                    throw new Exception("No RrApplication could be successfully initialized. This could be due to a faulty configuration");
+                    throw new Exception("No ArrApplication could be successfully initialized. This could be due to a faulty configuration");
                 }
             }
             catch (Exception e)
