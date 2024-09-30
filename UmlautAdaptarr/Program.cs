@@ -1,7 +1,6 @@
 using System.Net;
 using Serilog;
 using Serilog.Filters;
-using UmlautAdaptarr.Options;
 using UmlautAdaptarr.Routing;
 using UmlautAdaptarr.Services;
 using UmlautAdaptarr.Services.Factory;
