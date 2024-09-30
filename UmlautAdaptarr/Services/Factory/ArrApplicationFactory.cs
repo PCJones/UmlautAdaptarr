@@ -33,17 +33,17 @@ namespace UmlautAdaptarr.Services.Factory
         /// <summary>
         /// Constructor for the ArrApplicationFactory.
         /// </summary>
-        /// <param name="rrArrApplications">A dictionary of IArrApplication instances.</param>
+        /// <param name="arrArrApplications">A dictionary of IArrApplication instances.</param>
         /// <param name="logger">Logger Instanz</param>
-        public ArrApplicationFactory(IDictionary<string, IArrApplication> rrArrApplications, ILogger<ArrApplicationFactory> logger)
+        public ArrApplicationFactory(IDictionary<string, IArrApplication> arrArrApplications, ILogger<ArrApplicationFactory> logger)
         {
             _logger = logger;
             try
             {
-                SonarrInstances = rrArrApplications.Values.OfType<SonarrClient>();
-                LidarrInstances = rrArrApplications.Values.OfType<LidarrClient>();
-                ReadarrInstances = rrArrApplications.Values.OfType<ReadarrClient>();
-                AllInstances = rrArrApplications;
+                SonarrInstances = arrArrApplications.Values.OfType<SonarrClient>();
+                LidarrInstances = arrArrApplications.Values.OfType<LidarrClient>();
+                ReadarrInstances = arrArrApplications.Values.OfType<ReadarrClient>();
+                AllInstances = arrArrApplications;
 
                 if (AllInstances.Values.Count == 0)
                 {
