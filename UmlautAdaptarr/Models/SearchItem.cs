@@ -108,6 +108,20 @@ namespace UmlautAdaptarr.Models
 
             }
 
+            // if a german title ends with "Germany" (e.g. Good Luck Guys Germany) also add a search string that replaces Germany with GERMAN
+            // (e.g. Good Luck Guys GERMAN). This is because reality shows often have different formats in different countries with the same
+            // name. // also add a matching title without GERMAN
+            if (germanTitle?.EndsWith("germany", StringComparison.OrdinalIgnoreCase) ?? false)
+            {
+                TitleSearchVariations = [.. TitleSearchVariations,
+                    ..
+                    GenerateVariations(
+                        (germanTitle[..^7] + "GERMAN").RemoveExtraWhitespaces(),
+                    mediaType)];
+
+                allTitleVariations.AddRange(GenerateVariations(germanTitle[..^8].Trim(), mediaType));
+            }
+
             // If title contains ":" also match for "-"
             if (germanTitle?.Contains(':') ?? false)
             {
@@ -152,7 +166,7 @@ namespace UmlautAdaptarr.Models
             }
         }
 
-        private IEnumerable<string> GenerateVariations(string? title, string mediaType)
+        private static IEnumerable<string> GenerateVariations(string? title, string mediaType)
         {
             if (title == null)
             {

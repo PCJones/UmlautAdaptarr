@@ -10,13 +10,15 @@ namespace UmlautAdaptarr.Services
         private readonly ILogger<HttpProxyService> _logger;
         private readonly int _proxyPort = 5006; // TODO move to appsettings.json
         private readonly IHttpClientFactory _clientFactory;
-        private HashSet<string> _knownHosts = [];
-        private readonly object _hostsLock = new object();
+        private readonly HashSet<string> _knownHosts = [];
+        private readonly object _hostsLock = new();
+        private readonly IConfiguration _configuration;
+        private static readonly string[] newLineSeparator = ["\r\n"];
 
-
-        public HttpProxyService(ILogger<HttpProxyService> logger, IHttpClientFactory clientFactory)
+        public HttpProxyService(ILogger<HttpProxyService> logger, IHttpClientFactory clientFactory, IConfiguration configuration)
         {
             _logger = logger;
+            _configuration = configuration;
             _clientFactory = clientFactory;
             _knownHosts.Add("prowlarr.servarr.com");
         }
@@ -34,7 +36,7 @@ namespace UmlautAdaptarr.Services
         {
             using var clientStream = new NetworkStream(clientSocket, ownsSocket: true);
             var buffer = new byte[8192];
-            var bytesRead = await clientStream.ReadAsync(buffer, 0, buffer.Length);
+            var bytesRead = await clientStream.ReadAsync(buffer);
             var requestString = Encoding.ASCII.GetString(buffer, 0, bytesRead);
 
             if (requestString.StartsWith("CONNECT"))
@@ -91,7 +93,10 @@ namespace UmlautAdaptarr.Services
                     }
                 }
 
-                var modifiedUri = $"http://localhost:5005/_/{uri.Host}{uri.PathAndQuery}";  // TODO read port from appsettings?
+                var url = _configuration["Kestrel:Endpoints:Http:Url"];
+                var port = new Uri(url).Port;
+
+                var modifiedUri = $"http://localhost:{port}/_/{uri.Host}{uri.PathAndQuery}";
                 using var client = _clientFactory.CreateClient();
                 var httpRequestMessage = new HttpRequestMessage(HttpMethod.Get, modifiedUri);
                 httpRequestMessage.Headers.Add("User-Agent", userAgent);
@@ -123,21 +128,21 @@ namespace UmlautAdaptarr.Services
         {
             var headers = new Dictionary<string, string>();
             var headerString = Encoding.ASCII.GetString(buffer, 0, length);
-            var lines = headerString.Split(new string[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
+            var lines = headerString.Split(newLineSeparator, StringSplitOptions.RemoveEmptyEntries);
             foreach (var line in lines.Skip(1)) // Skip the request line
             {
                 var colonIndex = line.IndexOf(':');
                 if (colonIndex > 0)
                 {
-                    var key = line.Substring(0, colonIndex).Trim();
-                    var value = line.Substring(colonIndex + 1).Trim();
+                    var key = line[..colonIndex].Trim();
+                    var value = line[(colonIndex + 1)..].Trim();
                     headers[key] = value;
                 }
             }
             return headers;
         }
 
-        private (string host, int port) ParseTargetInfo(string requestLine)
+        private static (string host, int port) ParseTargetInfo(string requestLine)
         {
             var parts = requestLine.Split(' ')[1].Split(':');
             return (parts[0], int.Parse(parts[1]));
@@ -150,7 +155,7 @@ namespace UmlautAdaptarr.Services
             await Task.WhenAll(clientToTargetTask, targetToClientTask);
         }
 
-        private async Task RelayStream(NetworkStream input, NetworkStream output)
+        private static async Task RelayStream(NetworkStream input, NetworkStream output)
         {
             byte[] buffer = new byte[8192];
             int bytesRead;

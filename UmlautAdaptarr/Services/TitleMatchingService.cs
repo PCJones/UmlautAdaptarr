@@ -69,11 +69,11 @@ namespace UmlautAdaptarr.Services
         public void FindAndReplaceForBooksAndAudio(SearchItem searchItem, XElement? titleElement, string originalTitle)
         {
             var authorMatch = FindBestMatch(searchItem.AuthorMatchVariations, originalTitle.NormalizeForComparison(), originalTitle);
-            var titleMatch = FindBestMatch(searchItem.TitleMatchVariations, originalTitle.NormalizeForComparison(), originalTitle);
+            var (foundMatch, bestStart, bestEndInOriginal) = FindBestMatch(searchItem.TitleMatchVariations, originalTitle.NormalizeForComparison(), originalTitle);
 
-            if (authorMatch.foundMatch && titleMatch.foundMatch)
+            if (authorMatch.foundMatch && foundMatch)
             {
-                int matchEndPositionInOriginal = Math.Max(authorMatch.bestEndInOriginal, titleMatch.bestEndInOriginal);
+                int matchEndPositionInOriginal = Math.Max(authorMatch.bestEndInOriginal, bestEndInOriginal);
 
                 // Check and adjust for immediate following delimiter
                 char[] delimiters = [' ', '-', '_', '.'];
@@ -103,7 +103,7 @@ namespace UmlautAdaptarr.Services
         }
 
 
-        private (bool foundMatch, int bestStart, int bestEndInOriginal) FindBestMatch(string[] variations, string normalizedOriginal, string originalTitle)
+        private static (bool foundMatch, int bestStart, int bestEndInOriginal) FindBestMatch(string[] variations, string normalizedOriginal, string originalTitle)
         {
             bool found = false;
             int bestStart = int.MaxValue;
@@ -131,7 +131,7 @@ namespace UmlautAdaptarr.Services
         }
 
         // Maps an index from the normalized string back to a corresponding index in the original string
-        private int MapNormalizedIndexToOriginal(string normalizedOriginal, string originalTitle, int normalizedIndex)
+        private static int MapNormalizedIndexToOriginal(string normalizedOriginal, string originalTitle, int normalizedIndex)
         {
             // Count non-special characters up to the given index in the normalized string
             int nonSpecialCharCount = 0;
@@ -196,9 +196,9 @@ namespace UmlautAdaptarr.Services
                     // Workaround for the rare case of e.g. "Frieren: Beyond Journey's End" that also has the alias "Frieren"
                     if (expectedTitle!.StartsWith(variation, StringComparison.OrdinalIgnoreCase))
                     {
-                        // See if we already matched the whole title by checking if S01E01 pattern is coming next to avoid false positives
+                        // See if we already matched the whole title by checking if S01E01/S2024E123 pattern is coming next to avoid false positives
                         // - that won't help with movies but with tv shows
-                        var seasonMatchingPattern = $"^{separator}S\\d{{1,2}}E\\d{{1,2}}";
+                        var seasonMatchingPattern = $"^{separator}S\\d{{1,4}}E\\d{{1,4}}";
                         if (!Regex.IsMatch(suffix, seasonMatchingPattern))
                         {
                             logger.LogWarning($"TitleMatchingService - Didn't rename: '{originalTitle}' because the expected title '{expectedTitle}' starts with the variation '{variation}'");
@@ -209,16 +209,8 @@ namespace UmlautAdaptarr.Services
                     // Clean up any leading separator from the suffix
                     suffix = Regex.Replace(suffix, "^ +", "");
 
-                    // TODO EVALUTE! definitely make this optional - this adds GERMAN to the title is the title is german to make sure it's recognized as german
-                    // can lead to problems with shows such as "dark" that have international dubs
-                    /*
-                    // Check if "german" is not in the original title, ignoring case
-                    if (!Regex.IsMatch(originalTitle, "german", RegexOptions.IgnoreCase))
-                    {
-                        // Insert "GERMAN" after the newTitlePrefix
-                        newTitlePrefix += separator + "GERMAN";
-                    }
-                    */
+                    // TODO add this when radarr is implemented
+                    // FixBadReleaseNaming
 
                     // Construct the new title with the original suffix
                     var newTitle = newTitlePrefix + (string.IsNullOrEmpty(suffix) ? "" : suffix.StartsWith(separator) ? suffix : $"{separator}{suffix}");
@@ -231,6 +223,50 @@ namespace UmlautAdaptarr.Services
                     break;
                 }
             }
+        }
+
+        private static readonly string[] MissingGermanTagReleaseGroups = ["tvr"];
+        private static readonly string[] HEVCInsteadOfx265TagReleaseGroups = ["eisbaer"];
+        private static readonly string[] WrongTagsReleaseGroups = ["eisbaer"];
+        private static string FixBadReleaseNaming(string title, string seperator, ILogger<TitleMatchingService> logger)
+        {
+            var releaseGroup = GetReleaseGroup(title);
+            if (MissingGermanTagReleaseGroups.Contains(releaseGroup))
+            {
+                // Check if "german" is not in the title, ignoring case
+                if (!Regex.IsMatch(title, "german", RegexOptions.IgnoreCase))
+                {
+                    logger.LogInformation($"FixBadReleaseNaming - found missing GERMAN tag for {title}");
+                    // TODO not finished
+                    // Insert "GERMAN" after the newTitlePrefix
+                    //newTitlePrefix += separator + "GERMAN";
+                }
+            }
+
+            if (HEVCInsteadOfx265TagReleaseGroups.Contains(releaseGroup))
+            {
+                if (!title.Contains("REMUX", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    logger.LogInformation($"FixBadReleaseNaming - found HEVC instead of x265 for {title}");
+                    title = title.Replace("HEVC", "x265");
+                }
+            }
+
+            if (WrongTagsReleaseGroups.Contains(releaseGroup))
+            {
+                if (title.Contains($"{seperator}RM{seperator}"))
+                {
+                    logger.LogInformation($"FixBadReleaseNaming - found bad Tag RM instead of REMASTERED for {title}");
+                    title = title.Replace($"{seperator}RM{seperator}", $"{seperator}REMASTERED{seperator}");
+                }
+            }
+
+            return "";
+        }
+
+        private static string? GetReleaseGroup(string title)
+        {
+            return title.Contains('-') ? title[(title.LastIndexOf('-') + 1)..].Trim() : null;
         }
 
         private static string ReplaceSeperatorsWithSpace(string title)
@@ -278,7 +314,7 @@ namespace UmlautAdaptarr.Services
             {
                 return "book";
             }
-            else if (category == "3000" || category.StartsWith("Audio"))
+            else if (category == "3000" || category.StartsWith("Audio", StringComparison.OrdinalIgnoreCase))
             {
                 return "audio";
             }

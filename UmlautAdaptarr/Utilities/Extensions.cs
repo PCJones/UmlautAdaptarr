@@ -99,7 +99,7 @@ namespace UmlautAdaptarr.Utilities
         {
             if (removeUmlauts)
             {
-                return NoSpecialCharactersExceptHypenRegex().Replace(text, "");
+                return NoSpecialCharactersExceptHyphenRegex().Replace(text, "");
             }
             else
             {
@@ -157,9 +157,9 @@ namespace UmlautAdaptarr.Utilities
         }
 
         [GeneratedRegex("[^a-zA-Z0-9 -]+", RegexOptions.Compiled)]
-        private static partial Regex NoSpecialCharactersExceptHypenRegex();
+        private static partial Regex NoSpecialCharactersExceptHyphenRegex();
 
-        [GeneratedRegex("[^a-zA-Z0-9 -öäüßÖÄÜß]+", RegexOptions.Compiled)]
+        [GeneratedRegex("[^a-zA-Z0-9 öäüßÖÄÜß-]+", RegexOptions.Compiled)]
         private static partial Regex NoSpecialCharactersExceptHyphenAndUmlautsRegex();
 
         [GeneratedRegex(@"\s+")]
