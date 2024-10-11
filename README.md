@@ -132,3 +132,7 @@ Für andere Spendenmöglichkeiten gerne auf Discord oder Telegram melden - danke
 - TV Metadata source: https://thetvdb.com
 - Movie Metadata source: https://themoviedb.org
 - Licenses: TODO
+
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=pcjones/umlautadaptarr&type=Date)](https://star-history.com/#pcjones/umlautadaptarr&Date)
