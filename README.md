@@ -1,15 +1,14 @@
 # UmlautAdaptarr
 
-## English description coming soon
+ A tool to work around Sonarr, Radarr, Lidarr and Readarrs problems with foreign languages.
+
+## Detailed English description coming soon
 
 ## Beschreibung
-Wer möchte kann den UmlautAdaptarr jetzt gerne testen! Über Feedback würde ich mich sehr freuen!
-
-Es sollte mit allen *arrs funktionieren, hat aber nur bei Sonarr, Readarr und Lidarr schon Auswirkungen (abgesehen vom Caching).
 
 UmlautAdaptarr löst mehrere Probleme:
-- Releases mit Umlauten werden grundsätzlich nicht korrekt von den *Arrs importiert
-- Releases mit Umlauten werden oft nicht korrekt gefunden (*Arrs suchen nach "o" statt "ö" & es fehlt häufig die korrekte Zuordnung zur Serie/zum Film beim Indexer)
+- Releases mit Umlauten werden grundsätzlich nicht korrekt von den *arrs importiert
+- Releases mit Umlauten werden oft nicht korrekt gefunden (*arrs suchen nach "o" statt "ö" & es fehlt häufig die korrekte Zuordnung zur Serie/zum Film beim Indexer)
 - Sonarr & Radarr erwarten immer den englischen Titel von https://thetvdb.com/ bzw. https://www.themoviedb.org/. Das führt bei deutschen Produktionen oder deutschen Übersetzungen oft zu Problemen - falls die *arrs schon mal etwas mit der Meldung `Found matching series/movie via grab history, but release was matched to series by ID. Automatic import is not possible/` nicht importiert haben, dann war das der Grund.
 - Releases mit schlechtem Naming (z.B. von der Group TvR die kein "GERMAN" in den Releasename tun) werden korrigiert, so dass Sonarr&Radarr diese korrekt erkennen (optional)
 - Zusätzlich werden einige andere Fehler behoben, die häufig dazu führen, dass Titel nicht erfolgreich gefunden, geladen oder importiert werden.
@@ -24,21 +23,20 @@ Einige Beispiele finden sich [weiter unten](https://github.com/PCJones/UmlautAda
 
 | Feature                                                           | Status        |
 |-------------------------------------------------------------------|---------------|
-| Prowlarr & NZB Hydra Support                                                    | ✓|
-| Sonarr Support                                         | ✓             |
-| Lidarr Support                                                    | ✓|
-| Readarr Support                                                   | ✓       |
-| Releases mit deutschem Titel werden erkannt   | ✓             |
-| Releases mit TVDB-Alias Titel werden erkannt  | ✓             |
-| Korrekte Suche und Erkennung von Titel mit Umlauten                            | ✓             |
-| Anfragen-Caching für 12 Minuten zur Reduzierung der API-Zugriffe   | ✓             |
-| Usenet (newznab) Support                                          |✓|
-| Torrent (torznab) Support                                         |✓|
-| Support von mehreren *arr-Instanzen des gleichen Typs (z.B. 2x Sonarr)                               | ✓             
-| Releases mit mit schlechtem Naming werden korrekt umbenannt (optional) | in Arbeit             |
-| Radarr Support                                                    | in Arbeit       |
-| Webinterface              | Geplant       |
-| Prowlarr Unterstützung für "DE" SceneNZBs Kategorien              | Geplant       |
+| Prowlarr & NZB Hydra Support                                      |✓              |
+| Sonarr Support                                                    |✓              |
+| Lidarr Support                                                    |✓              |
+| Readarr Support                                                   |✓              |
+| Releases mit deutschem Titel werden erkannt                       |✓              |
+| Releases mit TVDB-Alias Titel werden erkannt                      |✓              |
+| Korrekte Suche und Erkennung von Titel mit Umlauten               |✓              |
+| Anfragen-Caching für 12 Minuten zur Reduzierung der API-Zugriff   |✓              |
+| Usenet (newznab) Support                                          |✓              |
+| Torrent (torznab) Support                                         |✓              |
+| Support von mehreren *arr-Instanzen des gleichen Typs (z.B. 2x Sonarr)|✓          |             
+| Releases mit mit schlechtem Naming werden korrekt umbenannt (optional) | in Arbeit|
+| Radarr Support                                                    | in Arbeit     |
+| Webinterface                                                      | Geplant       |
 | Unterstützung weiterer Sprachen neben Deutsch                     | Geplant       |
 | Wünsche?                                                          | Vorschläge?   |
 
@@ -48,13 +46,14 @@ Momentan ist Docker dafür nötig, wer kein Docker nutzt muss sich noch etwas ge
 
 [Link zum Docker Image](https://hub.docker.com/r/pcjones/umlautadaptarr)
 
-Nicht benötigte Umgebungsvariablen, z.B. wenn Readarr oder Lidarr nicht benötigt werden, können entfernt werden.
+Nicht benötigte Umgebungsvariablen, z.B. falls Readarr oder Lidarr nicht genutzt werden, können entfernt werden.
 
 ### Konfiguration in Prowlarr (**empfohlen**)
 Das ist die **empfohlene** Methode um den UmlautAdaptarr einzurichten. Sie hat den Vorteil, dass es, sofern man mehrere Indexer nutzt, keinen Geschwindigkeitsverlust bei der Suche geben sollte.
 
-1) In Prowlarr: Settings>Indexers bzw. Einstellungen>Indexer öffnen
-2) Lege einen neuen HTTP-Proxy an:
+1) Setze die benötigten [Docker Umgebungsvariablen](https://hub.docker.com/r/pcjones/umlautadaptarr) in deiner docker-compose Datei bzw. in deinem docker run Befehl
+2) In Prowlarr: Settings>Indexers bzw. Einstellungen>Indexer öffnen
+3) Lege einen neuen HTTP-Proxy an:
 
 ![Image](https://github.com/PCJones/UmlautAdaptarr/assets/377223/b97418d8-d972-4e3c-9d2f-3a830a5ac0a3)
 
@@ -63,19 +62,20 @@ Das ist die **empfohlene** Methode um den UmlautAdaptarr einzurichten. Sie hat d
 - Tag: `umlautadaptarr`
 - Host: Je nachdem, wie deine Docker-Konfiguration ist, kann es sein, dass du entweder `umlautadaptarr` oder `localhost`, oder ggf. die IP des Host setzen musst. Probiere es sonst einfach aus, indem du auf Test klickst.
 - Die Username- und Passwort-Felder können leergelassen werden.
-3) Gehe zur Indexer-Übersichtsseite
-4) Für alle Indexer/Tracker, die den UmlautAdaptarr nutzen sollen:
+4) Gehe zur Indexer-Übersichtsseite
+5) Für alle Indexer/Tracker, die den UmlautAdaptarr nutzen sollen:
 
 ![grafik](https://github.com/PCJones/UmlautAdaptarr/assets/377223/3daea3f1-7c7b-4982-84e2-ea6a42d90fba)
 
   - Füge den `umlautadaptarr` Tag hinzu
   - **Wichtig:** Ändere die URL von `https` zu `http`. (Dies ist erforderlich, damit der UmlautAdaptarr die Anfragen **lokal** abfangen kann. **Ausgehende** Anfragen an den Indexer verwenden natürlich weiterhin https).
-5) Klicke danach auf `Test All Indexers` bzw `Alle Indexer Testen`. Falls du irgendwo noch `https` statt `http` stehen hast, sollte in den UmlautAdaptarr logs eine Warnung auftauchen. Mindestens solltest du aber noch ein zweites Mal alle Indexer durchgehen und überprüfen, ob überall `http` eingestellt ist - Indexer, bei denen noch `https` steht, werden nämlich einwandfrei funktionieren - allerdings ohne, dass der UmlautAdaptarr bei diesen wirken kann.
+6) Klicke danach auf `Test All Indexers` bzw `Alle Indexer Testen`. Falls du irgendwo noch `https` statt `http` stehen hast, sollte in den UmlautAdaptarr logs eine Warnung auftauchen. Mindestens solltest du aber noch ein zweites Mal alle Indexer durchgehen und überprüfen, ob überall `http` eingestellt ist - Indexer, bei denen noch `https` steht, werden nämlich einwandfrei funktionieren - allerdings ohne, dass der UmlautAdaptarr bei diesen wirken kann.
 
 ### Konfiguration in Sonarr/Radarr oder Prowlarr ohne Proxy
 Falls du kein Prowlarr nutzt oder nur 1-3 Indexer nutzt, kannst du diese alternative Konfigurationsmöglichkeit nutzen.
 
-Dafür musst du einfach nur alle Indexer, bei denen der UmlautAdaptarr greifen soll, bearbeiten:
+1) Setze die benötigten [Docker Umgebungsvariablen](https://hub.docker.com/r/pcjones/umlautadaptarr) in deiner docker-compose Datei bzw. in deinem docker run Befehl
+2) Bearbeite alle Indexer, bei denen der UmlautAdaptarr greifen soll, wie folgt:
 
 Am Beispiel von sceneNZBs:
 
@@ -132,3 +132,7 @@ Für andere Spendenmöglichkeiten gerne auf Discord oder Telegram melden - danke
 - TV Metadata source: https://thetvdb.com
 - Movie Metadata source: https://themoviedb.org
 - Licenses: TODO
+
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=pcjones/umlautadaptarr&type=Date)](https://star-history.com/#pcjones/umlautadaptarr&Date)
