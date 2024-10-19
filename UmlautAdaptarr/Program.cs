@@ -11,10 +11,9 @@ internal class Program
     private static void Main(string[] args) {
         MainAsync(args).Wait();
     }
+
     private static async Task MainAsync(string[] args)
     {
-        Helper.ShowLogo();
-        Helper.ShowInformation();
         // TODO:
         // add option to sort by nzb age
         var builder = WebApplication.CreateBuilder(args);
@@ -56,6 +55,13 @@ internal class Program
         builder.Services.AddSingleton<IHostedService, HttpProxyService>();
 
         var app = builder.Build();
+
+        Helper.ShowLogo();
+
+        if (app.Configuration.GetValue<bool>("IpLeakTest:Enabled"))
+        {
+            await Helper.ShowInformation();
+        }
 
         GlobalStaticLogger.Initialize(app.Services.GetService<ILoggerFactory>()!);
         app.UseHttpsRedirection();
