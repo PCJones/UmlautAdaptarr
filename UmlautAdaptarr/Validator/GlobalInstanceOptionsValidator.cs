@@ -53,7 +53,7 @@ public class GlobalInstanceOptionsValidator : AbstractValidator<GlobalInstanceOp
                 }
                 else
                 {
-                    Console.WriteLine($"Reachable check got unexpected status code {response.StatusCode}.")
+                    Console.WriteLine($"Reachable check got unexpected status code {response.StatusCode}.");
                 }
             }
             catch (Exception ex)
