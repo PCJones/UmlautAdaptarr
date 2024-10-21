@@ -46,19 +46,23 @@ public class GlobalInstanceOptionsValidator : AbstractValidator<GlobalInstanceOp
             try
             {
                 using var response = await httpClient.GetAsync(url, cancellationToken);
-                reachable = response.StatusCode == HttpStatusCode.OK;
                 if (response.IsSuccessStatusCode)
                 {
+                    reachable = true;
                     break;
                 }
+                else
+                {
+                    Console.WriteLine($"Reachable check got unexpected status code {response.StatusCode}.")
+                }
             }
-            catch
+            catch (Exception ex)
             {
-
+                Console.WriteLine(ex.Message);
             }
 
             // Wait for 15 seconds for next try
-            Console.WriteLine($"The URL \"{opts.Host}\" is not reachable. Next attempt in 15 seconds...");
+            Console.WriteLine($"The URL \"{opts.Host}/api?apikey=[REDACTED]\" is not reachable. Next attempt in 15 seconds...");
             Thread.Sleep(15000);
         }
 
