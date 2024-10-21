@@ -4,7 +4,7 @@ using UmlautAdaptarr.Providers;
 namespace UmlautAdaptarr.Services.Factory
 {
     /// <summary>
-    /// Factory for creating RrApplication instances.
+    /// Factory for creating ArrApplication instances.
     /// </summary>
     public class ArrApplicationFactory
     {
@@ -33,21 +33,21 @@ namespace UmlautAdaptarr.Services.Factory
         /// <summary>
         /// Constructor for the ArrApplicationFactory.
         /// </summary>
-        /// <param name="rrArrApplications">A dictionary of IArrApplication instances.</param>
+        /// <param name="arrApplications">A dictionary of IArrApplication instances.</param>
         /// <param name="logger">Logger Instanz</param>
-        public ArrApplicationFactory(IDictionary<string, IArrApplication> rrArrApplications, ILogger<ArrApplicationFactory> logger)
+        public ArrApplicationFactory(IDictionary<string, IArrApplication> arrApplications, ILogger<ArrApplicationFactory> logger)
         {
             _logger = logger;
             try
             {
-                SonarrInstances = rrArrApplications.Values.OfType<SonarrClient>();
-                LidarrInstances = rrArrApplications.Values.OfType<LidarrClient>();
-                ReadarrInstances = rrArrApplications.Values.OfType<ReadarrClient>();
-                AllInstances = rrArrApplications;
+                SonarrInstances = arrApplications.Values.OfType<SonarrClient>();
+                LidarrInstances = arrApplications.Values.OfType<LidarrClient>();
+                ReadarrInstances = arrApplications.Values.OfType<ReadarrClient>();
+                AllInstances = arrApplications;
 
-                if (!AllInstances.Values.Any())
+                if (AllInstances.Values.Count == 0)
                 {
-                    throw new Exception("No RrApplication could be successfully initialized. This could be due to a faulty configuration");
+                    throw new Exception("No ArrApplication could be successfully initialized. This could be due to a faulty configuration");
                 }
             }
             catch (Exception e)
