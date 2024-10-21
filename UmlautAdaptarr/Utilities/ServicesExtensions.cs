@@ -29,7 +29,7 @@ public static class ServicesExtensions
     /// <param name="builder">The <see cref="WebApplicationBuilder" /> to configure the service collection.</param>
     /// <param name="sectionName">The name of the configuration section containing service options.</param>
     /// <returns>The configured <see cref="WebApplicationBuilder" />.</returns>
-    private static async Task<WebApplicationBuilder> AddServicesWithOptions<TOptions, TService, TInterface>(
+    private static WebApplicationBuilder AddServicesWithOptions<TOptions, TService, TInterface>(
         this WebApplicationBuilder builder, string sectionName)
         where TOptions : class, new()
         where TService : class, TInterface
@@ -57,9 +57,9 @@ public static class ServicesExtensions
 
             foreach (var option in optionsArray)
             {
-              GlobalInstanceOptionsValidator validator = new();
+              GlobalInstanceOptionsValidator validator = new GlobalInstanceOptionsValidator();
 
-              var results = await validator.ValidateAsync(option as GlobalInstanceOptions);
+              var results =  validator.Validate(option as GlobalInstanceOptions);
 
                 if (!results.IsValid)
                 {
@@ -143,7 +143,7 @@ public static class ServicesExtensions
     /// </summary>
     /// <param name="builder">The <see cref="WebApplicationBuilder" /> to configure the service collection.</param>
     /// <returns>The configured <see cref="WebApplicationBuilder" />.</returns>
-    public static Task<WebApplicationBuilder> AddSonarrSupport(this WebApplicationBuilder builder)
+    public static WebApplicationBuilder AddSonarrSupport(this WebApplicationBuilder builder)
     {
         //  builder.Serviceses.AddSingleton<IOptionsMonitoSonarrInstanceOptionsns>, OptionsMonitoSonarrInstanceOptionsns>>();
         return builder.AddServicesWithOptions<SonarrInstanceOptions, SonarrClient, IArrApplication>("Sonarr");
@@ -154,7 +154,7 @@ public static class ServicesExtensions
     /// </summary>
     /// <param name="builder">The <see cref="WebApplicationBuilder" /> to configure the service collection.</param>
     /// <returns>The configured <see cref="WebApplicationBuilder" />.</returns>
-    public static Task<WebApplicationBuilder> AddLidarrSupport(this WebApplicationBuilder builder)
+    public static WebApplicationBuilder AddLidarrSupport(this WebApplicationBuilder builder)
     {
         return builder.AddServicesWithOptions<LidarrInstanceOptions, LidarrClient, IArrApplication>("Lidarr");
     }
@@ -164,7 +164,7 @@ public static class ServicesExtensions
     /// </summary>
     /// <param name="builder">The <see cref="WebApplicationBuilder" /> to configure the service collection.</param>
     /// <returns>The configured <see cref="WebApplicationBuilder" />.</returns>
-    public static Task<WebApplicationBuilder> AddReadarrSupport(this WebApplicationBuilder builder)
+    public static WebApplicationBuilder AddReadarrSupport(this WebApplicationBuilder builder)
     {
         return builder.AddServicesWithOptions<ReadarrInstanceOptions, ReadarrClient, IArrApplication>("Readarr");
     }

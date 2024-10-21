@@ -8,12 +8,10 @@ using UmlautAdaptarr.Utilities;
 
 internal class Program
 {
-    private static void Main(string[] args) {
-        MainAsync(args).Wait();
-    }
-
-    private static async Task MainAsync(string[] args)
+    private static void Main(string[] args)
     {
+        Helper.ShowLogo();
+        Helper.ShowInformation();
         // TODO:
         // add option to sort by nzb age
         var builder = WebApplication.CreateBuilder(args);
@@ -45,9 +43,9 @@ internal class Program
         builder.AddTitleLookupService();
         builder.Services.AddSingleton<SearchItemLookupService>();
         builder.Services.AddSingleton<TitleMatchingService>();
-        await builder.AddSonarrSupport();
-        await builder.AddLidarrSupport();
-        await builder.AddReadarrSupport();
+        builder.AddSonarrSupport();
+        builder.AddLidarrSupport();
+        builder.AddReadarrSupport();
         builder.Services.AddSingleton<CacheService>();
         builder.Services.AddSingleton<ProxyRequestService>();
         builder.Services.AddSingleton<ArrApplicationFactory>();
@@ -55,13 +53,6 @@ internal class Program
         builder.Services.AddSingleton<IHostedService, HttpProxyService>();
 
         var app = builder.Build();
-
-        Helper.ShowLogo();
-
-        if (app.Configuration.GetValue<bool>("IpLeakTest:Enabled"))
-        {
-            await Helper.ShowInformation();
-        }
 
         GlobalStaticLogger.Initialize(app.Services.GetService<ILoggerFactory>()!);
         app.UseHttpsRedirection();
