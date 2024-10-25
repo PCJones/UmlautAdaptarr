@@ -163,7 +163,8 @@ namespace UmlautAdaptarr.Controllers
 
     public class SearchController(ProxyRequestService proxyRequestService,
                                   TitleMatchingService titleMatchingService,
-                                  SearchItemLookupService searchItemLookupService) : SearchControllerBase(proxyRequestService, titleMatchingService)
+                                  SearchItemLookupService searchItemLookupService,
+                                  ILogger<SearchControllerBase> logger) : SearchControllerBase(proxyRequestService, titleMatchingService, logger)
     {
         public readonly string[] LIDARR_CATEGORY_IDS = ["3000", "3010", "3020", "3040", "3050"];
         public readonly string[] READARR_CATEGORY_IDS = ["3030", "3130", "7000", "7010", "7020", "7030", "7100", "7110", "7120", "7130"];
