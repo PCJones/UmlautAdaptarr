@@ -13,7 +13,7 @@ namespace UmlautAdaptarr.Controllers
         [HttpGet]
         public async Task<IActionResult> Caps([FromRoute] string options, [FromRoute] string domain, [FromQuery] string? apikey)
         {
-            if (!UrlUtilities.IsValidDomain(domain))
+            if (!domain.StartsWith("localhost") && !UrlUtilities.IsValidDomain(domain))
             {
                 return NotFound($"{domain} is not a valid URL.");
             }
