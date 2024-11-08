@@ -52,7 +52,7 @@ namespace UmlautAdaptarr.Services.Factory
             }
             catch (Exception e)
             {
-                _logger.LogError("Error while Register ArrFactory. This might be a Config Problem", e.Message);
+                _logger.LogError("Error while registering ArrFactory. This is most likely a config problem, please check your environment variables.", e.Message);
                 throw;
             }
         }
