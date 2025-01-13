@@ -71,6 +71,7 @@ namespace UmlautAdaptarr.Services
                 await HandleHttp(requestString, clientStream, clientSocket, buffer, bytesRead);
             }
         }
+        
         private bool ValidateApiKey(string proxyAuthorizationHeader)
         {
             // Expect the header to be in the format: "Basic <base64encodedApiKey>"
