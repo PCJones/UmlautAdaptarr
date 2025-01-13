@@ -130,7 +130,7 @@ namespace UmlautAdaptarr.Services
                 var url = _configuration["Kestrel:Endpoints:Http:Url"];
                 var port = new Uri(url).Port;
 
-                var apiKey = _options.ApiKey == null ? "_" : _options.ApiKey;
+                var apiKey = string.IsNullOrEmpty(_options.ApiKey) ? "_" : _options.ApiKey;
 
                 var modifiedUri = $"http://localhost:{port}/{apiKey}/{uri.Host}{uri.PathAndQuery}";
                 using var client = _clientFactory.CreateClient();
