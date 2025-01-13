@@ -20,5 +20,12 @@
         /// </summary>  
         public int IndexerRequestsCacheDurationInMinutes { get; set; } = 12;
 
+        /// <summary>
+        /// API key for requests to the UmlautAdaptarr. Optional.
+        public string? ApiKey { get; set; } = null;
+
+        /// <summary>
+        /// Proxy port for the internal UmlautAdaptarr proxy.
+        public int ProxyPort { get; set; } = 5006;
     }
 }

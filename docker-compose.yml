@@ -35,6 +35,8 @@ services:
 
       ### Advanced options (with default values))
       #- IpLeakTest__Enabled=false
-      #- SETTINGS__IndexerRequestsCacheDurationInMinutes=12
-      #- Kestrel__Endpoints__Http__Url=http://[::]:8080
-      
+      #- SETTINGS__IndexerRequestsCacheDurationInMinutes=12 # How long to cache indexer requests for. Default is 12 minutes.
+      #- SETTINGS__ApiKey= # API key for requests to the UmlautAdaptarr. Optional, probably only needed for seedboxes.
+      #- SETTINGS__ProxyPort=5006 # Proxy port for the internal UmlautAdaptarr proxy used for Prowlarr.
+      #- Kestrel__Endpoints__Http__Url=http://[::]:5005 # HTTP port for the UmlautAdaptarr
+

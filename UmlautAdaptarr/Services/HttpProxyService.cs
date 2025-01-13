@@ -1,6 +1,8 @@
-﻿using System.Net;
+﻿using Microsoft.Extensions.Options;
+using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using UmlautAdaptarr.Options;
 
 namespace UmlautAdaptarr.Services
 {
@@ -8,15 +10,16 @@ namespace UmlautAdaptarr.Services
     {
         private TcpListener _listener;
         private readonly ILogger<HttpProxyService> _logger;
-        private readonly int _proxyPort = 5006; // TODO move to appsettings.json
         private readonly IHttpClientFactory _clientFactory;
+        private readonly GlobalOptions _options;
         private readonly HashSet<string> _knownHosts = [];
         private readonly object _hostsLock = new();
         private readonly IConfiguration _configuration;
         private static readonly string[] newLineSeparator = ["\r\n"];
 
-        public HttpProxyService(ILogger<HttpProxyService> logger, IHttpClientFactory clientFactory, IConfiguration configuration)
+        public HttpProxyService(ILogger<HttpProxyService> logger, IHttpClientFactory clientFactory, IConfiguration configuration, IOptions<GlobalOptions> options)
         {
+            _options = options.Value;
             _logger = logger;
             _configuration = configuration;
             _clientFactory = clientFactory;
@@ -168,7 +171,7 @@ namespace UmlautAdaptarr.Services
 
         public Task StartAsync(CancellationToken cancellationToken)
         {
-            _listener = new TcpListener(IPAddress.Any, _proxyPort);
+            _listener = new TcpListener(IPAddress.Any, _options.ProxyPort);
             _listener.Start();
             Task.Run(() => HandleRequests(cancellationToken), cancellationToken);
             return Task.CompletedTask;
