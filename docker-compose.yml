@@ -23,7 +23,7 @@ services:
       - LIDARR__ENABLED=false
       - LIDARR__HOST=http://localhost:8686
       - LIDARR__APIKEY=APIKEY
-      #- IpLeakTest_Enabled=false # uncomment and set to true to enable IP leak test
+      #- IpLeakTest__Enabled=false # uncomment and set to true to enable IP leak test
       ### example for multiple instances of same type
       #- SONARR__0__NAME=NAME 1 (optional)
       #- SONARR__0__ENABLED=false
