@@ -36,4 +36,5 @@ services:
       ### Advanced options (with default values))
       #- IpLeakTest__Enabled=false
       #- SETTINGS__IndexerRequestsCacheDurationInMinutes=12
+      #- Kestrel__Endpoints__Http__Url=http://[::]:8080
       
