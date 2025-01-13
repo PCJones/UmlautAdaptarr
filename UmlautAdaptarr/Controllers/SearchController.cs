@@ -1,12 +1,13 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System.Text;
 using UmlautAdaptarr.Models;
+using UmlautAdaptarr.Providers;
 using UmlautAdaptarr.Services;
 using UmlautAdaptarr.Utilities;
 
 namespace UmlautAdaptarr.Controllers
 {
-    public abstract class SearchControllerBase(ProxyRequestService proxyRequestService, TitleMatchingService titleMatchingService) : ControllerBase
+    public abstract class SearchControllerBase(ProxyRequestService proxyRequestService, TitleMatchingService titleMatchingService, ILogger<SearchControllerBase> logger) : ControllerBase
     {
         // TODO evaluate if this should be set to true by default
         private readonly bool TODO_FORCE_TEXT_SEARCH_ORIGINAL_TITLE = true;
@@ -110,7 +111,15 @@ namespace UmlautAdaptarr.Controllers
 
         private string ProcessContent(string content, SearchItem? searchItem)
         {
-            return titleMatchingService.RenameTitlesInContent(content, searchItem);
+            try
+            {
+                return titleMatchingService.RenameTitlesInContent(content, searchItem);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError($"Error at ProcessContent: {ex.Message}{Environment.NewLine}Content:{Environment.NewLine}{content}");
+            }
+            return null;
         }
 
         public async Task<AggregatedSearchResult> AggregateSearchResults(
@@ -154,7 +163,8 @@ namespace UmlautAdaptarr.Controllers
 
     public class SearchController(ProxyRequestService proxyRequestService,
                                   TitleMatchingService titleMatchingService,
-                                  SearchItemLookupService searchItemLookupService) : SearchControllerBase(proxyRequestService, titleMatchingService)
+                                  SearchItemLookupService searchItemLookupService,
+                                  ILogger<SearchControllerBase> logger) : SearchControllerBase(proxyRequestService, titleMatchingService, logger)
     {
         public readonly string[] LIDARR_CATEGORY_IDS = ["3000", "3010", "3020", "3040", "3050"];
         public readonly string[] READARR_CATEGORY_IDS = ["3030", "3130", "7000", "7010", "7020", "7030", "7100", "7110", "7120", "7130"];
