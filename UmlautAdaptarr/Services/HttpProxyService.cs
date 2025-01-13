@@ -42,7 +42,7 @@ namespace UmlautAdaptarr.Services
             var bytesRead = await clientStream.ReadAsync(buffer);
             var requestString = Encoding.ASCII.GetString(buffer, 0, bytesRead);
 
-            if (_options.ApiKey != null)
+            if (!string.IsNullOrEmpty(_options.ApiKey))
             {
                 var headers = ParseHeaders(buffer, bytesRead);
 

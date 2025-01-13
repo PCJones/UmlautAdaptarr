@@ -3,8 +3,7 @@
     "http": {
       "commandName": "Project",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development",
-        "SETTINGS__ApiKey": "test123"
+        "ASPNETCORE_ENVIRONMENT": "Development"
       },
       "_launchUrl": "optionsTODO/example.com/api?t=movie&apikey=132&imdbid=123&limit=100",
       "dotnetRunMessages": true,
