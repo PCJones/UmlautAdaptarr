@@ -18,7 +18,7 @@ namespace UmlautAdaptarr.Controllers
         [HttpGet]
         public async Task<IActionResult> Caps([FromRoute] string apiKey, [FromRoute] string domain, [FromQuery] string? apikey)
         {
-            if (_options.ApiKey != null && !apiKey.Equals(apiKey))
+            if (!string.IsNullOrEmpty(apikey) && !apiKey.Equals(apiKey))
             {
                 _logger.LogWarning("Invalid or missing API key for request.");
                 return Unauthorized("Unauthorized: Invalid or missing API key.");

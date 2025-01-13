@@ -169,7 +169,7 @@ namespace UmlautAdaptarr.Controllers
 
         internal bool AssureApiKey(string apiKey)
         {
-            if (options.Value.ApiKey != null && !apiKey.Equals(options.Value.ApiKey))
+            if (!string.IsNullOrEmpty(options.Value.ApiKey) && !apiKey.Equals(options.Value.ApiKey))
             {
                 logger.LogWarning("Invalid or missing API key for request.");
                 return false;
