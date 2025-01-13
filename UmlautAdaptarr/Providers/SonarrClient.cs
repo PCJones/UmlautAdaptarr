@@ -48,6 +48,21 @@ public class SonarrClient : ArrClientBase
             if (shows != null)
             {
                 _logger.LogInformation($"Successfully fetched {shows.Count} items from Sonarr ({InstanceName}).");
+                // Bulk request (germanTitle, aliases) for all shows
+                var tvdbIds = new List<string>();
+                foreach (var show in shows)
+                {
+                    if ((string)show.tvdbId is not string tvdbId)
+                    {
+                        continue;
+                    }
+                    tvdbIds.Add(tvdbId);
+                }
+
+                var bulkTitleData = await _titleService.FetchGermanTitlesAndAliasesByExternalIdBulkAsync(tvdbIds);
+                string? germanTitle;
+                string[]? aliases;
+
                 foreach (var show in shows)
                 {
                     var tvdbId = (string)show.tvdbId;
@@ -57,8 +72,16 @@ public class SonarrClient : ArrClientBase
                         continue;
                     }
 
-                    var (germanTitle, aliases) =
-                        await _titleService.FetchGermanTitleAndAliasesByExternalIdAsync(_mediaType, tvdbId);
+                    if (bulkTitleData.TryGetValue(tvdbId, out var titleData))
+                    {
+                        (germanTitle, aliases) = titleData;
+                    }
+                    else
+                    {
+                        (germanTitle, aliases) =
+                            await _titleService.FetchGermanTitleAndAliasesByExternalIdAsync(_mediaType, tvdbId);
+                    }
+                    
                     var searchItem = new SearchItem
                     (
                         (int)show.id,

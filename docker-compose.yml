@@ -23,7 +23,6 @@ services:
       - LIDARR__ENABLED=false
       - LIDARR__HOST=http://localhost:8686
       - LIDARR__APIKEY=APIKEY
-      #- IpLeakTest__Enabled=false # uncomment and set to true to enable IP leak test
       ### example for multiple instances of same type
       #- SONARR__0__NAME=NAME 1 (optional)
       #- SONARR__0__ENABLED=false
@@ -33,3 +32,11 @@ services:
       #- SONARR__1__ENABLED=false
       #- SONARR__1__HOST=http://localhost:8989
       #- SONARR__1__APIKEY=APIKEY
+
+      ### Advanced options (with default values))
+      #- IpLeakTest__Enabled=false
+      #- SETTINGS__IndexerRequestsCacheDurationInMinutes=12 # How long to cache indexer requests for. Default is 12 minutes.
+      #- SETTINGS__ApiKey= # API key for requests to the UmlautAdaptarr. Optional, probably only needed for seedboxes.
+      #- SETTINGS__ProxyPort=5006 # Proxy port for the internal UmlautAdaptarr proxy used for Prowlarr.
+      #- Kestrel__Endpoints__Http__Url=http://[::]:5005 # HTTP port for the UmlautAdaptarr
+

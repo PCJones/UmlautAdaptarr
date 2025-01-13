@@ -1,6 +1,8 @@
-﻿using System.Net;
+﻿using Microsoft.Extensions.Options;
+using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using UmlautAdaptarr.Options;
 
 namespace UmlautAdaptarr.Services
 {
@@ -8,15 +10,16 @@ namespace UmlautAdaptarr.Services
     {
         private TcpListener _listener;
         private readonly ILogger<HttpProxyService> _logger;
-        private readonly int _proxyPort = 5006; // TODO move to appsettings.json
         private readonly IHttpClientFactory _clientFactory;
+        private readonly GlobalOptions _options;
         private readonly HashSet<string> _knownHosts = [];
         private readonly object _hostsLock = new();
         private readonly IConfiguration _configuration;
         private static readonly string[] newLineSeparator = ["\r\n"];
 
-        public HttpProxyService(ILogger<HttpProxyService> logger, IHttpClientFactory clientFactory, IConfiguration configuration)
+        public HttpProxyService(ILogger<HttpProxyService> logger, IHttpClientFactory clientFactory, IConfiguration configuration, IOptions<GlobalOptions> options)
         {
+            _options = options.Value;
             _logger = logger;
             _configuration = configuration;
             _clientFactory = clientFactory;
@@ -39,6 +42,19 @@ namespace UmlautAdaptarr.Services
             var bytesRead = await clientStream.ReadAsync(buffer);
             var requestString = Encoding.ASCII.GetString(buffer, 0, bytesRead);
 
+            if (_options.ApiKey != null)
+            {
+                var headers = ParseHeaders(buffer, bytesRead);
+                if (!headers.TryGetValue("Proxy-Authorization", out var proxyAuthorizationHeader) ||
+                    !ValidateApiKey(proxyAuthorizationHeader))
+                {
+                    _logger.LogWarning("Unauthorized access attempt.");
+                    await clientStream.WriteAsync(Encoding.ASCII.GetBytes("HTTP/1.1 407 Proxy Authentication Required\r\nProxy-Authenticate: Basic realm=\"Proxy\"\r\n\r\n"));
+                    clientSocket.Close();
+                    return;
+                }
+            }
+
             if (requestString.StartsWith("CONNECT"))
             {
                 // Handle HTTPS CONNECT request
@@ -49,6 +65,18 @@ namespace UmlautAdaptarr.Services
                 // Handle HTTP request
                 await HandleHttp(requestString, clientStream, clientSocket, buffer, bytesRead);
             }
+        }
+        private bool ValidateApiKey(string proxyAuthorizationHeader)
+        {
+            // Expect the header to be in the format: "Basic <base64encodedApiKey>"
+            if (proxyAuthorizationHeader.StartsWith("Basic ", StringComparison.OrdinalIgnoreCase))
+            {
+                var encodedKey = proxyAuthorizationHeader["Basic ".Length..].Trim();
+                var decodedKey = Encoding.ASCII.GetString(Convert.FromBase64String(encodedKey));
+                var password = decodedKey.Split(':')[^1];
+                return password == _options.ApiKey;
+            }
+            return false;
         }
 
         private async Task HandleHttpsConnect(string requestString, NetworkStream clientStream, Socket clientSocket)
@@ -96,7 +124,9 @@ namespace UmlautAdaptarr.Services
                 var url = _configuration["Kestrel:Endpoints:Http:Url"];
                 var port = new Uri(url).Port;
 
-                var modifiedUri = $"http://localhost:{port}/_/{uri.Host}{uri.PathAndQuery}";
+                var apiKey = _options.ApiKey == null ? "_" : _options.ApiKey;
+
+                var modifiedUri = $"http://localhost:{port}/{apiKey}/{uri.Host}{uri.PathAndQuery}";
                 using var client = _clientFactory.CreateClient();
                 var httpRequestMessage = new HttpRequestMessage(HttpMethod.Get, modifiedUri);
                 httpRequestMessage.Headers.Add("User-Agent", userAgent);
@@ -168,7 +198,7 @@ namespace UmlautAdaptarr.Services
 
         public Task StartAsync(CancellationToken cancellationToken)
         {
-            _listener = new TcpListener(IPAddress.Any, _proxyPort);
+            _listener = new TcpListener(IPAddress.Any, _options.ProxyPort);
             _listener.Start();
             Task.Run(() => HandleRequests(cancellationToken), cancellationToken);
             return Task.CompletedTask;

@@ -6,7 +6,8 @@ namespace UmlautAdaptarr.Validator;
 
 public class GlobalInstanceOptionsValidator : AbstractValidator<GlobalInstanceOptions>
 {
-    private readonly static HttpClient httpClient = new() {
+    private readonly static HttpClient httpClient = new()
+    {
         Timeout = TimeSpan.FromSeconds(3)
     };
 
@@ -22,7 +23,7 @@ public class GlobalInstanceOptionsValidator : AbstractValidator<GlobalInstanceOp
 
             RuleFor(x => x.ApiKey)
                 .NotEmpty().WithMessage("ApiKey is required when Enabled is true.");
-                
+
             RuleFor(x => x)
                 .MustAsync(BeReachable)
                 .WithMessage("Host/Url is not reachable. Please check your Host or your UmlautAdaptrr Settings");
@@ -65,8 +66,6 @@ public class GlobalInstanceOptionsValidator : AbstractValidator<GlobalInstanceOp
           Console.WriteLine($"The URL \"{opts.Host}/api?apikey=[REDACTED]\" is not reachable. Next attempt in 15 seconds...");
           Thread.Sleep(15000);
       }
-
+      
       return reachable;
-  }
-
 }
