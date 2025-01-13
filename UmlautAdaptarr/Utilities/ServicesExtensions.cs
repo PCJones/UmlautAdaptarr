@@ -68,7 +68,7 @@ public static class ServicesExtensions
                         Console.WriteLine(($"Property {failure.PropertyName } failed validation. Error was: {failure.ErrorMessage}"));
                     }
 
-                    throw new Exception("Please fix your environment variables and then Start UmlautAdaptarr again");
+                    throw new Exception("Please fix cour environment variables and then Start UmlautAdaptarr again");
                 }
 
                 var instanceState = (bool)(typeof(TOptions).GetProperty("Enabled")?.GetValue(option, null) ?? false);
