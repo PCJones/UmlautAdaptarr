@@ -6,7 +6,8 @@ namespace UmlautAdaptarr.Validator;
 
 public class GlobalInstanceOptionsValidator : AbstractValidator<GlobalInstanceOptions>
 {
-    private readonly static HttpClient httpClient = new() {
+    private readonly static HttpClient httpClient = new()
+    {
         Timeout = TimeSpan.FromSeconds(3)
     };
 
@@ -22,7 +23,7 @@ public class GlobalInstanceOptionsValidator : AbstractValidator<GlobalInstanceOp
 
             RuleFor(x => x.ApiKey)
                 .NotEmpty().WithMessage("ApiKey is required when Enabled is true.");
-                
+
             RuleFor(x => x)
                 .MustAsync(BeReachable)
                 .WithMessage("Host/Url is not reachable. Please check your Host or your UmlautAdaptrr Settings");
@@ -35,38 +36,37 @@ public class GlobalInstanceOptionsValidator : AbstractValidator<GlobalInstanceOp
                && (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps);
     }
 
-  private static async Task<bool> BeReachable(GlobalInstanceOptions opts, CancellationToken cancellationToken)
-  {
-      var endTime = DateTime.Now.AddMinutes(3);
-      var reachable = false;
-      var url = $"{opts.Host}/api?apikey={opts.ApiKey}";
+    private static async Task<bool> BeReachable(GlobalInstanceOptions opts, CancellationToken cancellationToken)
+    {
+        var endTime = DateTime.Now.AddMinutes(3);
+        var reachable = false;
+        var url = $"{opts.Host}/api?apikey={opts.ApiKey}";
 
-      while (DateTime.Now < endTime)
-      {
-          try
-          {
-              using var response = await httpClient.GetAsync(url, cancellationToken);
-              if (response.IsSuccessStatusCode)
-              {
-                  reachable = true;
-                  break;
-              }
-              else
-              {
-                  Console.WriteLine($"Reachable check got unexpected status code {response.StatusCode}.");
-              }
-          }
-          catch (Exception ex)
-          {
-              Console.WriteLine(ex.Message);
-          }
+        while (DateTime.Now < endTime)
+        {
+            try
+            {
+                using var response = await httpClient.GetAsync(url, cancellationToken);
+                if (response.IsSuccessStatusCode)
+                {
+                    reachable = true;
+                    break;
+                }
+                else
+                {
+                    Console.WriteLine($"Reachable check got unexpected status code {response.StatusCode}.");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
 
-          // Wait for 15 seconds for next try
-          Console.WriteLine($"The URL \"{opts.Host}/api?apikey=[REDACTED]\" is not reachable. Next attempt in 15 seconds...");
-          Thread.Sleep(15000);
-      }
+            // Wait for 15 seconds for next try
+            Console.WriteLine($"The URL \"{opts.Host}/api?apikey=[REDACTED]\" is not reachable. Next attempt in 15 seconds...");
+            Thread.Sleep(15000);
+        }
 
-      return reachable;
-  }
-
+        return reachable;
+    }
 }

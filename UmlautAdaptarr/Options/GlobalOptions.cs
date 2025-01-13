@@ -14,5 +14,11 @@
         /// The User-Agent string used in HTTP requests.
         /// </summary>
         public string UserAgent { get; set; }
+
+        /// <summary>
+        /// The duration in minutes to cache the indexer requests.
+        /// </summary>  
+        public int IndexerRequestsCacheDurationInMinutes { get; set; } = 12;
+
     }
 }

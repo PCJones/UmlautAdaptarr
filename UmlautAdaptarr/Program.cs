@@ -22,6 +22,11 @@ internal class Program
 
         builder.Services.AddSerilog();
 
+
+        // Log all configuration values
+        LogConfigurationValues(configuration);
+
+
         // Add services to the container.
         builder.Services.AddHttpClient("HttpClient").ConfigurePrimaryHttpMessageHandler(() =>
         {
@@ -118,4 +123,15 @@ internal class Program
             //.Enrich.With(new ApiKeyMaskingEnricher("appsettings.json")) // TODO - Not working currently
             .CreateLogger();
     }
+
+    private static void LogConfigurationValues(IConfiguration configuration)
+    {
+        Log.Information("Logging all configuration values at startup:");
+
+        foreach (var kvp in configuration.AsEnumerable())
+        {
+            Log.Information("{Key}: {Value}", kvp.Key, kvp.Value);
+        }
+    }
+
 }

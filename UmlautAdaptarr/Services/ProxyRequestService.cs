@@ -81,7 +81,7 @@ namespace UmlautAdaptarr.Services
 
                 if (responseMessage.IsSuccessStatusCode)
                 {
-                    _cache.Set(targetUri, responseMessage, TimeSpan.FromMinutes(12));
+                    _cache.Set(targetUri, responseMessage, TimeSpan.FromMinutes(_options.IndexerRequestsCacheDurationInMinutes));
                 }
 
                 return responseMessage;
