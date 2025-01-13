@@ -45,10 +45,15 @@ namespace UmlautAdaptarr.Services
             if (_options.ApiKey != null)
             {
                 var headers = ParseHeaders(buffer, bytesRead);
+
                 if (!headers.TryGetValue("Proxy-Authorization", out var proxyAuthorizationHeader) ||
                     !ValidateApiKey(proxyAuthorizationHeader))
                 {
-                    _logger.LogWarning("Unauthorized access attempt.");
+                    var isFirstRequest = !headers.ContainsKey("Proxy-Authorization");
+                    if (!isFirstRequest)
+                    {
+                        _logger.LogWarning("Unauthorized access attempt.");
+                    }
                     await clientStream.WriteAsync(Encoding.ASCII.GetBytes("HTTP/1.1 407 Proxy Authentication Required\r\nProxy-Authenticate: Basic realm=\"Proxy\"\r\n\r\n"));
                     clientSocket.Close();
                     return;
