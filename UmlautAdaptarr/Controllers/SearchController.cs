@@ -1,24 +1,31 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using System.Text;
 using UmlautAdaptarr.Models;
+using UmlautAdaptarr.Options;
 using UmlautAdaptarr.Providers;
 using UmlautAdaptarr.Services;
 using UmlautAdaptarr.Utilities;
 
 namespace UmlautAdaptarr.Controllers
 {
-    public abstract class SearchControllerBase(ProxyRequestService proxyRequestService, TitleMatchingService titleMatchingService, ILogger<SearchControllerBase> logger) : ControllerBase
+    public abstract class SearchControllerBase(ProxyRequestService proxyRequestService, TitleMatchingService titleMatchingService, IOptions<GlobalOptions> options, ILogger<SearchControllerBase> logger) : ControllerBase
     {
         // TODO evaluate if this should be set to true by default
         private readonly bool TODO_FORCE_TEXT_SEARCH_ORIGINAL_TITLE = true;
         private readonly bool TODO_FORCE_TEXT_SEARCH_GERMAN_TITLE = false;
-        protected async Task<IActionResult> BaseSearch(string options,
+        protected async Task<IActionResult> BaseSearch(string apiKey,
                                                        string domain,
                                                        IDictionary<string, string> queryParameters,
                                                        SearchItem? searchItem = null)
         {
             try
             {
+                if (!AssureApiKey(apiKey))
+                {
+                    return Unauthorized("Unauthorized: Invalid or missing API key.");
+                }
+
                 if (!UrlUtilities.IsValidDomain(domain))
                 {
                     return NotFound($"{domain} is not a valid URL.");
@@ -159,30 +166,50 @@ namespace UmlautAdaptarr.Controllers
 
             return aggregatedResult;
         }
+
+        internal bool AssureApiKey(string apiKey)
+        {
+            if (options.Value.ApiKey != null && !apiKey.Equals(options.Value.ApiKey))
+            {
+                logger.LogWarning("Invalid or missing API key for request.");
+                return false;
+            }
+            return true;
+        }
     }
 
     public class SearchController(ProxyRequestService proxyRequestService,
                                   TitleMatchingService titleMatchingService,
                                   SearchItemLookupService searchItemLookupService,
-                                  ILogger<SearchControllerBase> logger) : SearchControllerBase(proxyRequestService, titleMatchingService, logger)
+                                  IOptions<GlobalOptions> options,
+                                  ILogger<SearchControllerBase> logger) : SearchControllerBase(proxyRequestService, titleMatchingService, options, logger)
     {
         public readonly string[] LIDARR_CATEGORY_IDS = ["3000", "3010", "3020", "3040", "3050"];
         public readonly string[] READARR_CATEGORY_IDS = ["3030", "3130", "7000", "7010", "7020", "7030", "7100", "7110", "7120", "7130"];
 
         [HttpGet]
-        public async Task<IActionResult> MovieSearch([FromRoute] string options, [FromRoute] string domain)
+        public async Task<IActionResult> MovieSearch([FromRoute] string apiKey, [FromRoute] string domain)
         {
+            if (!AssureApiKey(apiKey))
+            {
+                return Unauthorized("Unauthorized: Invalid or missing API key.");
+            }
+
             var queryParameters = HttpContext.Request.Query.ToDictionary(
                  q => q.Key,
                  q => string.Join(",", q.Value));
-            return await BaseSearch(options, domain, queryParameters);
+            return await BaseSearch(apiKey, domain, queryParameters);
         }
 
         [HttpGet]
-        public async Task<IActionResult> GenericSearch([FromRoute] string options, [FromRoute] string domain)
+        public async Task<IActionResult> GenericSearch([FromRoute] string apiKey, [FromRoute] string domain)
         {
+            if (!AssureApiKey(apiKey))
+            {
+                return Unauthorized("Unauthorized: Invalid or missing API key.");
+            }
 
-        var queryParameters = HttpContext.Request.Query.ToDictionary(
+            var queryParameters = HttpContext.Request.Query.ToDictionary(
                  q => q.Key,
                  q => string.Join(",", q.Value));
 
@@ -208,21 +235,31 @@ namespace UmlautAdaptarr.Controllers
                 }
             }
 
-            return await BaseSearch(options, domain, queryParameters, searchItem);
+            return await BaseSearch(apiKey, domain, queryParameters, searchItem);
         }
 
         [HttpGet]
-        public async Task<IActionResult> BookSearch([FromRoute] string options, [FromRoute] string domain)
+        public async Task<IActionResult> BookSearch([FromRoute] string apiKey, [FromRoute] string domain)
         {
+            if (!AssureApiKey(apiKey))
+            {
+                return Unauthorized("Unauthorized: Invalid or missing API key.");
+            }
+
             var queryParameters = HttpContext.Request.Query.ToDictionary(
                  q => q.Key,
                  q => string.Join(",", q.Value));
-            return await BaseSearch(options, domain, queryParameters);
+            return await BaseSearch(apiKey, domain, queryParameters);
         }
 
         [HttpGet]
-        public async Task<IActionResult> TVSearch([FromRoute] string options, [FromRoute] string domain)
+        public async Task<IActionResult> TVSearch([FromRoute] string apiKey, [FromRoute] string domain)
         {
+            if (!AssureApiKey(apiKey))
+            {
+               return Unauthorized("Unauthorized: Invalid or missing API key.");
+            }
+
             var queryParameters = HttpContext.Request.Query.ToDictionary(
                  q => q.Key,
                  q => string.Join(",", q.Value));
@@ -239,16 +276,21 @@ namespace UmlautAdaptarr.Controllers
                 searchItem = await searchItemLookupService.GetOrFetchSearchItemByTitle(mediaType, title);
             }
 
-            return await BaseSearch(options, domain, queryParameters, searchItem);
+            return await BaseSearch(apiKey, domain, queryParameters, searchItem);
         }
 
         [HttpGet]
-        public async Task<IActionResult> MusicSearch([FromRoute] string options, [FromRoute] string domain)
+        public async Task<IActionResult> MusicSearch([FromRoute] string apiKey, [FromRoute] string domain)
         {
+            if (!AssureApiKey(apiKey))
+            {
+                return Unauthorized("Unauthorized: Invalid or missing API key.");
+            }
+
             var queryParameters = HttpContext.Request.Query.ToDictionary(
                  q => q.Key,
                  q => string.Join(",", q.Value));
-            return await BaseSearch(options, domain, queryParameters);
+            return await BaseSearch(apiKey, domain, queryParameters);
         }
     }
 }

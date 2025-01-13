@@ -69,32 +69,32 @@ internal class Program
         app.UseAuthorization();
 
         app.MapControllerRoute("caps",
-            "{options}/{*domain}",
+            "{apiKey}/{*domain}",
             new { controller = "Caps", action = "Caps" },
             new { t = new TRouteConstraint("caps") });
 
         app.MapControllerRoute("movie-search",
-            "{options}/{*domain}",
+            "{apiKey}/{*domain}",
             new { controller = "Search", action = "MovieSearch" },
             new { t = new TRouteConstraint("movie") });
 
         app.MapControllerRoute("tv-search",
-            "{options}/{*domain}",
+            "{apiKey}/{*domain}",
             new { controller = "Search", action = "TVSearch" },
             new { t = new TRouteConstraint("tvsearch") });
 
         app.MapControllerRoute("music-search",
-            "{options}/{*domain}",
+            "{apiKey}/{*domain}",
             new { controller = "Search", action = "MusicSearch" },
             new { t = new TRouteConstraint("music") });
 
         app.MapControllerRoute("book-search",
-            "{options}/{*domain}",
+            "{apiKey}/{*domain}",
             new { controller = "Search", action = "BookSearch" },
             new { t = new TRouteConstraint("book") });
 
         app.MapControllerRoute("generic-search",
-            "{options}/{*domain}",
+            "{apiKey}/{*domain}",
             new { controller = "Search", action = "GenericSearch" },
             new { t = new TRouteConstraint("search") });
         app.Run();
