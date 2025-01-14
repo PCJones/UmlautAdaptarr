@@ -43,7 +43,7 @@ export LIDARR__APIKEY=APIKEY
 # Advanced Options
 #export IpLeakTest__Enabled=false
 #export SETTINGS__IndexerRequestsCacheDurationInMinutes=12
-export SETTINGS__ApiKey="apikey"
+export SETTINGS__ApiKey="apikey" # Change to something unique! Then in Prowlarr, in the proxy settings set any username and use this ApiKey as password.
 export SETTINGS__ProxyPort=1234 # Port for Proxy
 export Kestrel__Endpoints__Http__Url="http://[::]:1235" # Port for UmlautAdaptarr API
 
