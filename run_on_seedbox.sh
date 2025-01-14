@@ -1,7 +1,6 @@
 #!/bin/bash
 
-# Download linux binary from
-https://github.com/PCJones/UmlautAdaptarr/releases
+# Download linux binary from https://github.com/PCJones/UmlautAdaptarr/releases
 
 # script by schumi4 - THX!
 
