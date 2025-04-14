@@ -42,8 +42,6 @@ Einige Beispiele finden sich [weiter unten](https://github.com/PCJones/UmlautAda
 
 
 ## Installation
-Momentan ist Docker dafür nötig, wer kein Docker nutzt muss sich noch etwas gedulden. Eine Unraid-App gibt es auch, einfach nach `umlautadaptarr` suchen.
-
 - [Docker](https://hub.docker.com/r/pcjones/umlautadaptarr)
 - [Proxmox LXC (unofficial)](https://github.com/elvito/ProxmoxVE/blob/main/ct/umlautadaptarr.sh)
 - Unraid: nach `umlautadaptarr` suchen
