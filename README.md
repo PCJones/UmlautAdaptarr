@@ -45,7 +45,7 @@ Einige Beispiele finden sich [weiter unten](https://github.com/PCJones/UmlautAda
 - [Docker](https://hub.docker.com/r/pcjones/umlautadaptarr)
 - Unraid: nach `umlautadaptarr` suchen
 - [Proxmox LXC (unofficial)](https://github.com/elvito/ProxmoxVE/blob/main/ct/umlautadaptarr.sh) - appsettings.json muss nach Installation konfiguriert werden
-- [Seedbox/Binary](https://github.com/PCJones/UmlautAdaptarr/blob/master/run_on_seedbox.sh) - appsettings.json muss nach Installation konfiguriert werden
+- [Seedbox/Binary](https://github.com/PCJones/UmlautAdaptarr/blob/master/run_on_seedbox.sh)
 
 Nicht benötigte Umgebungsvariablen, z.B. falls Readarr oder Lidarr nicht genutzt werden, können entfernt werden.
 
