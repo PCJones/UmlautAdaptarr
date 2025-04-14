@@ -44,7 +44,10 @@ Einige Beispiele finden sich [weiter unten](https://github.com/PCJones/UmlautAda
 ## Installation
 Momentan ist Docker dafür nötig, wer kein Docker nutzt muss sich noch etwas gedulden. Eine Unraid-App gibt es auch, einfach nach `umlautadaptarr` suchen.
 
-[Link zum Docker Image](https://hub.docker.com/r/pcjones/umlautadaptarr)
+- [Docker](https://hub.docker.com/r/pcjones/umlautadaptarr)
+- [Proxmox LXC (unofficial)](https://github.com/elvito/ProxmoxVE/blob/main/ct/umlautadaptarr.sh)
+- Unraid: nach `umlautadaptarr` suchen
+- [Seedbox/Binary](https://github.com/PCJones/UmlautAdaptarr/blob/master/run_on_seedbox.sh)
 
 Nicht benötigte Umgebungsvariablen, z.B. falls Readarr oder Lidarr nicht genutzt werden, können entfernt werden.
 
