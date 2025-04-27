@@ -121,7 +121,7 @@ Sonarr erwartet immer den Englischen Namen, der hier natürlich nicht gegeben is
 ## Kontakt & Support
 - Öffne gerne ein Issue auf GitHub falls du Unterstützung benötigst.
 - [Telegram](https://t.me/pc_jones)
-- Discord: pcjones1 - oder komm in den UsenetDE Discord Server: [https://discord.gg/pZrrMcJMQM](https://discord.gg/pZrrMcJMQM)
+- [UsenetDE Discord Server](https://discord.gg/src6zcH4rr)
 
 ## Spenden
 Über eine Spende freue ich mich natürlich immer :D
