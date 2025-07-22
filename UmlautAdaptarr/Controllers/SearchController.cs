@@ -3,7 +3,6 @@ using Microsoft.Extensions.Options;
 using System.Text;
 using UmlautAdaptarr.Models;
 using UmlautAdaptarr.Options;
-using UmlautAdaptarr.Providers;
 using UmlautAdaptarr.Services;
 using UmlautAdaptarr.Utilities;
 

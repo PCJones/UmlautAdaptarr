@@ -22,10 +22,17 @@
 
         /// <summary>
         /// API key for requests to the UmlautAdaptarr. Optional.
+        /// </summary>
         public string? ApiKey { get; set; } = null;
 
         /// <summary>
         /// Proxy port for the internal UmlautAdaptarr proxy.
+        /// </summary>
         public int ProxyPort { get; set; } = 5006;
-    }
+
+		/// <summary>
+		/// Enable or disable the cache for changed titles.
+		/// </summary>
+		public bool EnableChangedTitleCache { get; set; } = false;
+	}
 }
