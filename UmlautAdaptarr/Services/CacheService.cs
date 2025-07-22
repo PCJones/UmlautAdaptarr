@@ -1,20 +1,19 @@
-﻿using Microsoft.AspNetCore.Mvc.Formatters;
-using Microsoft.Extensions.Caching.Memory;
-using System.Reflection.Metadata.Ecma335;
-using System.Text.RegularExpressions;
+﻿using Microsoft.Extensions.Caching.Memory;
 using UmlautAdaptarr.Models;
 using UmlautAdaptarr.Utilities;
 
 namespace UmlautAdaptarr.Services
 {
-    public partial class CacheService(IMemoryCache cache)
+	public partial class CacheService(IMemoryCache cache)
     {
         private readonly Dictionary<string, HashSet<string>> VariationIndex = [];
         private readonly Dictionary<string, List<(HashSet<string> TitleVariations, string CacheKey)>> BookVariationIndex = [];
         private readonly Dictionary<string, List<(HashSet<string> TitleVariations, string CacheKey)>> AudioVariationIndex = [];
         private const int VARIATION_LOOKUP_CACHE_LENGTH = 5;
+		private const string TitleRenamePrefix = "title_rename_";
+		private static readonly TimeSpan TitleRenameCacheDuration = TimeSpan.FromHours(12);
 
-        public void CacheSearchItem(SearchItem item)
+		public void CacheSearchItem(SearchItem item)
         {
             var prefix = item.MediaType;
             var cacheKey = $"{prefix}_extid_{item.ExternalId}";
@@ -196,8 +195,19 @@ namespace UmlautAdaptarr.Services
             return null;
         }
 
+		public void CacheTitleRename(string changedTitle, string originalTitle)
+		{
+			if (string.IsNullOrWhiteSpace(changedTitle) || string.IsNullOrWhiteSpace(originalTitle))
+				return;
 
-        [GeneratedRegex("\\s")]
-        private static partial Regex WhiteSpaceRegex();
-    }
+			var key = $"{TitleRenamePrefix}{changedTitle.Trim().ToLowerInvariant()}";
+			cache.Set(key, originalTitle, TitleRenameCacheDuration);
+		}
+
+		public string? GetOriginalTitleFromRenamed(string changedTitle)
+		{
+			var key = $"{TitleRenamePrefix}{changedTitle.Trim().ToLowerInvariant()}";
+			return cache.TryGetValue(key, out string? originalTitle) ? originalTitle : null;
+		}
+	}
 }

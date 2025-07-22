@@ -1,14 +1,18 @@
 ﻿using Microsoft.Extensions.FileSystemGlobbing.Internal;
+using Microsoft.Extensions.Options;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
 using UmlautAdaptarr.Models;
+using UmlautAdaptarr.Options;
 using UmlautAdaptarr.Utilities;
 
 namespace UmlautAdaptarr.Services
 {
-    public partial class TitleMatchingService(CacheService cacheService, ILogger<TitleMatchingService> logger)
+    public partial class TitleMatchingService(CacheService cacheService, ILogger<TitleMatchingService> logger, IOptions<GlobalOptions> options)
     {
-        public string RenameTitlesInContent(string content, SearchItem? searchItem)
+		public GlobalOptions _options { get; } = options.Value;
+
+		public string RenameTitlesInContent(string content, SearchItem? searchItem)
         {
             var xDoc = XDocument.Parse(content);
 
@@ -46,10 +50,10 @@ namespace UmlautAdaptarr.Services
                     switch (mediaType)
                     {
                         case "tv":
-                            FindAndReplaceForMoviesAndTV(logger, searchItem, titleElement, originalTitle, cleanTitleSeperatedBySpace!);
+                            FindAndReplaceForMoviesAndTV(searchItem, titleElement, originalTitle, cleanTitleSeperatedBySpace!);
                             break;
                         case "movie":
-                            FindAndReplaceForMoviesAndTV(logger, searchItem, titleElement, originalTitle, cleanTitleSeperatedBySpace!);
+                            FindAndReplaceForMoviesAndTV(searchItem, titleElement, originalTitle, cleanTitleSeperatedBySpace!);
                             break;
                         case "audio":
                             FindAndReplaceForBooksAndAudio(searchItem, titleElement, originalTitle!);
@@ -94,7 +98,11 @@ namespace UmlautAdaptarr.Services
 
                 // Update the title element
                 titleElement.Value = updatedTitle;
-                logger.LogInformation($"TitleMatchingService - Title changed: '{originalTitle}' to '{updatedTitle}'");
+                if (_options.EnableChangedTitleCache)
+                {
+					cacheService.CacheTitleRename(updatedTitle, originalTitle);
+				}
+				logger.LogInformation($"TitleMatchingService - Title changed: '{originalTitle}' to '{updatedTitle}'");
             }
             else
             {
@@ -161,7 +169,7 @@ namespace UmlautAdaptarr.Services
         }
 
         // This method replaces the first variation that starts at the beginning of the release title
-        private static void FindAndReplaceForMoviesAndTV(ILogger<TitleMatchingService> logger, SearchItem searchItem, XElement? titleElement, string originalTitle, string normalizedOriginalTitle)
+        private void FindAndReplaceForMoviesAndTV(SearchItem searchItem, XElement? titleElement, string originalTitle, string normalizedOriginalTitle)
         {
             var titleMatchVariations = searchItem.TitleMatchVariations;
             var expectedTitle = searchItem.ExpectedTitle;
@@ -218,8 +226,11 @@ namespace UmlautAdaptarr.Services
                     // Update the title element's value with the new title
                     //titleElement.Value = newTitle + $"({originalTitle.Substring(0, variationLength)})";
                     titleElement.Value = newTitle;
-
-                    logger.LogInformation($"TitleMatchingService - Title changed: '{originalTitle}' to '{newTitle}'");
+					if (_options.EnableChangedTitleCache)
+					{
+						cacheService.CacheTitleRename(newTitle, originalTitle);
+					}
+					logger.LogInformation($"TitleMatchingService - Title changed: '{originalTitle}' to '{newTitle}'");
                     break;
                 }
             }
@@ -298,23 +309,23 @@ namespace UmlautAdaptarr.Services
                 return null;
             }
 
-            if (category == "7000" || category.StartsWith("EBook", StringComparison.OrdinalIgnoreCase) || category.StartsWith("Book", StringComparison.OrdinalIgnoreCase))
+            if (category == "7000" || category.StartsWith("EBook", StringComparison.OrdinalIgnoreCase) || category.StartsWith("Book", StringComparison.OrdinalIgnoreCase) ||category.StartsWith("Bücher", StringComparison.OrdinalIgnoreCase))
             {
                 return "book";
             }
-            else if (category == "2000" || category.StartsWith("Movies", StringComparison.OrdinalIgnoreCase))
+            else if (category == "2000" || category.StartsWith("Movies", StringComparison.OrdinalIgnoreCase) || category.StartsWith("Filme", StringComparison.OrdinalIgnoreCase))
             {
                 return "movies";
             }
-            else if (category == "5000" || category.StartsWith("TV", StringComparison.OrdinalIgnoreCase))
+            else if (category == "5000" || category.StartsWith("TV", StringComparison.OrdinalIgnoreCase) || category.StartsWith("Serien", StringComparison.OrdinalIgnoreCase))
             {
                 return "tv";
             }
-            else if (category == "3030" || category.Contains("Audiobook", StringComparison.OrdinalIgnoreCase))
+            else if (category == "3030" || category.Contains("Audiobook", StringComparison.OrdinalIgnoreCase) || category.Contains("Hörbuch", StringComparison.OrdinalIgnoreCase))
             {
                 return "book";
             }
-            else if (category == "3000" || category.StartsWith("Audio", StringComparison.OrdinalIgnoreCase))
+            else if (category == "3000" || category.StartsWith("Audio", StringComparison.OrdinalIgnoreCase) || category.StartsWith("Musik", StringComparison.OrdinalIgnoreCase))
             {
                 return "audio";
             }
