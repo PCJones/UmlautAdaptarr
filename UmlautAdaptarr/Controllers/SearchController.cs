@@ -13,7 +13,7 @@ namespace UmlautAdaptarr.Controllers
         // TODO evaluate if this should be set to true by default
         private readonly bool TODO_FORCE_TEXT_SEARCH_ORIGINAL_TITLE = true;
         private readonly bool TODO_FORCE_TEXT_SEARCH_GERMAN_TITLE = false;
-        protected async Task<IActionResult> BaseSearch(string apiKey,
+        protected async Task<IActionResult?> BaseSearch(string apiKey,
                                                        string domain,
                                                        IDictionary<string, string> queryParameters,
                                                        SearchItem? searchItem = null)
@@ -30,8 +30,7 @@ namespace UmlautAdaptarr.Controllers
                     return NotFound($"{domain} is not a valid URL.");
                 }
 
-                ContentResult? initialSearchResult = await PerformSingleSearchRequest(domain, queryParameters) as ContentResult;
-                if (initialSearchResult == null)
+                if (await PerformSingleSearchRequest(domain, queryParameters) is not ContentResult initialSearchResult)
                 {
                     return null;
                 }
