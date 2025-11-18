@@ -202,6 +202,13 @@ namespace UmlautAdaptarr.Services
 
 			var key = $"{TitleRenamePrefix}{changedTitle.Trim().ToLowerInvariant()}";
 			cache.Set(key, originalTitle, TitleRenameCacheDuration);
+
+			// If title contains ":" also add it as "-" for arr/sabnzbd compatibility
+			if (changedTitle.Contains(':'))
+			{
+				var altKey = $"{TitleRenamePrefix}{changedTitle.Replace(':', '-').Trim().ToLowerInvariant()}";
+				cache.Set(altKey, originalTitle, TitleRenameCacheDuration);
+			}
 		}
 
 		public string? GetOriginalTitleFromRenamed(string changedTitle)
