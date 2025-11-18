@@ -56,6 +56,8 @@ namespace UmlautAdaptarr.Controllers
                     queryParameters.Remove("tvdbid");
                     queryParameters.Remove("tvmazeid");
                     queryParameters.Remove("imdbid");
+                    queryParameters.Remove("rid");
+                    queryParameters.Remove("tmdbid");
 
                     var titleSearchVariations = new List<string>(searchItem?.TitleSearchVariations);
 

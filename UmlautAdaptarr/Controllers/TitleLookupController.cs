@@ -21,9 +21,7 @@ namespace UmlautAdaptarr.Controllers
 			if (string.IsNullOrWhiteSpace(changedTitle))
 				return BadRequest("changedTitle is required.");
 
-			var cleanChangedTitle = changedTitle.Replace(":", "-");
-
-			var originalTitle = cacheService.GetOriginalTitleFromRenamed(cleanChangedTitle);
+			var originalTitle = cacheService.GetOriginalTitleFromRenamed(changedTitle);
 
 			return originalTitle != null
 				? Ok(new { changedTitle, originalTitle })
