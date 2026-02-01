@@ -54,6 +54,7 @@ namespace UmlautAdaptarr.Services
             }
 
             await EnsureMinimumDelayAsync(targetUri);
+            var targetHost = new Uri(targetUri).Host;
 
             var requestMessage = new HttpRequestMessage
             {
@@ -88,7 +89,14 @@ namespace UmlautAdaptarr.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error proxying request: {UrlUtilities.RedactApiKey(targetUri)}. Error: {ex.Message}");
+                var upstreamMessage = IsTimeoutOrReset(ex)
+                    ? $"{targetHost} timed out or reset the connection. This is an error with your indexer or network, not with UmlautAdaptarr."
+                    : $"{targetHost} request failed. This is an error with your indexer or network, not with UmlautAdaptarr.";
+
+                _logger.LogError(ex, "{UpstreamMessage} Target: {TargetUri} Error: {ErrorMessage}",
+                    upstreamMessage,
+                    UrlUtilities.RedactApiKey(targetUri),
+                    ex.Message);
 
                 var errorResponse = new HttpResponseMessage(System.Net.HttpStatusCode.InternalServerError)
                 {
@@ -96,6 +104,27 @@ namespace UmlautAdaptarr.Services
                 };
                 return errorResponse;
             }
+        }
+
+        private static bool IsTimeoutOrReset(Exception ex)
+        {
+            if (ex is TaskCanceledException)
+            {
+                return true;
+            }
+
+            var current = ex;
+            while (current != null)
+            {
+                if (current is System.Net.Sockets.SocketException socketEx)
+                {
+                    return socketEx.SocketErrorCode == System.Net.Sockets.SocketError.TimedOut
+                        || socketEx.SocketErrorCode == System.Net.Sockets.SocketError.ConnectionReset;
+                }
+                current = current.InnerException;
+            }
+
+            return false;
         }
     }
 }
