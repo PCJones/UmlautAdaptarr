@@ -138,4 +138,10 @@ Für andere Spendenmöglichkeiten gerne auf Discord oder Telegram melden - danke
 
 ## Star History
 
-[![Star History Chart](https://api.star-history.com/svg?repos=pcjones/umlautadaptarr&type=Date)](https://star-history.com/#pcjones/umlautadaptarr&Date)
+<a href="https://www.star-history.com/?repos=PCJones%2FUmlautAdaptarr&type=date&legend=top-left">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=PCJones/UmlautAdaptarr&type=date&theme=dark&legend=top-left&sealed_token=mrAMea_5JkyuLMWcMjKQi_fvdlrMcGg3kmmnPSV_QDIekML_46m1rdiH0MhbmyKS3nOOC5i2EKBSOps7FTTCWTQhOkhMRAHShpvlvCTIvcbQgEUiJrqyDDKyXCekEw_DWIWE01nO6WwXIjF9Nsz_-rx_1lsnSxm73mEacx-0FIitmWZLZ9hoAggRWHlT" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=PCJones/UmlautAdaptarr&type=date&legend=top-left&sealed_token=mrAMea_5JkyuLMWcMjKQi_fvdlrMcGg3kmmnPSV_QDIekML_46m1rdiH0MhbmyKS3nOOC5i2EKBSOps7FTTCWTQhOkhMRAHShpvlvCTIvcbQgEUiJrqyDDKyXCekEw_DWIWE01nO6WwXIjF9Nsz_-rx_1lsnSxm73mEacx-0FIitmWZLZ9hoAggRWHlT" />
+   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=PCJones/UmlautAdaptarr&type=date&legend=top-left&sealed_token=mrAMea_5JkyuLMWcMjKQi_fvdlrMcGg3kmmnPSV_QDIekML_46m1rdiH0MhbmyKS3nOOC5i2EKBSOps7FTTCWTQhOkhMRAHShpvlvCTIvcbQgEUiJrqyDDKyXCekEw_DWIWE01nO6WwXIjF9Nsz_-rx_1lsnSxm73mEacx-0FIitmWZLZ9hoAggRWHlT" />
+ </picture>
+</a>
